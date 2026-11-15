@@ -3,7 +3,7 @@
 <title>Diagnóstico Fichamigo</title>
 <link rel="manifest" href="/manifest.webmanifest?v=3">
 <style>body{font:16px system-ui,sans-serif;margin:16px;background:#F4F2FF;color:#1B1F3B}h1{font-size:1.3rem}li{margin:8px 0;padding:8px 10px;background:#fff;border-radius:10px;list-style:none}.ok{border-left:6px solid #14866A}.bad{border-left:6px solid #C8344A}.wait{border-left:6px solid #E2A11B}code{font-size:.8rem;word-break:break-all}</style>
-</head><body><h1>Diagnóstico de instalación</h1><p>Espera 10 segundos y toma una captura de toda la lista.</p><ul id="l"></ul>
+</head><body><h1>Diagnóstico de instalación</h1><p>Toca la pantalla una vez y espera 60 segundos. Luego toma una captura.</p><ul id="l"></ul>
 <script>
 const L=document.getElementById("l");const add=(k,t,d)=>{const li=document.createElement("li");li.className=k;li.innerHTML="<b>"+t+"</b>"+(d?"<br><code>"+d+"</code>":"");L.appendChild(li);return li};
 add("wait","Navegador",navigator.userAgent);
@@ -19,6 +19,6 @@ addEventListener("beforeinstallprompt",e=>{bip.className="ok";bip.innerHTML="<b>
  if("serviceWorker" in navigator){try{const reg=await navigator.serviceWorker.register("/sw.js");await navigator.serviceWorker.ready;add(reg.active?"ok":"bad","Service worker",(reg.active?"activo":"no activo")+" · alcance "+reg.scope+" · controla la página: "+(!!navigator.serviceWorker.controller))}catch(e){add("bad","Service worker falló",String(e))}}else add("bad","Sin service worker");
  try{const r=await fetch("/",{cache:"no-store"});const t=await r.text();add(/rel="manifest"/.test(t)?"ok":"bad","Página principal",r.status+" · tiene manifiesto: "+/rel="manifest"/.test(t)+" · tiene SW: "+/serviceWorker/.test(t)+" · bytes "+t.length+" · cache "+r.headers.get("cache-control"))}catch(e){add("bad","Página principal falló",String(e))}
  if(navigator.getInstalledRelatedApps){try{const a=await navigator.getInstalledRelatedApps();add("wait","Apps relacionadas",JSON.stringify(a))}catch(e){}}
- setTimeout(()=>{if(bip.className==="wait"){bip.className="bad";bip.innerHTML="<b>Chrome NO ofreció instalar en 10 s</b>"}},10000);
+ setTimeout(()=>{if(bip.className==="wait"){bip.className="bad";bip.innerHTML="<b>Chrome NO ofreció instalar en 60 s</b>"}},60000);
 })();
 </script></body></html>

@@ -1448,6 +1448,7 @@ function welcome(){
     <label class="f">Edad<input id="r-age" type="number" min="5" max="25" placeholder="8 a 20"></label>
     <button class="btn block" type="submit">Crear mi perfil</button><button class="link" type="button" data-act="wback">Volver</button></form>${rec}</div>`;
   return `<div class="welcome">${demo}<h1>Fichamigo</h1><p class="lead">Cada deber cumplido te da fichas. Con ellas alimentas y cuidas a tu mascota, y ahorras para la meta que pactaste en casa.</p>
+    ${installEvt?`<button class="btn coinb block" data-act="installapp" style="max-width:360px">📲 Instalar Fichamigo en este celular</button>`:""}
     <div class="choices"><button class="btn block" data-act="wstep" data-v="kid">${devKid&&S.kids[devKid]?`Entrar como ${esc(S.kids[devKid].name)}`:"Soy un joven"}</button><button class="btn ghost block" data-act="wstep" data-v="parent">Soy papá o mamá</button></div></div>`;
 }
 
@@ -1536,7 +1537,9 @@ function chooser(kidId){
 }
 function dueTag(t){if(!t.due)return"";const late=t.status==="pendiente"&&t.due<today();return late?`<span class="pill bad">Vencida · ${fmtDate(t.due)}</span>`:`<span>${t.due===today()?"Hoy":fmtDate(t.due)}</span>`}
 const repTag=t=>t.repeat==="daily"?"<span>↻ diaria</span>":t.repeat==="weekly"?"<span>↻ semanal</span>":"";
-let photoTask=null, photoView=null;
+let photoTask=null, photoView=null, installEvt=null;
+addEventListener("beforeinstallprompt",e=>{e.preventDefault();installEvt=e;render()});
+addEventListener("appinstalled",()=>{installEvt=null;toast("¡Fichamigo quedó instalada!");render()});
 function proofSrc(t){const p=t.proof;if(!p)return null;if(p.id)return `/api/photo?f=${encodeURIComponent(family||"")}&id=${encodeURIComponent(p.id)}`;return p.data||null}
 function proofThumb(t){const src=proofSrc(t);if(src)return `<button class="thumb" data-act="viewphoto" data-src="${esc(src)}" aria-label="Ver foto de prueba"><img src="${esc(src)}" alt="Foto de prueba"></button>`;return t.needPhoto?'<span class="pill plain">Sin foto</span>':""}
 function compressImg(file,max,q){return new Promise((res,rej)=>{const u=URL.createObjectURL(file),img=new Image();img.onload=()=>{const k=Math.min(1,max/Math.max(img.width,img.height)),cv=document.createElement("canvas");
@@ -1757,6 +1760,7 @@ document.addEventListener("click",async e=>{
   if(a==="askkid"){if(b.dataset.confirm){role={r:"kid",id};setDevKid(id);saveRole();pview=null;menuOpen=false;foodOpen=false;ktab="deberes";window.scrollTo(0,0);render();return}
     b.dataset.confirm="1";const old=b.textContent;b.textContent="¿Pasar este celular a "+(S.kids[id]?.name||"joven")+"? Toca otra vez";setTimeout(()=>{if(b.isConnected){delete b.dataset.confirm;b.textContent=old}},3500);return}
   if(a==="copyfam"){try{await navigator.clipboard.writeText(family);toast("Código copiado")}catch(e){toast("Código: "+family)}return}
+  if(a==="installapp"&&installEvt){try{installEvt.prompt();await installEvt.userChoice}catch(e){}installEvt=null;render();return}
   if(a==="cancelpair"){role=null;setDevKid(null);saveRole();wstep=null;render();return}
   if(a==="viewphoto"){photoView=b.dataset.src;render();return}
   if(a==="closephoto"){photoView=null;render();return}
