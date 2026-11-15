@@ -330,6 +330,25 @@ body.playing{overflow:hidden}
 .thumb img{width:100%;height:100%;object-fit:cover;display:block}
 .photoview{position:fixed;inset:0;z-index:60;background:rgb(10 12 25 / .85);display:grid;place-items:center;align-content:center;gap:14px;padding:max(16px,env(safe-area-inset-top,0px)) 16px}
 .photoview img{max-width:100%;max-height:78vh;border-radius:14px;box-shadow:0 10px 30px rgb(0 0 0 / .5)}
+
+/* ---------- amigos y chat ---------- */
+.sav{width:var(--s);height:var(--s);border-radius:50%;background:var(--c,#7C5CFF);display:inline-grid;place-items:center;flex:none;border:2px solid var(--line)}
+.sav i{width:55%;height:55%;border-radius:50% 50% 45% 45%;display:block;border:2px solid #23253A}
+.sav.fam{background:var(--surface2);font-size:1.1rem}
+.chatrow{display:flex;gap:10px;align-items:center;width:100%;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 12px}
+.chatrow span:last-child{display:grid;min-width:0}.chatrow small{color:var(--muted)}
+.chatrow.off{opacity:.75}
+.chat{display:grid;gap:10px}
+.chathead{display:flex;gap:8px;align-items:center}
+.chatlog{display:flex;flex-direction:column;gap:8px;max-height:52vh;overflow:auto;background:var(--surface2);border-radius:14px;padding:10px}
+.msg{align-self:flex-start;max-width:82%;background:var(--surface);border:1px solid var(--line);border-radius:14px 14px 14px 4px;padding:6px 10px;display:grid;gap:2px}
+.msg.me{align-self:flex-end;background:#E4DCFF;border-color:#C9B8FF;border-radius:14px 14px 4px 14px;color:#1B1F3B}
+.msg p{margin:0;overflow-wrap:anywhere}.msg .who{font-size:.72rem;font-weight:800;color:var(--muted)}.msg.me .who{color:#5B3FD9}
+.msg time{font-size:.68rem;color:var(--muted);justify-self:end}
+.msg.flag{border-color:var(--bad);box-shadow:0 0 0 1px var(--bad)}.msg .fl{font-size:.7rem;color:var(--bad);font-weight:800}
+.chatform{display:flex;gap:6px}.chatform input{flex:1}
+.safe{font-size:.8rem;color:var(--muted);background:var(--surface2);border-radius:10px;padding:8px 10px}
+.ksoc{display:grid;gap:8px;border-top:1px dashed var(--line);padding-top:10px}
 </style>
 
 <div class="wrap">
@@ -1001,13 +1020,14 @@ function startGame(kidId){
   while(coins.size<20&&tries<4000){tries++;const x=1+Math.floor(r()*(MW-2)),y=1+Math.floor(r()*(MH-2));const t=WORLD.m[y][x];
     if(blockedAt(x,y)||!".,*:=mB".includes(t)||(x===WORLD.start.x&&y===WORLD.start.y))continue;coins.set(x+","+y,coins.size<4?"gem":"coin")}
   G={kid:kidId,x:WORLD.start.x,y:WORLD.start.y,face:"down",mv:null,dir:null,coins:0,energy:ENERGY,steps:0,coinsMap:coins,opened:new Set(),friends:new Set(),npcPlayed:new Set(),dialog:null,enc:null,zone:"Pueblo Fichas",end:null,banner:{t:"Pueblo Fichas",until:performance.now()+1800}};
-  menuOpen=false;foodOpen=false;petMenu=null;wake();tune([[523,.08],[659,.08],[784,.08],[1046,.12]]);render();requestAnimationFrame(gameLoop);
+  menuOpen=false;foodOpen=false;petMenu=null;wake();tune([[523,.08],[659,.08],[784,.08],[1046,.12]]);render();requestAnimationFrame(gameLoop);startWorld();
 }
 const DIRS={up:[0,-1],down:[0,1],left:[-1,0],right:[1,0]};
 function gSay(lines,opts={}){G.dialog={lines,i:0,...opts};G.dir=null;render()}
 function gInteract(){if(!G||G.end||G.enc)return;
   if(G.dialog){const d=G.dialog;if(d.ask)return;d.i++;beep(880,.04);if(d.i>=d.lines.length){G.dialog=null;render();d.after&&d.after();return}render();return}
   const [dx,dy]=DIRS[G.face],tx=G.x+dx,ty=G.y+dy;
+  const op=otherAt(tx,ty);if(op){beep(660,.05);G.dialog={lines:[`Es ${op.nick}, otra mascota que está explorando.`+(op.fr==="ok"?" ¡Es tu amigo!":op.fr==="req"?" Ya pediste ser su amigo; faltan los permisos de los papás.":"")],i:0,ask:"player",op};G.dir=null;render();return}
   const n=WORLD.npcs.find(o=>o.x===tx&&o.y===ty);if(n){beep(660,.05);gSay(n.t.map(l=>n.n+": "+l),{after:()=>{if(!G.npcPlayed.has(n.n))gSay([`${n.n}: ¿Jugamos a ${MINIS[NPC_GAME[n.n]].n}?`],{ask:"npc",npc:n})}});return}
   const s=WORLD.signs.find(o=>o.x===tx&&o.y===ty);if(s){beep(660,.05);gSay(s.t);return}
   const ch=WORLD.chests.find(o=>o.x===tx&&o.y===ty);if(ch){const k=ch.x+","+ch.y;if(G.opened.has(k)){gSay(["El cofre está vacío."]);return}
@@ -1038,7 +1058,7 @@ function startEncounter(){
   G.dir=null;G.enc={c:cr,phase:"intro",start:performance.now()};tune([[330,.08],[392,.08],[330,.08],[523,.15]]);render();
 }
 async function finishGame(){
-  if(!G||G.end)return;const kid=G.kid,award=G.coins;
+  if(!G||G.end)return;leaveWorld(G.kid);const kid=G.kid,award=G.coins;
   const p=S.pets[kid],old=new Set(p.friends||[]),nf=[...G.friends].filter(f=>!old.has(f));
   G.end={coins:G.coins,award,nf};G.dialog=null;G.enc=null;render();
   try{if(award>0)await ledger(kid,"juego",award,"Exploración",null,"m");
@@ -1101,6 +1121,7 @@ function drawGame(c,ts){
     const ck=G.coinsMap.get(x+","+y);if(ck)obj.push({y:y*TS+8,d:()=>gCoin(c,sx,sy,ck,ts,hsh(x,y)%7)})}
   WORLD.houses.forEach(h=>obj.push({y:(h.y+3)*TS-1,d:()=>gHouse(c,h,h.x*TS-camX,h.y*TS-camY,ts)}));
   WORLD.npcs.forEach(n=>obj.push({y:n.y*TS+14,d:()=>gNpc(c,n,n.x*TS-camX,n.y*TS-camY,ts)}));
+  drawOthers(obj,c,camX,camY,ts);
   WORLD.signs.forEach(s=>obj.push({y:s.y*TS+14,d:()=>{const sx=s.x*TS-camX,sy=s.y*TS-camY;sh(c,sx+8,sy+15,5,1);R(c,sx+7,sy+8,2,8,"#7A4E2D");R(c,sx+1,sy+2,14,8,OL);R(c,sx+2,sy+3,12,6,"#E6B07A");R(c,sx+4,sy+5,8,1,"#9C6236");R(c,sx+4,sy+7,6,1,"#9C6236")}}));
   WORLD.chests.forEach(o=>obj.push({y:o.y*TS+14,d:()=>gChest(c,o.x*TS-camX,o.y*TS-camY,G.opened.has(o.x+","+o.y))}));
   const xi=xpInfo(kid),walking=!!G.mv,psx=Math.round(px-camX),psy=Math.round(py-camY);
@@ -1132,7 +1153,7 @@ function gameScreen(){
   if(MG)over=miniScreen();
   else if(G.enc){const e=G.enc,c=e.c,gm=MINIS[CRIT_GAME[c.id]];
     over=`<div class="gdlg"><p>¡Apareció un <b>${c.n}</b> salvaje!${c.rare?" ✦ Es muy raro":""} Quiere jugar a <b>${gm.n}</b>.</p><div class="gbtns"><button class="btn" data-act="gplay">¡A jugar!</button><button class="btn ghost" data-act="grun">Seguir caminando</button></div></div>`}
-  else if(G.dialog){const d=G.dialog;over=`<div class="gdlg" ${d.ask?"":`data-act="gnext"`}><p>${esc(d.lines[d.i])}</p>${d.ask==="npc"?`<div class="gbtns"><button class="btn" data-act="npcplay">¡Sí, juguemos!</button><button class="btn ghost" data-act="gstay">Ahora no</button></div>`:d.ask?`<div class="gbtns"><button class="btn" data-act="gfinish">Sí, volver a casa</button><button class="btn ghost" data-act="gstay">Seguir explorando</button></div>`:`<span class="gmore">▼</span>`}</div>`}
+  else if(G.dialog){const d=G.dialog;over=`<div class="gdlg" ${d.ask?"":`data-act="gnext"`}><p>${esc(d.lines[d.i])}</p>${d.ask==="player"?`<div class="gbtns"><button class="btn" data-act="pwave">👋 Saludar</button>${!d.op.fr?`<button class="btn coinb" data-act="pfriend">Pedir amistad</button>`:""}<button class="btn ghost" data-act="gstay">Seguir</button></div>`:d.ask==="npc"?`<div class="gbtns"><button class="btn" data-act="npcplay">¡Sí, juguemos!</button><button class="btn ghost" data-act="gstay">Ahora no</button></div>`:d.ask?`<div class="gbtns"><button class="btn" data-act="gfinish">Sí, volver a casa</button><button class="btn ghost" data-act="gstay">Seguir explorando</button></div>`:`<span class="gmore">▼</span>`}</div>`}
   return `<div class="play game" style="--shell:${esc(k.color||COLORS[0])}">
     <div class="lcdwrap"><canvas id="gcv" width="128" height="160" aria-label="Mapa de exploración"></canvas>
       <div class="ghud"><span class="gchip" id="gzone">${G.zone}</span><span class="gchip">${cI("m")}<b id="gcoins" class="num">${G.coins}</b></span>
@@ -1267,6 +1288,77 @@ document.addEventListener("keydown",e=>{if(!MG||MG.phase!=="play")return;const k
   else if(MG.id==="frutas"){if(k==="ArrowLeft")MG.hold=-1;else if(k==="ArrowRight")MG.hold=1;else used=false}else used=false;if(used){e.preventDefault();e.stopImmediatePropagation()}},true);
 document.addEventListener("keyup",e=>{if(!MG)return;if(e.key==="ArrowDown")MG.soft=false;if(e.key==="ArrowLeft"||e.key==="ArrowRight")MG.hold=0});
 
+/* ================= Social: amigos, chat y mundo compartido ================= */
+const SOC={};           // kidId -> {friends:[], code, nick, at}
+let chatWith=null, chatMsgs=[], chatFor=null, chatAt=0, profSig={};
+const socialOn=()=>remote&&!!family;
+const kidSoc=kid=>((S.kids[kid]||{}).social)||{};
+async function syncProfile(kidId,force){if(!socialOn()||!S.kids[kidId])return;const p=S.pets[kidId]||{},k=S.kids[kidId];
+  const sig=JSON.stringify([p.name,p.species,p.equip,k.nick,k.color,k.social]);if(!force&&profSig[kidId]===sig)return;profSig[kidId]=sig;
+  try{const j=await api("social/profile",{family,kidId});SOC[kidId]={...(SOC[kidId]||{}),code:j.code,nick:j.nick}}catch(e){profSig[kidId]=null}}
+async function loadFriends(kidId){if(!socialOn())return;try{const r=await fetch(`/api/friends?f=${family}&kid=${kidId}`,{cache:"no-store"});const j=await r.json();SOC[kidId]={...(SOC[kidId]||{}),friends:j.friends||[],code:j.code||(SOC[kidId]||{}).code,nick:j.nick,at:Date.now()}}catch(e){}}
+async function loadChat(kidId,w){if(!socialOn())return;try{const r=await fetch(`/api/chat?f=${family}&kid=${kidId}&with=${w}`,{cache:"no-store"});const j=await r.json();if(r.ok){const changed=JSON.stringify(j.msgs)!==JSON.stringify(chatMsgs);chatMsgs=j.msgs||[];chatAt=Date.now();try{localStorage.setItem("fm-seen-"+kidId+"-"+w,String((chatMsgs[chatMsgs.length-1]||{}).ts||0))}catch(e){}return changed}}catch(e){}return false}
+function pendingApprovals(){let n=0;famKids().forEach(k=>(SOC[k.id]&&SOC[k.id].friends||[]).forEach(f=>{if(f.st==="req"&&!f.mine)n++}));return n}
+/* ciclo de actualización social (cada 4 s) */
+setInterval(async()=>{if(!socialOn()||document.visibilityState!=="visible")return;
+  if(role&&role.r==="kid"&&S.kids[role.id]){syncProfile(role.id);if(menuOpen&&ktab==="chat"){await loadFriends(role.id);let ch=false;if(chatWith)ch=await loadChat(role.id,chatWith);if(!document.activeElement||document.activeElement.id!=="chat-in"||ch)render()}}
+  if(role&&role.r==="parent"&&!pview){const kids=famKids();for(const k of kids){if(!SOC[k.id]||Date.now()-(SOC[k.id].at||0)>9000)await loadFriends(k.id)}
+    if(ptab==="amigos"&&chatWith&&chatFor){const ch=await loadChat(chatFor,chatWith);if(ch&&(!document.activeElement||document.activeElement.id!=="chat-in"))render()}else if(ptab==="amigos"||ptab==="familia")render()}},4000);
+function avatarMini(look,size){const col=(look&&look.color)||"#7C5CFF",sp=(look&&SPECIES[look.sp])||SPECIES.blob;return `<span class="sav" style="--c:${esc(col)};--s:${size||36}px"><i style="background:${sp.c}"></i></span>`}
+function chatThread(kidId,w,asParent){
+  const fr=w==="family"?null:((SOC[kidId]||{}).friends||[]).find(f=>f.id===w);const title=w==="family"?(asParent?`Chat con ${kidName(kidId)}`:"Mi familia"):(fr?esc(fr.nick):"Amigo");
+  const canWrite=w==="family"||(!asParent&&fr&&fr.st==="ok"&&kidSoc(kidId).chat!==false);
+  const me=asParent?"parent":kidId;
+  return `<div class="chat"><div class="chathead"><button class="btn ghost sm" data-act="chatback">←</button><b>${title}</b>${asParent&&w!=="family"?'<span class="pill plain">Solo lectura</span>':""}</div>
+    <div class="chatlog" id="chatlog">${chatMsgs.length?chatMsgs.map(m=>{const mine=m.from===me;const who=m.from==="parent"?"Papá/Mamá":m.from===kidId?(asParent?kidName(kidId):"Tú"):(fr?fr.nick:"Amigo");
+      return `<div class="msg ${mine?"me":""} ${m.flag?"flag":""}"><span class="who">${esc(who)}</span><p>${esc(m.text)}</p>${m.flag?'<span class="fl">Se ocultaron datos personales</span>':""}<time>${fmtTs(m.ts)}</time></div>`}).join(""):`<p class="muted" style="text-align:center">Todavía no hay mensajes.</p>`}</div>
+    ${canWrite?`<form class="chatform" data-form="chatsend" data-kid="${kidId}" data-with="${w}" data-as="${asParent?"parent":"kid"}"><input id="chat-in" maxlength="300" autocomplete="off" placeholder="Escribe un mensaje…" required><button class="btn" type="submit">Enviar</button></form>`:""}
+    ${!asParent&&w!=="family"?'<p class="safe">🔒 Nunca compartas tu dirección, teléfono, colegio ni redes sociales. Tus papás pueden ver este chat.</p>':""}</div>`}
+function kChat(kidId){
+  if(!socialOn())return `<section><div class="empty">El chat y los amigos funcionan en la app de Netlify, donde los celulares de tu familia están conectados.</div></section>`;
+  if(chatWith)return chatThread(kidId,chatWith,false);
+  const so=SOC[kidId]||{},fr=so.friends||[];
+  const ok=fr.filter(f=>f.st==="ok"),req=fr.filter(f=>f.st==="req");
+  return `<section><div class="sechead"><h2>Chat</h2></div>
+    <button class="chatrow" data-act="chatopen" data-w="family"><span class="sav fam" style="--s:36px">🏠</span><span><b>Mi familia</b><small>Habla con tu papá o mamá</small></span></button>
+    <div class="sechead"><h3>Amigos</h3><p>${ok.length}</p></div>
+    ${ok.length?ok.map(f=>`<button class="chatrow" data-act="chatopen" data-w="${f.id}">${avatarMini(f.look)}<span><b>${esc(f.nick)}</b><small>Toca para chatear</small></span></button>`).join(""):`<p class="muted" style="font-size:.88rem">Aún no tienes amigos. Encuéntralos explorando el mundo o agrégalos con su código.</p>`}
+    ${req.length?`<div class="sechead"><h3>Esperando permiso</h3></div>${req.map(f=>`<div class="chatrow off">${avatarMini(f.look)}<span><b>${esc(f.nick)}</b><small>${!f.mine?"Falta que lo apruebe tu papá o mamá":"Falta que lo aprueben los papás de "+esc(f.nick)}</small></span></div>`).join("")}`:""}
+    <div class="goal"><div class="top"><span>Tu código de amigo</span><b class="px">${esc(so.code||"…")}</b></div>
+      <form data-form="addfriend" data-kid="${kidId}" style="display:flex;gap:6px"><input id="af-code" placeholder="Código de tu amigo (ej. PIX-123)" autocapitalize="characters" required><button class="btn sm" type="submit">Agregar</button></form>
+      <p class="muted" style="font-size:.82rem">Toda amistad necesita el permiso de tus papás y de los papás de tu amigo.</p></div></section>`;
+}
+function pAmigos(){
+  const kids=famKids();if(!kids.length)return needKids();
+  if(!socialOn())return `<div class="empty">Los amigos y el chat funcionan en la app de Netlify.</div>`;
+  if(chatWith&&chatFor)return chatThread(chatFor,chatWith,true);
+  return kids.map(k=>{const so=SOC[k.id]||{},fr=so.friends||[],sc=k.social||{};
+    const pend=fr.filter(f=>f.st==="req"),ok=fr.filter(f=>f.st==="ok"),bl=fr.filter(f=>f.st==="blocked");
+    return `<section class="form"><div class="sechead"><h2>${esc(k.name)}</h2><p>Código: <span class="code">${esc(so.code||"—")}</span></p></div>
+      <button class="chatrow" data-act="pchat" data-kid="${k.id}" data-w="family"><span class="sav fam" style="--s:36px">💬</span><span><b>Chat con ${esc(k.name)}</b><small>Mensajes entre tú y tu hijo</small></span></button>
+      ${pend.length?`<h3>Solicitudes de amistad</h3>${pend.map(f=>`<div class="item">${avatarMini(f.look)}<div class="body"><div class="t">${esc(f.nick)}</div><div class="meta">${f.byMe?`${esc(k.name)} lo invitó`:`Quiere ser amigo de ${esc(k.name)}`} · ${f.mine?'<span class="pill ok">Ya aprobaste</span>':'<span class="pill warn">Falta tu permiso</span>'} ${f.theirs?'<span class="pill ok">Su familia aprobó</span>':'<span class="pill plain">Falta su familia</span>'}</div></div>
+        <div class="actions">${f.mine?"":`<button class="btn okb sm" data-act="fdecide" data-kid="${k.id}" data-o="${f.id}" data-v="approve">Aprobar</button>`}<button class="btn ghost sm" data-act="fdecide" data-kid="${k.id}" data-o="${f.id}" data-v="remove">Rechazar</button><button class="x" data-act="fdecide" data-kid="${k.id}" data-o="${f.id}" data-v="block">Bloquear</button></div></div>`).join("")}`:""}
+      <h3>Amigos (${ok.length})</h3>${ok.length?ok.map(f=>`<div class="item">${avatarMini(f.look)}<div class="body"><div class="t">${esc(f.nick)}</div></div><div class="actions"><button class="btn sm" data-act="pchat" data-kid="${k.id}" data-w="${f.id}">Ver chat</button><button class="btn ghost sm" data-act="fdecide" data-kid="${k.id}" data-o="${f.id}" data-v="remove">Quitar</button><button class="x" data-act="fdecide" data-kid="${k.id}" data-o="${f.id}" data-v="block">Bloquear</button></div></div>`).join(""):'<p class="muted" style="font-size:.88rem">Sin amigos todavía.</p>'}
+      ${bl.length?`<p class="muted" style="font-size:.85rem">Bloqueados: ${bl.map(f=>esc(f.nick)).join(", ")}</p>`:""}
+      <form data-form="ksocial" data-kid="${k.id}" class="ksoc"><label class="f">Apodo público (no uses su nombre completo)<input id="ks-nick-${k.id}" maxlength="16" value="${esc(k.nick||"")}" placeholder="${esc((S.pets[k.id]||{}).name||"Apodo")}"></label>
+        <label class="toggle"><input id="ks-world-${k.id}" type="checkbox" ${sc.world!==false?"checked":""}><span>Puede ver y saludar a otros niños en el mundo libre</span></label>
+        <label class="toggle"><input id="ks-chat-${k.id}" type="checkbox" ${sc.chat!==false?"checked":""}><span>Puede chatear con amigos aprobados</span></label>
+        <div><button class="btn sm" type="submit">Guardar</button></div></form></section>`}).join("")+
+    `<p class="muted" style="font-size:.85rem">En el chat se ocultan automáticamente teléfonos, direcciones, correos, enlaces, redes sociales y groserías. Los mensajes donde se ocultó algo quedan marcados en rojo.</p>`;
+}
+/* ---- mundo compartido ---- */
+let worldTimer=null;
+function worldOn(){return socialOn()&&G&&role&&role.r==="kid"&&G.kid===role.id&&kidSoc(G.kid).world!==false}
+async function worldTick(emote){if(!worldOn())return;try{const j=await api("world",{family,kidId:G.kid,x:G.x,y:G.y,zone:G.zone,emote});const now=performance.now();const nx={};
+  (j.others||[]).forEach(o=>{const old=G.others&&G.others[o.id];nx[o.id]={...o,px:old?old.px:o.x,py:old?old.py:o.y,seen:now}});G.others=nx}catch(e){}}
+function startWorld(){clearInterval(worldTimer);if(!worldOn())return;G.others={};syncProfile(G.kid,true).then(()=>worldTick());worldTimer=setInterval(()=>{if(!G){clearInterval(worldTimer);return}worldTick()},1500)}
+function leaveWorld(kid){clearInterval(worldTimer);if(socialOn()&&kid)api("world",{family,kidId:kid,x:0,y:0,zone:"",leave:true}).catch(()=>{})}
+function otherAt(x,y){if(!G||!G.others)return null;return Object.values(G.others).find(o=>o.x===x&&o.y===y)||null}
+function drawOthers(obj,c,camX,camY,ts){if(!G||!G.others)return;Object.values(G.others).forEach(o=>{o.px+=(o.x-o.px)*.25;o.py+=(o.y-o.py)*.25;const sx=Math.round(o.px*TS-camX),sy=Math.round(o.py*TS-camY);
+  obj.push({y:o.py*TS+15,d:()=>{sh(c,sx+8,sy+15,7,2);drawPet(c,{sp:(o.look||{}).sp,stage:1,mood:"happy",equip:(o.look||{}).equip,x:sx+8,base:sy+14,t:ts+o.x*97,walking:Math.abs(o.x-o.px)+Math.abs(o.y-o.py)>.05});
+    c.font="bold 6px system-ui,sans-serif";c.textAlign="center";const w=Math.min(40,c.measureText(o.nick).width+6);R(c,sx+8-w/2,sy-12,w,8,o.fr==="ok"?"#14866A":"#23253A");c.fillStyle="#FFFFFF";c.fillText(o.nick,sx+8,sy-6);
+    if(o.emote){R(c,sx+12,sy-24,11,9,"#FFFFFF");R(c,sx+12,sy-25,11,1,OL);R(c,sx+12,sy-15,11,1,OL);R(c,sx+11,sy-24,1,9,OL);R(c,sx+23,sy-24,1,9,OL);heart(c,sx+15,sy-22)}}})})}
+
 /* ================= Interfaz ================= */
 function preserve(fn){
   const vals={};document.querySelectorAll("#app input[id],#app select[id]").forEach(el=>vals[el.id]=el.type==="checkbox"?el.checked:el.value);
@@ -1389,9 +1481,9 @@ function kidScreen(kidId,asParent){
   const dis=st.egg||st.dead?"disabled":"";
   const pend=arr("tasks").filter(t=>t.kidId===kidId&&t.status==="pendiente").length;
   const goalsReady=arr("goals").filter(g=>g.kidId===kidId&&g.status==="activa"&&m.goalPts>=g.cost).length;
-  const tabs=[["deberes","Deberes",pend],["tienda","Tienda"],["metas","Metas",goalsReady],["album","Amigos"],["registro","Registro"]];
+  const tabs=[["deberes","Deberes",pend],["tienda","Tienda"],["metas","Metas",goalsReady],["chat","Chat"],["album","Álbum"],["registro","Registro"]];
   if(!asParent)tabs.push(["padres","Zona de padres"]);
-  const body=ktab==="padres"?parentGate():({deberes:kDeberes,tienda:kTienda,metas:kMetas,album:kAlbum,registro:kRegistro}[ktab]||kDeberes)(kidId,m,xi,asParent);
+  const body=ktab==="padres"?parentGate():({deberes:kDeberes,tienda:kTienda,metas:kMetas,album:kAlbum,chat:kChat,registro:kRegistro}[ktab]||kDeberes)(kidId,m,xi,asParent);
   const pair=!k.linked?`<div class="paircard"><span>Código para unirte a tu familia</span><b class="px">${esc(k.code)}</b><small>Tu papá o mamá lo escribe en Familia → Agregar dispositivo</small></div>`:"";
   const sheet=menuOpen?`<div class="scrim" data-act="closemenu"></div>
     <div class="sheet" role="dialog" aria-modal="true" aria-label="Menú de ${esc(p.name)}">
@@ -1501,8 +1593,8 @@ function kRegistro(kidId,m){
 /* ---------- pantalla del padre ---------- */
 function parentScreen(){
   const revCount=arr("tasks").filter(t=>t.status==="revision").length+arr("goals").filter(g=>g.status==="solicitada").length;
-  const tabs=[["familia","Familia"],["revisar","Revisar",revCount],["deberes","Deberes"],["metas","Metas"],["registro","Registro"],["ajustes","Ajustes"]];
-  const body={familia:pFamilia,revisar:pRevisar,deberes:pDeberes,metas:pMetas,registro:pRegistro,ajustes:pAjustes}[ptab]();
+  const tabs=[["familia","Familia"],["revisar","Revisar",revCount],["deberes","Deberes"],["metas","Metas"],["amigos","Amigos y chat",pendingApprovals()],["registro","Registro"],["ajustes","Ajustes"]];
+  const body={familia:pFamilia,revisar:pRevisar,deberes:pDeberes,metas:pMetas,amigos:pAmigos,registro:pRegistro,ajustes:pAjustes}[ptab]();
   const fk=role.fromKid&&S.kids[role.fromKid];
   return `<div class="pnav"><button class="btn ghost sm" data-act="logout">← Menú principal</button>${fk?`<button class="btn ghost sm" data-act="askkid" data-id="${role.fromKid}">Volver al Fichamigo de ${esc(fk.name)}</button>`:""}<span class="muted" style="font-size:.85rem;margin-left:auto">Zona de padres</span></div>
   <nav class="tabs" aria-label="Secciones">${tabs.map(([k,l,n])=>`<button data-act="ptab" data-v="${k}" aria-pressed="${ptab===k}">${l}${n?`<span class="badge">${n}</span>`:""}</button>`).join("")}</nav>${body}`;
@@ -1611,12 +1703,19 @@ document.addEventListener("click",async e=>{
   if(a==="recover"){wkid=id;wstep="recover";render();return}
   if(a==="wback"){wstep=null;render();return}
   if(a==="logout"){role=null;wstep=null;pview=null;foodOpen=false;saveRole();render();return}
-  if(a==="ptab"){ptab=b.dataset.v;render();return}
-  if(a==="ktab"){ktab=b.dataset.v;render();return}
+  if(a==="ptab"){chatWith=null;chatFor=null;if(b.dataset.v==="amigos")famKids().forEach(k=>{syncProfile(k.id);loadFriends(k.id).then(render)});ptab=b.dataset.v;render();return}
+  if(a==="ktab"){if(b.dataset.v==="chat"&&role&&role.r==="kid"){loadFriends(role.id).then(render);syncProfile(role.id)}chatWith=null;ktab=b.dataset.v;render();return}
   if(a==="pview"){pview=id;ktab="deberes";foodOpen=false;menuOpen=false;window.scrollTo(0,0);render();return}
   if(a==="pback"){pview=null;menuOpen=false;foodOpen=false;render();return}
   if(a==="picksp"){pickSp=b.dataset.v;beep(990);render();return}
   if(a==="explore"){startGame(id);return}
+  if(a==="pwave"){worldTick("hola");G.dialog=null;G.waveT=performance.now();tune([[784,.06],[988,.08]]);toast("¡Saludaste!");render();return}
+  if(a==="pfriend"){const op=G.dialog.op;G.dialog=null;render();try{const j=await api("friend/request",{family,kidId:G.kid,target:op.id});op.fr=j.st;tune([[523,.06],[659,.06],[784,.1]]);toast("Solicitud enviada. Tus papás y los de "+op.nick+" deben aprobarla.")}catch(e){toast("No se pudo enviar la solicitud.")}return}
+  if(a==="chatopen"){chatWith=b.dataset.w;chatMsgs=[];render();await loadChat(role.id,chatWith);render();const l=document.getElementById("chatlog");if(l)l.scrollTop=l.scrollHeight;return}
+  if(a==="chatback"){chatWith=null;chatFor=null;chatMsgs=[];render();return}
+  if(a==="pchat"){chatFor=b.dataset.kid;chatWith=b.dataset.w;chatMsgs=[];render();await loadChat(chatFor,chatWith);render();const l=document.getElementById("chatlog");if(l)l.scrollTop=l.scrollHeight;return}
+  if(a==="fdecide"){const kid=b.dataset.kid,o=b.dataset.o,v=b.dataset.v;if((v==="block"||v==="remove")&&!b.dataset.confirm){b.dataset.confirm="1";b.textContent="¿Seguro?";setTimeout(()=>{if(b.isConnected)delete b.dataset.confirm},3000);return}
+    try{await api("friend/decide",{family,pin:S.config.pin,kidId:kid,other:o,action:v});await loadFriends(kid);toast(v==="approve"?"Amistad aprobada":v==="block"?"Bloqueado":"Listo");render()}catch(e){toast(e.code==="pin"?"El PIN no coincide.":"No se pudo. Revisa tu internet.")}return}
   if(a==="ga"||a==="gnext"){gInteract();return}
   if(a==="gfinish"){finishGame();return}
   if(a==="gstay"){G.dialog=null;render();return}
@@ -1627,7 +1726,7 @@ document.addEventListener("click",async e=>{
   if(a==="mgclose"){closeMini();return}
   if(a==="mgquit"){quitMini();return}
   if(a==="grun"){G.enc=null;render();return}
-  if(a==="gexit"){MG=null;G=null;tune([[784,.06],[659,.06],[523,.1]]);render();return}
+  if(a==="gexit"){if(G)leaveWorld(G.kid);MG=null;G=null;tune([[784,.06],[659,.06],[523,.1]]);render();return}
   if(a==="pact"){petMenu=null;render();doAct(b.dataset.v);return}
   if(a==="pmclose"){petMenu=null;render();return}
   if(a==="pmteach"){petMenu="teach";render();return}
@@ -1699,6 +1798,13 @@ document.addEventListener("submit",async e=>{
   if(k==="ppin"){const p=v("pin");if(!/^\d{4}$/.test(p)){toast("El PIN debe tener 4 dígitos.");return}
     if(!S.config.pin){await setConfig({pin:p});toast("PIN creado")}else if(p!==S.config.pin){toast("PIN incorrecto");document.getElementById("pin").value="";beep(180,.2);return}
     role={r:"parent"};saveRole();wstep=null;tune([[660,.06],[990,.1]]);render();return}
+  if(k==="chatsend"){const inp=document.getElementById("chat-in"),text=inp.value.trim();if(!text)return;inp.value="";
+    try{const j=await api("chat",{family,kidId:f.dataset.kid,with:f.dataset.with,as:f.dataset.as,text});chatMsgs.push(j.msg);beep(880,.04);if(j.flagged)toast("Por seguridad se ocultaron datos personales o palabras feas.");render();const l=document.getElementById("chatlog");if(l)l.scrollTop=l.scrollHeight;document.getElementById("chat-in")?.focus()}
+    catch(e){inp.value=text;toast(e.code==="notfriends"?"Todavía no son amigos aprobados.":e.code==="chatoff"?"Tus papás desactivaron el chat.":"No se pudo enviar.")}return}
+  if(k==="addfriend"){const kid=f.dataset.kid;try{const j=await api("friend/request",{family,kidId:kid,code:v("af-code")});document.getElementById("af-code").value="";toast(j.st==="ok"?`${j.nick} ya es tu amigo`:`Solicitud enviada a ${j.nick}. Faltan los permisos de los papás.`);await loadFriends(kid);render()}
+    catch(e){toast(e.code==="nocode"?"No encontramos ese código.":e.code==="samefamily"?"Ese código es de alguien de tu misma familia.":"No se pudo enviar.")}return}
+  if(k==="ksocial"){const kid=f.dataset.kid;await put("kids",kid,{...S.kids[kid],nick:v("ks-nick-"+kid).slice(0,16),social:{world:document.getElementById("ks-world-"+kid).checked,chat:document.getElementById("ks-chat-"+kid).checked}});
+    await syncProfile(kid,true);toast("Guardado");return}
   if(k==="fcreate"){const p=v("pin");if(!/^\d{4}$/.test(p)){toast("El PIN debe tener 4 dígitos.");return}
     try{const j=await api("family",{pin:p});setFamily(j.family);applyState(j.state);role={r:"parent"};saveRole();wstep=null;ptab="familia";tune([[660,.06],[990,.1]]);toast("¡Familia creada!");render()}catch(e){toast("No se pudo crear. Revisa tu internet.")}return}
   if(k==="fjoin"){try{const j=await api("join",{family:v("fj-code").toLowerCase().replace(/\s/g,""),pin:v("fj-pin")});setFamily(j.family);applyState(j.state);role={r:"parent"};saveRole();wstep=null;ptab="familia";tune([[660,.06],[990,.1]]);toast("Celular conectado a tu familia");render()}

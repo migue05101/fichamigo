@@ -9,10 +9,23 @@ const COLS = ["kids", "pets", "tasks", "ledger", "goals", "config"];
 const newPet = now => ({ bornAt: now, hatchedAt: null, species: null, name: "", hunger: 80, happy: 80, clean: 100, at: now, owned: [], equip: {}, house: 1, wall: "celeste", gen: 1 });
 const okFam = f => typeof f === "string" && /^[a-z0-9]{12}$/.test(f);
 
-async function update(store, key, fn) {
+const BAD = ["hijueputa","hp","gonorrea","malparido","malparida","puta","puto","mierda","marica","pendejo","pendeja","idiota","estupido","estúpido","imbecil","imbécil","perra","verga","culo","huevon","huevón","guevon","boba","bobo","sapo","zorra"];
+function clean(raw) {
+  let t = String(raw || "").replace(/\s+/g, " ").trim().slice(0, 300), flagged = false;
+  const pats = [/\d[\d\s\-.()]{5,}\d/g, /[\w.+-]+@[\w-]+\.[\w.]+/g, /(https?:\/\/|www\.)\S+/gi, /\b\S+\.(com|co|net|org|me|io|ly|app|gg|tv)\b\S*/gi, /@\w{3,}/g,
+    /\b(calle|carrera|cra|cll|kr|avenida|av|diagonal|transversal|barrio|conjunto|apto|apartamento|torre|manzana|mz|direcci[oó]n|vivo en|mi casa queda)\b[^.!?]*/gi,
+    /\b(whats?app|wasap|wsp|insta(gram)?|tik ?tok|telegram|snap(chat)?|discord|facebook|face|messenger|correo|celular|n[uú]mero|tel[eé]fono)\b/gi];
+  for (const p of pats) t = t.replace(p, () => { flagged = true; return "***"; });
+  t = t.replace(new RegExp("(^|[^\\p{L}])(" + BAD.join("|") + ")(?=$|[^\\p{L}])", "giu"), (m, a, w) => { flagged = true; return a + "*".repeat(w.length); });
+  return { text: t, flagged };
+}
+const pairKey = (a, b) => [a, b].sort().join("_");
+const noAcc = s => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+async function update(store, key, fn, init) {
   for (let i = 0; i < 8; i++) {
-    const cur = await store.getWithMetadata(key, { type: "json" });
-    if (!cur) return null;
+    let cur = await store.getWithMetadata(key, { type: "json" });
+    if (!cur) { if (!init) return null; const r = await store.setJSON(key, init, { onlyIfNew: true }); cur = await store.getWithMetadata(key, { type: "json" }); if (!cur) continue; }
     const st = cur.data;
     const out = fn(st);
     if (out === false) return st;
@@ -30,6 +43,11 @@ export default async req => {
   const fam = getStore({ name: "familias", consistency: "strong" });
   const pairs = getStore({ name: "pairs", consistency: "strong" });
   const fotos = getStore({ name: "fotos" });
+  const social = getStore({ name: "social", consistency: "strong" });
+  const famState = async f => okFam(f) ? await fam.get(f, { type: "json" }) : null;
+  const myKid = async (f, kidId) => { const st = await famState(f); return st && st.kids && st.kids[kidId] ? st : null; };
+  const profile = id => social.get("k/" + id, { type: "json" });
+  const upd = (key, fn, init) => update(social, key, fn, init);
   const body = req.method === "POST" ? await req.json().catch(() => ({})) : {};
   try {
     if (p === "ping") return J({ ok: true });
@@ -109,6 +127,127 @@ export default async req => {
       if (pinBad) return J({ error: "pin" }, 403);
       pr.family = f; await pairs.setJSON(code, pr);
       return J({ kidId: pr.kidId, name: pr.name, v: st.v });
+    }
+
+    /* ---------- social: perfil, mundo compartido, amigos y chat ---------- */
+    if (p === "social/profile" && req.method === "POST") {
+      const { family: f, kidId } = body;
+      const st = await myKid(f, kidId); if (!st) return J({ error: "notfound" }, 404);
+      const kid = st.kids[kidId], pet = st.pets[kidId] || {};
+      const nick = String(kid.nick || pet.name || "Amigo").slice(0, 16);
+      let prof = await profile(kidId), code = prof && prof.code;
+      if (!code) {
+        const base = (noAcc(pet.name || kid.name || "FIC").toUpperCase().replace(/[^A-Z]/g, "") + "FIC").slice(0, 3);
+        for (let i = 0; i < 20; i++) { code = base + "-" + String(100 + Math.floor(Math.random() * 900)); if (!(await social.get("code/" + code))) break; }
+        await social.setJSON("code/" + code, { kidId });
+      }
+      const look = { sp: pet.species || "blob", equip: pet.equip || {}, color: kid.color || "#7C5CFF" };
+      await upd("k/" + kidId, s2 => { s2.family = f; s2.nick = nick; s2.look = look; s2.code = code; s2.world = kid.social?.world !== false; s2.chat = kid.social?.chat !== false; }, { friends: {} });
+      return J({ code, nick });
+    }
+
+    if (p === "world" && req.method === "POST") {
+      const { family: f, kidId } = body;
+      const prof = await profile(kidId);
+      if (!prof || prof.family !== f) return J({ error: "noprofile" }, 404);
+      const now = Date.now();
+      const me = { x: +body.x | 0, y: +body.y | 0, zone: String(body.zone || "").slice(0, 30), nick: prof.nick, look: prof.look, ts: now };
+      if (body.emote) { me.emote = String(body.emote).slice(0, 12); me.et = now; }
+      const w = await upd("world", s2 => {
+        s2.p = s2.p || {};
+        for (const k in s2.p) if (now - s2.p[k].ts > 30000) delete s2.p[k];
+        if (body.leave || !prof.world) { delete s2.p[kidId]; return; }
+        const old = s2.p[kidId];
+        if (!me.emote && old && old.et && now - old.et < 4000) { me.emote = old.emote; me.et = old.et; }
+        s2.p[kidId] = me;
+      }, { p: {} });
+      const others = [];
+      if (prof.world) for (const [id, o] of Object.entries(w.p || {})) {
+        if (id === kidId || now - o.ts > 12000) continue;
+        const fr = prof.friends[id];
+        if (fr && fr.st === "blocked") continue;
+        others.push({ id, x: o.x, y: o.y, nick: o.nick, look: o.look, emote: o.et && now - o.et < 4000 ? o.emote : null, fr: fr ? fr.st : null });
+      }
+      return J({ others });
+    }
+
+    if (p === "friend/request" && req.method === "POST") {
+      const { family: f, kidId } = body;
+      const me = await profile(kidId);
+      if (!me || me.family !== f) return J({ error: "noprofile" }, 404);
+      let target = body.target;
+      if (!target && body.code) { const c = await social.get("code/" + String(body.code).toUpperCase().trim(), { type: "json" }); target = c && c.kidId; }
+      if (!target || target === kidId) return J({ error: "nocode" }, 404);
+      const other = await profile(target);
+      if (!other) return J({ error: "nocode" }, 404);
+      if (other.family === f) return J({ error: "samefamily" }, 400);
+      const cur = me.friends[target];
+      if (cur) return J({ ok: true, st: cur.st, nick: other.nick });
+      const entry = { st: "req", by: kidId, appr: {}, ts: Date.now() };
+      await upd("k/" + kidId, s2 => { s2.friends[target] = { ...entry, fam: other.family }; });
+      await upd("k/" + target, s2 => { s2.friends[kidId] = { ...entry, fam: f }; });
+      return J({ ok: true, st: "req", nick: other.nick });
+    }
+
+    if (p === "friend/decide" && req.method === "POST") {
+      const { family: f, kidId, other, action } = body;
+      const st = await myKid(f, kidId); if (!st) return J({ error: "notfound" }, 404);
+      if ((st.config?.main?.pin) !== body.pin) return J({ error: "pin" }, 403);
+      const me = await profile(kidId), them = await profile(other);
+      if (!me || !me.friends[other] || !them) return J({ error: "notfound" }, 404);
+      if (action === "remove") {
+        await upd("k/" + kidId, s2 => { delete s2.friends[other]; }); await upd("k/" + other, s2 => { delete s2.friends[kidId]; });
+      } else if (action === "block") {
+        await upd("k/" + kidId, s2 => { s2.friends[other] = { ...(s2.friends[other] || {}), st: "blocked", by: kidId, ts: Date.now() }; });
+        await upd("k/" + other, s2 => { delete s2.friends[kidId]; });
+      } else if (action === "approve") {
+        let both = false;
+        await upd("k/" + kidId, s2 => { const e = s2.friends[other]; if (!e || e.st === "blocked") return false; e.appr = { ...(e.appr || {}), [f]: true }; both = !!(e.appr[f] && e.appr[them.family]); if (both) e.st = "ok"; });
+        await upd("k/" + other, s2 => { const e = s2.friends[kidId]; if (!e) return false; e.appr = { ...(e.appr || {}), [f]: true }; if (e.appr[f] && e.appr[them.family]) e.st = "ok"; });
+      } else return J({ error: "bad" }, 400);
+      return J({ ok: true });
+    }
+
+    if (p === "friends" && req.method === "GET") {
+      const f = url.searchParams.get("f"), kidId = url.searchParams.get("kid");
+      const me = await profile(kidId);
+      if (!me || me.family !== f) return J({ friends: [], code: null });
+      const list = [];
+      for (const [id, e] of Object.entries(me.friends || {})) {
+        const o = await profile(id);
+        list.push({ id, st: e.st, mine: !!(e.appr || {})[f], theirs: !!(o && (e.appr || {})[o.family]), byMe: e.by === kidId, nick: o ? o.nick : "?", look: o ? o.look : null, ts: e.ts });
+      }
+      return J({ friends: list, code: me.code, nick: me.nick });
+    }
+
+    if (p === "chat" && req.method === "GET") {
+      const f = url.searchParams.get("f"), kidId = url.searchParams.get("kid"), w = url.searchParams.get("with");
+      if (w === "family") { if (!(await myKid(f, kidId))) return J({ error: "notfound" }, 404); const c = await social.get("fchat/" + kidId, { type: "json" }); return J({ msgs: c ? c.msgs : [] }); }
+      const me = await profile(kidId);
+      if (!me || me.family !== f || !me.friends[w]) return J({ error: "notfriends" }, 403);
+      const c = await social.get("chat/" + pairKey(kidId, w), { type: "json" });
+      return J({ msgs: c ? c.msgs : [], st: me.friends[w].st });
+    }
+
+    if (p === "chat" && req.method === "POST") {
+      const { family: f, kidId, with: w, as } = body;
+      const { text, flagged } = clean(body.text);
+      if (!text) return J({ error: "empty" }, 400);
+      const msg = { from: as === "parent" ? "parent" : kidId, text, flag: flagged || undefined, ts: Date.now() };
+      let key;
+      if (w === "family") {
+        if (!(await myKid(f, kidId))) return J({ error: "notfound" }, 404);
+        key = "fchat/" + kidId;
+      } else {
+        if (as === "parent") return J({ error: "readonly" }, 403);
+        const me = await profile(kidId);
+        if (!me || me.family !== f || !me.friends[w] || me.friends[w].st !== "ok") return J({ error: "notfriends" }, 403);
+        if (me.chat === false) return J({ error: "chatoff" }, 403);
+        const them = await profile(w); if (!them || !them.friends[kidId] || them.friends[kidId].st !== "ok") return J({ error: "notfriends" }, 403);
+        key = "chat/" + pairKey(kidId, w);
+      }
+      await upd(key, s2 => { s2.msgs.push(msg); if (s2.msgs.length > 300) s2.msgs = s2.msgs.slice(-300); }, { msgs: [] });
+      return J({ ok: true, msg, flagged });
     }
 
     if (p === "photo" && req.method === "POST") {
