@@ -379,6 +379,18 @@ body.playing{overflow:hidden}
 
 .bell{position:relative}.bell i{position:absolute;top:6px;right:6px;width:9px;height:9px;border-radius:50%;background:#FF4D6D;box-shadow:0 0 0 2px rgb(0 0 0 / .25)}
 @media (prefers-reduced-motion:no-preference){.bell{animation:ring 2.4s ease-in-out infinite}@keyframes ring{0%,80%,100%{transform:rotate(0)}84%{transform:rotate(14deg)}88%{transform:rotate(-12deg)}92%{transform:rotate(8deg)}}}
+
+/* ---------- globo de mensaje y chat rápido ---------- */
+.msgalert{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);left:50%;transform:translateX(-50%);z-index:80;width:min(440px,calc(100% - 20px));display:flex;align-items:stretch;
+  background:#FFFFFF;color:#1B1F3B;border:3px solid #23253A;border-radius:18px;box-shadow:0 6px 0 #23253A,0 14px 30px rgb(0 0 0 / .35)}
+@media (prefers-reduced-motion:no-preference){.msgalert{animation:drop .35s cubic-bezier(.2,1.4,.4,1)}@keyframes drop{from{transform:translate(-50%,-120%)}to{transform:translate(-50%,0)}}}
+.ma-main{flex:1;min-width:0;display:flex;gap:10px;align-items:center;border:0;background:transparent;padding:10px 12px;text-align:left;color:inherit}
+.ma-ico{width:40px;height:40px;border-radius:50%;background:#FFE07A;display:grid;place-items:center;font-size:1.3rem;flex:none;border:2px solid #23253A}
+.ma-txt{display:grid;min-width:0}.ma-txt b{font-size:.95rem}.ma-txt span{font-size:.88rem;color:#5A6482;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ma-x{border:0;background:transparent;padding:0 14px;font-weight:900;color:#5A6482}
+.qchat{position:fixed;inset:0;z-index:75;background:rgb(10 12 25 / .5);display:flex;align-items:flex-end;justify-content:center}
+.qpanel{width:min(560px,100%);max-height:88%;overflow:auto;background:var(--bg);color:var(--ink);border-radius:22px 22px 0 0;padding:16px max(16px,env(safe-area-inset-right,0px)) calc(16px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.on-netlify .qpanel{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 76px)}
 </style>
 
 <div class="wrap">
@@ -1376,6 +1388,33 @@ function pAmigos(){
         <div><button class="btn sm" type="submit">Guardar</button></div></form></section>`}).join("")+
     `<p class="muted" style="font-size:.85rem">En el chat se ocultan automáticamente teléfonos, direcciones, correos, enlaces, redes sociales y groserías. Los mensajes donde se ocultó algo quedan marcados en rojo.</p>`;
 }
+/* ---- globo de mensajes nuevos (encima de todo) y chat rápido ---- */
+let inboxAlert=null, qchat=null, inboxBusy=false;
+function inboxSeenKey(){return "fm-inbox-"+(role&&role.r==="kid"?"k:"+role.id:"p:"+family)}
+async function pollInbox(){if(!socialOn()||!role||inboxBusy)return;if(role.r==="kid"&&!S.kids[role.id])return;inboxBusy=true;
+  try{let since=0;try{since=+localStorage.getItem(inboxSeenKey())||0}catch(e){}
+    if(!since){since=Date.now()-60000;try{localStorage.setItem(inboxSeenKey(),String(since))}catch(e){}}
+    const q=role.r==="kid"?`who=kid&kid=${role.id}`:"who=parent";const r=await fetch(`/api/inbox?f=${family}&${q}&since=${since}`,{cache:"no-store"});const j=await r.json();
+    const msgs=(j.msgs||[]).filter(m=>!(qchat&&qchat.w===m.with&&(!m.kidId||qchat.kid===m.kidId)));
+    if(j.msgs&&j.msgs.length){const last=j.msgs[j.msgs.length-1].ts;try{localStorage.setItem(inboxSeenKey(),String(last))}catch(e){}
+      if(qchat){await loadChat(qchat.kid,qchat.w);renderQChat()}}
+    if(msgs.length){const m=msgs[msgs.length-1];inboxAlert={...m,count:msgs.length,at:Date.now()};tune([[880,.06],[1175,.06],[1568,.1]]);try{navigator.vibrate&&navigator.vibrate([150,80,150])}catch(e){}renderAlert();
+      clearTimeout(pollInbox.t);pollInbox.t=setTimeout(()=>{inboxAlert=null;renderAlert()},12000)}}
+  catch(e){}finally{inboxBusy=false}}
+setInterval(()=>{if(document.visibilityState==="visible")pollInbox()},4000);
+function renderAlert(){let el=document.getElementById("msgalert");if(!inboxAlert){if(el)el.remove();return}
+  if(!el){el=document.createElement("div");el.id="msgalert";el.className="msgalert";el.setAttribute("role","status");document.body.appendChild(el)}
+  const m=inboxAlert;const who=m.with==="family"&&role.r==="kid"?"🏠":m.with==="family"?"💬":"";
+  el.innerHTML=`<button class="ma-main" data-act="openalert">${who?`<span class="ma-ico">${who}</span>`:avatarMini(m.look,40)}<span class="ma-txt"><b>${esc(m.name)} te escribió${m.count>1?` (${m.count})`:""}</b><span>${esc(m.text)}</span></span></button><button class="ma-x" data-act="closealert" aria-label="Cerrar">✕</button>`}
+function renderQChat(){let el=document.getElementById("qchat");if(!qchat){if(el)el.remove();return}
+  if(!el){el=document.createElement("div");el.id="qchat";el.className="qchat";document.body.appendChild(el)}
+  const val=document.getElementById("chat-in")?.value||"";const focused=document.activeElement&&document.activeElement.id==="chat-in";
+  el.innerHTML=`<div class="qpanel" role="dialog" aria-label="Chat">${chatThread(qchat.kid,qchat.w,qchat.asParent)}</div>`;
+  const inp=document.getElementById("chat-in");if(inp){inp.value=val;if(focused)inp.focus()}
+  const l=document.getElementById("chatlog");if(l)l.scrollTop=l.scrollHeight}
+async function openQChat(kid,w,asParent){qchat={kid,w,asParent};chatMsgs=[];inboxAlert=null;renderAlert();renderQChat();await loadChat(kid,w);renderQChat()}
+setInterval(async()=>{if(qchat&&document.visibilityState==="visible"){const ch=await loadChat(qchat.kid,qchat.w);if(ch)renderQChat()}},4000);
+
 /* ---- mundo compartido ---- */
 let worldTimer=null;
 function worldOn(){return socialOn()&&G&&role&&role.r==="kid"&&G.kid===role.id&&kidSoc(G.kid).world!==false}
@@ -1770,7 +1809,9 @@ document.addEventListener("click",async e=>{
   if(a==="pwave"){worldTick("hola");G.dialog=null;G.waveT=performance.now();tune([[784,.06],[988,.08]]);toast("¡Saludaste!");render();return}
   if(a==="pfriend"){const op=G.dialog.op;G.dialog=null;render();try{const j=await api("friend/request",{family,kidId:G.kid,target:op.id});op.fr=j.st;tune([[523,.06],[659,.06],[784,.1]]);toast("Solicitud enviada. Tus papás y los de "+op.nick+" deben aprobarla.")}catch(e){toast("No se pudo enviar la solicitud.")}return}
   if(a==="chatopen"){chatWith=b.dataset.w;chatMsgs=[];render();await loadChat(role.id,chatWith);render();const l=document.getElementById("chatlog");if(l)l.scrollTop=l.scrollHeight;return}
-  if(a==="chatback"){chatWith=null;chatFor=null;chatMsgs=[];render();return}
+  if(a==="chatback"){if(qchat){qchat=null;chatMsgs=[];renderQChat();return}chatWith=null;chatFor=null;chatMsgs=[];render();return}
+  if(a==="closealert"){inboxAlert=null;renderAlert();return}
+  if(a==="openalert"&&inboxAlert){const m=inboxAlert;if(role.r==="kid")openQChat(role.id,m.with,false);else openQChat(m.kidId,"family",true);return}
   if(a==="pchat"){chatFor=b.dataset.kid;chatWith=b.dataset.w;chatMsgs=[];render();await loadChat(chatFor,chatWith);render();const l=document.getElementById("chatlog");if(l)l.scrollTop=l.scrollHeight;return}
   if(a==="fdecide"){const kid=b.dataset.kid,o=b.dataset.o,v=b.dataset.v;if((v==="block"||v==="remove")&&!b.dataset.confirm){b.dataset.confirm="1";b.textContent="¿Seguro?";setTimeout(()=>{if(b.isConnected)delete b.dataset.confirm},3000);return}
     try{await api("friend/decide",{family,pin:S.config.pin,kidId:kid,other:o,action:v});await loadFriends(kid);toast(v==="approve"?"Amistad aprobada":v==="block"?"Bloqueado":"Listo");render()}catch(e){toast(e.code==="pin"?"El PIN no coincide.":"No se pudo. Revisa tu internet.")}return}
@@ -1860,7 +1901,7 @@ document.addEventListener("submit",async e=>{
     if(!S.config.pin){await setConfig({pin:p});toast("PIN creado")}else if(p!==S.config.pin){toast("PIN incorrecto");document.getElementById("pin").value="";beep(180,.2);return}
     role={r:"parent"};saveRole();wstep=null;tune([[660,.06],[990,.1]]);render();return}
   if(k==="chatsend"){const inp=document.getElementById("chat-in"),text=inp.value.trim();if(!text)return;inp.value="";
-    try{const j=await api("chat",{family,kidId:f.dataset.kid,with:f.dataset.with,as:f.dataset.as,text});chatMsgs.push(j.msg);beep(880,.04);if(j.flagged)toast("Por seguridad se ocultaron datos personales o palabras feas.");render();const l=document.getElementById("chatlog");if(l)l.scrollTop=l.scrollHeight;document.getElementById("chat-in")?.focus()}
+    try{const j=await api("chat",{family,kidId:f.dataset.kid,with:f.dataset.with,as:f.dataset.as,text});chatMsgs.push(j.msg);beep(880,.04);if(j.flagged)toast("Por seguridad se ocultaron datos personales o palabras feas.");if(qchat){renderQChat();document.getElementById("chat-in")?.focus();return}render();const l=document.getElementById("chatlog");if(l)l.scrollTop=l.scrollHeight;document.getElementById("chat-in")?.focus()}
     catch(e){inp.value=text;toast(e.code==="notfriends"?"Todavía no son amigos aprobados.":e.code==="chatoff"?"Tus papás desactivaron el chat.":"No se pudo enviar.")}return}
   if(k==="addfriend"){const kid=f.dataset.kid;try{const j=await api("friend/request",{family,kidId:kid,code:v("af-code")});document.getElementById("af-code").value="";toast(j.st==="ok"?`${j.nick} ya es tu amigo`:`Solicitud enviada a ${j.nick}. Faltan los permisos de los papás.`);await loadFriends(kid);render()}
     catch(e){toast(e.code==="nocode"?"No encontramos ese código.":e.code==="samefamily"?"Ese código es de alguien de tu misma familia.":"No se pudo enviar.")}return}

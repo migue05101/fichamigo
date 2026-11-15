@@ -261,6 +261,15 @@ export default async req => {
       return J({ friends: list, code: me.code, nick: me.nick });
     }
 
+    if (p === "inbox" && req.method === "GET") {
+      const f = url.searchParams.get("f"), who = url.searchParams.get("who"), kidId = url.searchParams.get("kid"), since = +url.searchParams.get("since") || 0;
+      let key;
+      if (who === "parent") { if (!(await famState(f))) return J({ msgs: [] }); key = "inbox/p:" + f; }
+      else { if (!(await myKid(f, kidId))) return J({ msgs: [] }); key = "inbox/k:" + kidId; }
+      const box = await social.get(key, { type: "json" });
+      return J({ msgs: (box?.msgs || []).filter(m => m.ts > since), now: Date.now() });
+    }
+
     if (p === "chat" && req.method === "GET") {
       const f = url.searchParams.get("f"), kidId = url.searchParams.get("kid"), w = url.searchParams.get("with");
       if (w === "family") { if (!(await myKid(f, kidId))) return J({ error: "notfound" }, 404); const c = await social.get("fchat/" + kidId, { type: "json" }); return J({ msgs: c ? c.msgs : [] }); }
@@ -289,11 +298,19 @@ export default async req => {
       }
       await upd(key, s2 => { s2.msgs.push(msg); if (s2.msgs.length > 300) s2.msgs = s2.msgs.slice(-300); }, { msgs: [] });
       const preview = text.length > 80 ? text.slice(0, 80) + "…" : text;
+      const inbox = (key, item) => upd("inbox/" + key, s2 => { s2.msgs.push(item); if (s2.msgs.length > 40) s2.msgs = s2.msgs.slice(-40); }, { msgs: [] });
       if (w === "family") {
-        if (as === "parent") await notify(f, toKid(kidId), { title: "Mensaje de papá/mamá 💬", body: preview, tag: "fchat" });
-        else { const stF = await famState(f); await notify(f, toParents, { title: `${stF?.kids?.[kidId]?.name || "Tu hijo"} te escribió 💬`, body: preview, tag: "fchat-" + kidId }); }
+        if (as === "parent") {
+          await inbox("k:" + kidId, { name: "Papá/Mamá", with: "family", text: preview, ts: msg.ts });
+          await notify(f, toKid(kidId), { title: "Mensaje de papá/mamá 💬", body: preview, tag: "fchat" });
+        } else {
+          const stF = await famState(f), nm = stF?.kids?.[kidId]?.name || "Tu hijo";
+          await inbox("p:" + f, { name: nm, kidId, with: "family", text: preview, ts: msg.ts });
+          await notify(f, toParents, { title: `${nm} te escribió 💬`, body: preview, tag: "fchat-" + kidId });
+        }
       } else {
         const me2 = await profile(kidId), them2 = await profile(w);
+        await inbox("k:" + w, { name: me2?.nick || "Un amigo", with: kidId, look: me2?.look || null, text: preview, ts: msg.ts });
         if (them2) await notify(them2.family, toKid(w), { title: `${me2?.nick || "Un amigo"} te escribió 💬`, body: preview, tag: "chat-" + kidId });
       }
       return J({ ok: true, msg, flagged });
