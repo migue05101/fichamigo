@@ -502,6 +502,11 @@ let remote=false, family=null, ver=0, pendingOps=0, isOffline=false;
 try{family=localStorage.getItem("fm-family")}catch(e){}
 async function api(path,payload){const r=await fetch("/api/"+path,payload?{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(payload)}:{cache:"no-store"});
   const j=await r.json().catch(()=>({}));if(!r.ok){const e=new Error(j.error||("http "+r.status));e.status=r.status;e.code=j.error;throw e}return j}
+/* Ahorro de servidor: consultas seguidas solo cuando alguien está usando la app; espaciadas si está quieta */
+let lastUse=Date.now();["pointerdown","keydown","touchstart"].forEach(ev=>addEventListener(ev,()=>{lastUse=Date.now()},{passive:true,capture:true}));
+const lastRun={};
+function due(key,activeMs,idleMs){const now=Date.now(),ms=now-lastUse<60000?activeMs:idleMs;if(now-(lastRun[key]||0)<ms)return false;lastRun[key]=now;return true}
+const visible=()=>document.visibilityState==="visible";
 function applyState(st){if(!st)return;["kids","pets","tasks","ledger","goals","school"].forEach(c=>S[c]=st[c]||{});S.config=(st.config&&st.config.main)||{};ver=st.v||0;try{localStorage.setItem("fm-cache",JSON.stringify(st))}catch(e){}}
 function setFamily(f){family=f;try{f?localStorage.setItem("fm-family",f):localStorage.removeItem("fm-family")}catch(e){}}
 function offline(on){if(on===isOffline)return;isOffline=on;$("#notice").innerHTML=on?'<div class="notice">Sin conexión. Revisa tu internet; lo que ves puede estar desactualizado.</div>':""}
@@ -541,8 +546,8 @@ async function start(){
   if(!found&&/^https?:/.test(location.protocol)){try{await api("ping");remote=true}catch(e){}}
   if(remote){
     if(family){let c=null;try{c=JSON.parse(localStorage.getItem("fm-cache")||"null")}catch(e){}if(c){applyState(c);loading=false;render()}await poll(true);if(loading){loading=false;render()}}else{loading=false;render()}
-    setInterval(()=>{if(document.visibilityState==="visible")poll()},3000);
-    document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")poll(true)});
+    setInterval(()=>{if(visible()&&due("state",5000,25000))poll()},1000);
+    document.addEventListener("visibilitychange",()=>{if(visible()){lastUse=Date.now();poll(true);pollInbox()}});
     if(role&&role.r==="kid"&&role.pair)pairPoll();
     if(role&&role.r==="teacher")tLoad();
     return}
@@ -1602,9 +1607,11 @@ async function loadFriends(kidId){if(!socialOn())return;try{const r=await fetch(
 async function loadChat(kidId,w){if(!socialOn())return;try{const r=await fetch(`/api/chat?f=${family}&kid=${kidId}&with=${w}`,{cache:"no-store"});const j=await r.json();if(r.ok){const changed=JSON.stringify(j.msgs)!==JSON.stringify(chatMsgs);chatMsgs=j.msgs||[];chatAt=Date.now();try{localStorage.setItem("fm-seen-"+kidId+"-"+w,String((chatMsgs[chatMsgs.length-1]||{}).ts||0))}catch(e){}return changed}}catch(e){}return false}
 function pendingApprovals(){let n=0;famKids().forEach(k=>(SOC[k.id]&&SOC[k.id].friends||[]).forEach(f=>{if(f.st==="req"&&!f.mine)n++}));return n}
 /* ciclo de actualización social (cada 4 s) */
-setInterval(async()=>{if(!socialOn()||document.visibilityState!=="visible")return;
+setInterval(async()=>{if(!socialOn()||!visible())return;
+  const chatOpen=(role&&role.r==="kid"&&menuOpen&&ktab==="chat")||(role&&role.r==="parent"&&ptab==="amigos");
+  if(!due("social",chatOpen?4000:30000,chatOpen?8000:60000))return;
   if(role&&role.r==="kid"&&S.kids[role.id]){syncProfile(role.id);if(menuOpen&&ktab==="chat"){await loadFriends(role.id);let ch=false;if(chatWith)ch=await loadChat(role.id,chatWith);if(!document.activeElement||document.activeElement.id!=="chat-in"||ch)render()}}
-  if(role&&role.r==="parent"&&!pview){const kids=famKids();for(const k of kids){if(!SOC[k.id]||Date.now()-(SOC[k.id].at||0)>9000)await loadFriends(k.id)}
+  if(role&&role.r==="parent"&&!pview){const kids=famKids();for(const k of kids){if(!SOC[k.id]||Date.now()-(SOC[k.id].at||0)>(ptab==="amigos"?9000:55000))await loadFriends(k.id)}
     if(ptab==="amigos"&&chatWith&&chatFor){const ch=await loadChat(chatFor,chatWith);if(ch&&(!document.activeElement||document.activeElement.id!=="chat-in"))render()}else if(ptab==="amigos"||ptab==="familia")render()}},4000);
 function avatarMini(look,size){const col=(look&&look.color)||"#7C5CFF",sp=(look&&SPECIES[look.sp])||SPECIES.blob;return `<span class="sav" style="--c:${esc(col)};--s:${size||36}px"><i style="background:${sp.c}"></i></span>`}
 function chatThread(kidId,w,asParent){
@@ -1661,7 +1668,7 @@ async function pollInbox(){if(!socialOn()||!role||role.r==="teacher"||inboxBusy)
     if(msgs.length){const m=msgs[msgs.length-1];inboxAlert={...m,count:msgs.length,at:Date.now()};tune([[880,.06],[1175,.06],[1568,.1]]);try{navigator.vibrate&&navigator.vibrate([150,80,150])}catch(e){}renderAlert();
       clearTimeout(pollInbox.t);pollInbox.t=setTimeout(()=>{inboxAlert=null;renderAlert()},12000)}}
   catch(e){}finally{inboxBusy=false}}
-setInterval(()=>{if(document.visibilityState==="visible")pollInbox()},4000);
+setInterval(()=>{if(visible()&&due("inbox",qchat?4000:10000,30000))pollInbox()},1000);
 function renderAlert(){let el=document.getElementById("msgalert");if(!inboxAlert){if(el)el.remove();return}
   if(!el){el=document.createElement("div");el.id="msgalert";el.className="msgalert";el.setAttribute("role","status");document.body.appendChild(el)}
   const m=inboxAlert;const who=m.with==="family"&&role.r==="kid"?"🏠":m.with==="family"?"💬":"";
@@ -1680,7 +1687,7 @@ let worldTimer=null;
 function worldOn(){return socialOn()&&G&&role&&role.r==="kid"&&G.kid===role.id&&kidSoc(G.kid).world!==false}
 async function worldTick(emote){if(!worldOn())return;try{const j=await api("world",{family,kidId:G.kid,x:G.x,y:G.y,zone:G.zone,emote});const now=performance.now();const nx={};
   (j.others||[]).forEach(o=>{const old=G.others&&G.others[o.id],moved=old&&(old.x!==o.x||old.y!==o.y);nx[o.id]={...o,px:old?old.px:o.x,py:old?old.py:o.y,bx:moved?old.x:old?old.bx:o.x,by:moved?old.y:old?old.by:o.y+1,qx:old?old.qx:o.x,qy:old?old.qy:o.y+1,dir:moved?(o.x>old.x?"right":o.x<old.x?"left":o.y<old.y?"up":"down"):old?old.dir:"down",seen:now}});G.others=nx}catch(e){}}
-function startWorld(){clearInterval(worldTimer);if(!worldOn())return;G.others={};syncProfile(G.kid,true).then(()=>worldTick());worldTimer=setInterval(()=>{if(!G){clearInterval(worldTimer);return}worldTick()},1500)}
+function startWorld(){clearInterval(worldTimer);if(!worldOn())return;G.others={};syncProfile(G.kid,true).then(()=>worldTick());worldTimer=setInterval(()=>{if(!G){clearInterval(worldTimer);return}if(!visible())return;worldTick()},2500)}
 function leaveWorld(kid){clearInterval(worldTimer);if(socialOn()&&kid)api("world",{family,kidId:kid,x:0,y:0,zone:"",leave:true}).catch(()=>{})}
 function otherAt(x,y){if(!G||!G.others)return null;return Object.values(G.others).find(o=>o.x===x&&o.y===y)||null}
 function drawOthers(obj,c,camX,camY,ts){if(!G||!G.others)return;Object.values(G.others).forEach(o=>{o.px+=(o.x-o.px)*.25;o.py+=(o.y-o.py)*.25;const sx=Math.round(o.px*TS-camX),sy=Math.round(o.py*TS-camY);
@@ -2008,7 +2015,7 @@ function kRegistro(kidId,m){
 let TS_=null, tTab="grupos", tBusy=false;
 async function tLoad(){if(!role||role.r!=="teacher"||tBusy)return;tBusy=true;try{const j=await api("teacher/state?t="+role.id);const ch=JSON.stringify(j)!==JSON.stringify(TS_);TS_=j;offline(false);if(ch&&!/INPUT|SELECT|TEXTAREA/.test((document.activeElement||{}).tagName||""))render()}
   catch(e){if(e.status===404){role=null;saveRole();TS_=null;render();toast("Este perfil de docente ya no existe.")}else offline(true)}finally{tBusy=false}}
-setInterval(()=>{if(document.visibilityState==="visible"&&role&&role.r==="teacher")tLoad()},6000);
+setInterval(()=>{if(visible()&&role&&role.r==="teacher"&&due("teacher",10000,30000))tLoad()},1000);
 async function tApi(path,payload,okMsg){try{const j=await api(path,{teacher:role.id,...payload});if(okMsg)toast(okMsg);await tLoad();render();return j}catch(e){toast(e.code==="nocode"?"No encontramos ese código. Pídele al papá o mamá el código del celular de su hijo (Zona de padres → Colegio).":"No se pudo. Revisa tu internet.");throw e}}
 const ST_PILL={pendiente:'<span class="pill warn">Esperando permiso del padre</span>',ok:'<span class="pill ok">Vinculado</span>',rechazado:'<span class="pill bad">El padre no lo aprobó</span>',retirado:'<span class="pill plain">Retirado por el padre</span>'};
 const TK_PILL={pendiente:'<span class="pill plain">Por hacer</span>',revision:'<span class="pill warn">Entregada · por revisar</span>',aprobada:'<span class="pill ok">Aprobada</span>',borrada:'<span class="pill plain">Retirada</span>'};

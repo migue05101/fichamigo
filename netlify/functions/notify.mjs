@@ -1,4 +1,4 @@
-// Revisor automático: cada 15 minutos mira cómo está cada mascota y los deberes pendientes, y avisa al celular del niño.
+// Revisor automático: cada 30 minutos mira cómo está cada mascota y los deberes pendientes, y avisa al celular del niño.
 import { getStore } from "@netlify/blobs";
 import { pushTo, toKid, petNow } from "../lib/push.mjs";
 
@@ -55,4 +55,4 @@ export default async () => {
   }
 };
 
-export const config = { schedule: "*/15 * * * *" };
+export const config = { schedule: "*/30 * * * *" };
