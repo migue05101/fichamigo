@@ -357,6 +357,9 @@ body.playing{overflow:hidden}
 .on-netlify .sheet{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 72px)}
 .on-netlify .toast{bottom:calc(env(safe-area-inset-bottom,0px) + 92px)}
 .on-netlify .photoview{padding-bottom:84px}
+
+.bell{position:relative}.bell i{position:absolute;top:6px;right:6px;width:9px;height:9px;border-radius:50%;background:#FF4D6D;box-shadow:0 0 0 2px rgb(0 0 0 / .25)}
+@media (prefers-reduced-motion:no-preference){.bell{animation:ring 2.4s ease-in-out infinite}@keyframes ring{0%,80%,100%{transform:rotate(0)}84%{transform:rotate(14deg)}88%{transform:rotate(-12deg)}92%{transform:rotate(8deg)}}}
 </style>
 
 <div class="wrap">
@@ -1505,6 +1508,7 @@ function kidScreen(kidId,asParent){
       ${asParent?`<button class="iconbtn" data-act="pback" aria-label="Volver a Familia">←</button>`:""}
       <div class="pid"><span class="pname">${esc(p.name||"")}</span><span class="stage">${stageLabel(xi)}${asParent?` · de ${esc(k.name)}`:""}</span></div>
       <span class="pchip num" title="Fichas de deberes">${cI("f")}${m.wallet}</span><span class="pchip num m" title="Monedas de explorar">${cI("m")}${m.mon}</span>
+      ${!asParent&&remote&&pushStatus()!=="on"&&pushStatus()!=="nofamily"?`<button class="iconbtn bell" data-act="enablepush" aria-label="Activar notificaciones">🔔<i></i></button>`:""}
       <button class="iconbtn" data-act="mute" aria-label="${muted?"Activar sonido":"Silenciar"}">${muted?"🔇":"🔊"}</button>
     </div>
     ${!k.linked&&!menuOpen?pair:""}
@@ -1527,6 +1531,24 @@ function chooser(kidId){
 function dueTag(t){if(!t.due)return"";const late=t.status==="pendiente"&&t.due<today();return late?`<span class="pill bad">Vencida · ${fmtDate(t.due)}</span>`:`<span>${t.due===today()?"Hoy":fmtDate(t.due)}</span>`}
 const repTag=t=>t.repeat==="daily"?"<span>↻ diaria</span>":t.repeat==="weekly"?"<span>↻ semanal</span>":"";
 let photoTask=null, photoView=null, installEvt=null;
+/* ---------- notificaciones push ---------- */
+const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent), standalone=matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;
+function pushKey(){return role?(role.r==="kid"?"kid:"+role.id:"parent"):""}
+function pushStatus(){if(!remote||!family)return "nofamily";if(!("serviceWorker" in navigator)||!("PushManager" in window)||!("Notification" in window))return isIOS&&!standalone?"install":"unsupported";
+  if(Notification.permission==="denied")return "denied";let k=null;try{k=localStorage.getItem("fm-push")}catch(e){}return Notification.permission==="granted"&&k===pushKey()?"on":"off"}
+const b64u=s=>{const p="=".repeat((4-s.length%4)%4),b=atob((s+p).replace(/-/g,"+").replace(/_/g,"/"));return Uint8Array.from(b,c=>c.charCodeAt(0))};
+async function subscribePush(test){const reg=await navigator.serviceWorker.ready;const {key}=await api("push/key");
+  let sub=await reg.pushManager.getSubscription();if(!sub)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64u(key)});
+  await api("push/subscribe",{family,role:role.r,kidId:role.r==="kid"?role.id:null,sub:sub.toJSON(),tz:Intl.DateTimeFormat().resolvedOptions().timeZone});
+  try{localStorage.setItem("fm-push",pushKey())}catch(e){}if(test)await api("push/test",{family,endpoint:sub.endpoint})}
+async function enablePush(){const st=pushStatus();
+  if(st==="install"){toast("En iPhone primero agrega Fichamigo a la pantalla de inicio y ábrela desde el ícono.");return}
+  if(st==="unsupported"){toast("Este navegador no permite notificaciones. Instala la app desde Chrome.");return}
+  if(st==="denied"){toast("Las notificaciones están bloqueadas. Actívalas en Ajustes del celular → Notificaciones → Fichamigo.");return}
+  try{const p=await Notification.requestPermission();if(p!=="granted"){toast("Sin permiso no podemos avisarte.");return}await subscribePush(true);toast("¡Listo! Te llegará una notificación de prueba.");render()}
+  catch(e){toast("No se pudieron activar las notificaciones. Intenta de nuevo.")}}
+/* si ya hay permiso y cambia el perfil del celular, se reactiva solo */
+setTimeout(()=>{try{if(remote&&family&&role&&"Notification" in window&&Notification.permission==="granted"&&localStorage.getItem("fm-push")!==pushKey())subscribePush(false).then(render).catch(()=>{})}catch(e){}},4000);
 addEventListener("beforeinstallprompt",e=>{e.preventDefault();installEvt=e;render()});
 addEventListener("appinstalled",()=>{installEvt=null;toast("¡Fichamigo quedó instalada!");render()});
 function proofSrc(t){const p=t.proof;if(!p)return null;if(p.id)return `/api/photo?f=${encodeURIComponent(family||"")}&id=${encodeURIComponent(p.id)}`;return p.data||null}
@@ -1689,6 +1711,12 @@ function pAjustes(){
     <label class="toggle"><input id="s-bolsa" type="checkbox" ${S.config.unaBolsa?"checked":""}><span>Una sola bolsa: lo que gastan en la mascota también se descuenta de sus metas reales.<br><span class="muted" style="font-weight:600">Apagado: las metas cuentan todo lo ganado, y la mascota solo gasta de su saldo.</span></span></label>
     <p class="muted" style="font-size:.85rem">Hay dos monedas separadas. <b>Fichas</b>: solo las das tú con los deberes y bonos; son las únicas que cuentan para las metas reales. <b>Monedas</b>: se ganan explorando y jugando; sirven para la mascota y valen ${RATE} veces menos (1 ficha = ${RATE} monedas).</p>
     <div><button class="btn" type="submit">Guardar</button></div></form>
+  ${remote&&family?`<div class="form"><h2>Notificaciones en este celular</h2>
+    <p class="muted">Te avisamos cuando tu hijo termine un deber (con su foto), reclame una meta, te escriba o alguien quiera ser su amigo. En el celular de tu hijo, la campana 🔔 de su pantalla activa los avisos de hambre, aburrimiento, tristeza y deberes pendientes (de 7 a. m. a 9 p. m.).</p>
+    ${pushStatus()==="on"?`<p><span class="pill ok">Activadas</span></p><div><button class="btn ghost sm" type="button" data-act="testpush">Enviar una prueba</button></div>`
+      :pushStatus()==="install"?`<p class="muted"><b>En iPhone:</b> primero agrega Fichamigo a la pantalla de inicio (Compartir → Agregar a pantalla de inicio), ábrela desde el ícono y vuelve aquí.</p>`
+      :pushStatus()==="denied"?`<p class="muted">Están bloqueadas. Actívalas en los Ajustes del celular → Notificaciones → Fichamigo (o Chrome).</p>`
+      :`<div><button class="btn" type="button" data-act="enablepush">🔔 Activar notificaciones</button></div>`}</div>`:""}
   ${remote&&family?`<div class="form"><h2>Código de familia</h2><p class="muted">Para conectar el celular de otro papá o mamá: en ese celular elige <b>Soy papá o mamá → Ya tengo una familia</b> y escribe este código con tu PIN.</p><div class="px bigcode sm">${esc(family)}</div><button class="btn ghost sm" type="button" data-act="copyfam">Copiar código</button></div>`:""}
   <form class="form" data-form="newpin"><h2>Cambiar PIN de padre</h2><label class="f">Nuevo PIN (4 dígitos)<input id="s-pin" data-keep="no" inputmode="numeric" maxlength="4" pattern="[0-9]{4}" required></label>
     <div><button class="btn" type="submit">Cambiar PIN</button></div></form>
@@ -1750,6 +1778,8 @@ document.addEventListener("click",async e=>{
     b.dataset.confirm="1";const old=b.textContent;b.textContent="¿Pasar este celular a "+(S.kids[id]?.name||"joven")+"? Toca otra vez";setTimeout(()=>{if(b.isConnected){delete b.dataset.confirm;b.textContent=old}},3500);return}
   if(a==="copyfam"){try{await navigator.clipboard.writeText(family);toast("Código copiado")}catch(e){toast("Código: "+family)}return}
   if(a==="installapp"&&installEvt){try{installEvt.prompt();await installEvt.userChoice}catch(e){}installEvt=null;render();return}
+  if(a==="enablepush"){await enablePush();return}
+  if(a==="testpush"){try{const reg=await navigator.serviceWorker.ready,sub=await reg.pushManager.getSubscription();if(sub){await api("push/test",{family,endpoint:sub.endpoint});toast("Enviada. Debe llegar en unos segundos.")}else enablePush()}catch(e){toast("No se pudo enviar la prueba.")}return}
   if(a==="cancelpair"){role=null;setDevKid(null);saveRole();wstep=null;render();return}
   if(a==="viewphoto"){photoView=b.dataset.src;render();return}
   if(a==="closephoto"){photoView=null;render();return}

@@ -1,4 +1,5 @@
 import { getStore } from "@netlify/blobs";
+import { vapid, pushTo, toKid, toParents } from "../lib/push.mjs";
 
 const J = (o, s = 200) => new Response(JSON.stringify(o), { status: s, headers: { "content-type": "application/json", "cache-control": "no-store" } });
 const ALPHA = "abcdefghjkmnpqrstuvwxyz23456789";
@@ -44,6 +45,8 @@ export default async req => {
   const pairs = getStore({ name: "pairs", consistency: "strong" });
   const fotos = getStore({ name: "fotos" });
   const social = getStore({ name: "social", consistency: "strong" });
+  const push = getStore({ name: "push", consistency: "strong" });
+  const notify = (f, filter, payload) => pushTo(push, f, filter, { url: "/", ...payload }).catch(() => 0);
   const famState = async f => okFam(f) ? await fam.get(f, { type: "json" }) : null;
   const myKid = async (f, kidId) => { const st = await famState(f); return st && st.kids && st.kids[kidId] ? st : null; };
   const profile = id => social.get("k/" + id, { type: "json" });
@@ -82,14 +85,29 @@ export default async req => {
     if (p === "op" && req.method === "POST") {
       const f = body.family;
       if (!okFam(f) || !Array.isArray(body.ops)) return J({ error: "bad" }, 400);
+      const ev = [];
       const st = await update(fam, f, s => {
+        ev.length = 0;
         for (const o of body.ops) {
+          if (o.col === "tasks" && o.data) {
+            const old = s.tasks?.[o.id], t = o.data, kid = s.kids?.[t.kidId];
+            if (!old && t.status === "pendiente") ev.push(["kid", t.kidId, { title: "Nuevo deber 📝", body: `${t.title} · ${t.tokens} fichas`, tag: "deber-" + o.id }]);
+            else if (old && old.status !== "revision" && t.status === "revision") ev.push(["parents", null, { title: `${kid?.name || "Tu hijo"} terminó un deber`, body: `${t.title}${t.proof ? " · con foto, toca para revisar" : ""}`, tag: "rev-" + o.id }]);
+            else if (old && old.status !== "aprobada" && t.status === "aprobada") ev.push(["kid", t.kidId, { title: "¡Deber aprobado! ⭐", body: `${t.title} · +${t.tokens} fichas`, tag: "ok-" + o.id }]);
+            else if (old && old.status === "revision" && t.status === "pendiente") ev.push(["kid", t.kidId, { title: "Te devolvieron un deber", body: `${t.title}: revísalo y vuelve a enviarlo`, tag: "dev-" + o.id }]);
+          }
+          if (o.col === "goals" && o.data) {
+            const old = s.goals?.[o.id], g = o.data, kid = s.kids?.[g.kidId];
+            if (old && old.status !== "solicitada" && g.status === "solicitada") ev.push(["parents", null, { title: `¡${kid?.name || "Tu hijo"} reclamó una meta!`, body: `${g.title} · ${g.cost} fichas`, tag: "meta-" + o.id }]);
+            if (old && old.status !== "entregada" && g.status === "entregada") ev.push(["kid", g.kidId, { title: "¡Meta entregada! 🎁", body: g.title, tag: "meta-" + o.id }]);
+          }
           if (!COLS.includes(o.col) || typeof o.id !== "string") continue;
           s[o.col] = s[o.col] || {};
           if (o.data === null) delete s[o.col][o.id]; else s[o.col][o.id] = o.data;
         }
       });
       if (!st) return J({ error: "notfound" }, 404);
+      if (ev.length) await Promise.all(ev.map(([who, kidId, p]) => notify(f, who === "kid" ? toKid(kidId) : toParents, p)));
       return J({ v: st.v });
     }
 
@@ -127,6 +145,27 @@ export default async req => {
       if (pinBad) return J({ error: "pin" }, 403);
       pr.family = f; await pairs.setJSON(code, pr);
       return J({ kidId: pr.kidId, name: pr.name, v: st.v });
+    }
+
+    /* ---------- notificaciones ---------- */
+    if (p === "push/key" && req.method === "GET") { const k = await vapid(push); return J({ key: k.publicKey }); }
+    if (p === "push/subscribe" && req.method === "POST") {
+      const { family: f, role: r, kidId, sub, tz } = body;
+      if (!okFam(f) || !sub || !sub.endpoint || !sub.keys) return J({ error: "bad" }, 400);
+      if (!(await famState(f))) return J({ error: "notfound" }, 404);
+      if (r === "kid" && !(await myKid(f, kidId))) return J({ error: "notfound" }, 404);
+      await update(push, "f/" + f, s2 => { s2.subs = (s2.subs || []).filter(x => x.endpoint !== sub.endpoint); s2.subs.push({ endpoint: sub.endpoint, keys: sub.keys, role: r === "kid" ? "kid" : "parent", kidId: r === "kid" ? kidId : null, tz: String(tz || "America/Bogota").slice(0, 40), ts: Date.now() }); }, { subs: [], sent: {} });
+      return J({ ok: true });
+    }
+    if (p === "push/unsubscribe" && req.method === "POST") {
+      const { family: f, endpoint } = body; if (!okFam(f)) return J({ error: "bad" }, 400);
+      await update(push, "f/" + f, s2 => { s2.subs = (s2.subs || []).filter(x => x.endpoint !== endpoint); });
+      return J({ ok: true });
+    }
+    if (p === "push/test" && req.method === "POST") {
+      const { family: f, endpoint } = body; if (!okFam(f)) return J({ error: "bad" }, 400);
+      const n = await notify(f, s2 => s2.endpoint === endpoint, { title: "¡Notificaciones activadas! 🔔", body: "Así te avisará Fichamigo.", tag: "test" });
+      return J({ sent: n });
     }
 
     /* ---------- social: perfil, mundo compartido, amigos y chat ---------- */
@@ -186,6 +225,8 @@ export default async req => {
       const entry = { st: "req", by: kidId, appr: {}, ts: Date.now() };
       await upd("k/" + kidId, s2 => { s2.friends[target] = { ...entry, fam: other.family }; });
       await upd("k/" + target, s2 => { s2.friends[kidId] = { ...entry, fam: f }; });
+      await Promise.all([notify(f, toParents, { title: "Solicitud de amistad", body: `${me.nick} quiere ser amigo de ${other.nick}. Necesita tu permiso.`, tag: "fr-" + target }),
+        notify(other.family, toParents, { title: "Solicitud de amistad", body: `${me.nick} quiere ser amigo de ${other.nick}. Necesita tu permiso.`, tag: "fr-" + kidId })]);
       return J({ ok: true, st: "req", nick: other.nick });
     }
 
@@ -247,6 +288,14 @@ export default async req => {
         key = "chat/" + pairKey(kidId, w);
       }
       await upd(key, s2 => { s2.msgs.push(msg); if (s2.msgs.length > 300) s2.msgs = s2.msgs.slice(-300); }, { msgs: [] });
+      const preview = text.length > 80 ? text.slice(0, 80) + "…" : text;
+      if (w === "family") {
+        if (as === "parent") await notify(f, toKid(kidId), { title: "Mensaje de papá/mamá 💬", body: preview, tag: "fchat" });
+        else { const stF = await famState(f); await notify(f, toParents, { title: `${stF?.kids?.[kidId]?.name || "Tu hijo"} te escribió 💬`, body: preview, tag: "fchat-" + kidId }); }
+      } else {
+        const me2 = await profile(kidId), them2 = await profile(w);
+        if (them2) await notify(them2.family, toKid(w), { title: `${me2?.nick || "Un amigo"} te escribió 💬`, body: preview, tag: "chat-" + kidId });
+      }
       return J({ ok: true, msg, flagged });
     }
 
