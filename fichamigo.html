@@ -372,6 +372,39 @@ body.playing{overflow:hidden}
 .qchat{position:fixed;inset:0;z-index:75;background:rgb(10 12 25 / .5);display:flex;align-items:flex-end;justify-content:center}
 .qpanel{width:min(560px,100%);max-height:88%;overflow:auto;background:var(--bg);color:var(--ink);border-radius:22px 22px 0 0;padding:16px max(16px,env(safe-area-inset-right,0px)) calc(16px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
 .on-netlify .qpanel{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 76px)}
+/* personaje humano y varios fichamigos */
+.petrow{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.petrow::-webkit-scrollbar{display:none}
+.petchip{flex:none;display:inline-flex;align-items:center;gap:6px;border:0;border-radius:999px;padding:6px 12px;font-weight:900;font-size:.85rem;background:rgb(0 0 0 / .22);color:#fff;box-shadow:0 3px 0 rgb(0 0 0 / .18)}
+.petchip i{width:10px;height:10px;border-radius:50%;box-shadow:0 0 0 2px rgb(255 255 255 / .7)}
+.petchip[aria-selected="true"]{background:#FFF7DA;color:#4A3300}
+.petchip.add{background:#22B573;color:#fff}
+.msel{display:inline-flex;align-items:center;gap:6px;font-size:.82rem;font-weight:700;color:var(--muted)}
+.msel select{padding:4px 6px;border-radius:8px;font-size:.82rem}
+.coin.e{background:radial-gradient(circle at 32% 30%,#E3FBEA,#5CC98A 62%);color:#0E5A33}
+.coin.e::after{content:"C"}
+.tdesc{font-size:.85rem;color:var(--muted);margin-top:4px;white-space:pre-wrap}
+details.tdet>summary{list-style:none;cursor:pointer;display:grid;gap:6px}
+details.tdet>summary::-webkit-details-marker{display:none}
+details.tdet .meta{display:flex;flex-wrap:wrap;gap:8px;font-size:.82rem;color:var(--muted);margin-top:2px}
+.tprog{display:flex;flex-wrap:wrap;gap:6px}
+textarea{width:100%;font:inherit;padding:10px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.petchip.lock{background:rgb(0 0 0 / .14);font-weight:700;opacity:.9}
+.avc{max-width:520px}
+.avstage{background:linear-gradient(#DDF0F8,#CFE8F2);border-radius:18px;padding:8px;width:min(220px,60vw);margin:0 auto}
+.avstage canvas,.avtop canvas,.prod canvas[width="72"]{width:100%;height:auto;image-rendering:pixelated;display:block;border-radius:12px}
+.avopts{display:grid;gap:12px;width:100%}
+.avgrp{display:grid;gap:6px;text-align:left}
+.avgrp b{font-size:.85rem}
+.sws{display:flex;flex-wrap:wrap;gap:8px}
+.seg2{display:flex;gap:8px}
+.swatch{min-width:40px;height:40px;border-radius:12px;border:3px solid var(--line);background:var(--c,var(--surface));font-weight:800;padding:0 12px;color:var(--ink)}
+.sws:not(.txt) .swatch[style]{width:40px;padding:0}
+.swatch[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 30%,transparent)}
+.avtop{display:grid;grid-template-columns:minmax(110px,170px) 1fr;gap:14px;align-items:start}
+.avtop canvas{background:#CFE8F2}
+.shop .prod canvas[width="72"]{max-width:150px;margin:0 auto}
+@media (max-width:420px){.avtop{grid-template-columns:1fr}.avtop canvas{max-width:180px;margin:0 auto}}
 </style>
 
 <div class="wrap">
@@ -388,7 +421,7 @@ body.playing{overflow:hidden}
 <script>
 /* ================= Datos y reglas ================= */
 const COLS=["kids","pets","tasks","ledger","goals"];
-const S={kids:{},pets:{},tasks:{},ledger:{},goals:{},config:{}};
+const S={kids:{},pets:{},tasks:{},ledger:{},goals:{},school:{},config:{}};
 const CATS={escuela:"Colegio",casa:"Casa",deber:"Responsabilidad"};
 const COLORS=["#7C5CFF","#FF6B4A","#16A37F","#E8459B","#2F8FE8","#E2A11B"];
 const HR=3.6e6, HUNGER_H=30, HAPPY_H=36, CLEAN_H=24, DEATH_H=48;
@@ -405,6 +438,30 @@ const FURN=[{id:"cuadro",n:"Cuadro",p:30,wall:1,cx:23},{id:"reloj",n:"Reloj",p:3
 const HOUSES=[{l:1,n:"Cuartito",cap:5,p:0},{l:2,n:"Apartamento",cap:11,p:200},{l:3,n:"Casa grande",cap:19,p:500}];
 const WALLS=[{id:"celeste",n:"Celeste",p:0,c:"#BFE3F2",d:"#A3D2E8"},{id:"menta",n:"Rayas menta",p:15,c:"#CDEFDC",d:"#B2E2C7"},{id:"lavanda",n:"Estrellitas",p:15,c:"#E2D9F7",d:"#B9A8EA"},
   {id:"durazno",n:"Rombos durazno",p:15,c:"#FFDCC7",d:"#F7BFA0"},{id:"arcoiris",n:"Arcoíris",p:30,c:"#FFE5C2",d:"#FFD6E0"},{id:"nubes",n:"Cielo con nubes",p:30,c:"#9ED8F7",d:"#FFFFFF"},{id:"noche",n:"Noche estrellada",p:40,c:"#26305E",d:"#323D73"}];
+/* personaje humano */
+const SKINS=["#FFE3CC","#F6CBA4","#E3AA7A","#C68A5C","#9A633E","#6B4128"];
+const HAIRC=[{id:"negro",n:"Negro",c:"#2B2230",p:0},{id:"cafe",n:"Café",c:"#5D3A1A",p:0},{id:"castano",n:"Castaño",c:"#8D5A2B",p:0},{id:"rubio",n:"Rubio",c:"#E8C060",p:0},{id:"rojo",n:"Pelirrojo",c:"#C8502D",p:0},
+  {id:"rosa",n:"Rosado",c:"#FF7AB6",p:30},{id:"azul",n:"Azul",c:"#4D96FF",p:30},{id:"morado",n:"Morado",c:"#9D4EDD",p:30},{id:"verde",n:"Verde",c:"#22B573",p:30},{id:"plata",n:"Plateado",c:"#DDE3EA",p:40}];
+const HAIRS=[{id:"corto",n:"Corto",p:0},{id:"largo",n:"Largo",p:0},{id:"colitas",n:"Dos colitas",p:0},{id:"puntas",n:"Puntas",p:20},{id:"crespo",n:"Crespo",p:20},{id:"mono",n:"Moño alto",p:25},{id:"trenza",n:"Trenza",p:30},{id:"cresta",n:"Cresta",p:40}];
+const OUTFIT=[
+  {id:"camiseta",slot:"top",n:"Camiseta azul",p:0,c:"#4D96FF"},{id:"camiseta-r",slot:"top",n:"Camiseta roja",p:0,c:"#E5484D"},{id:"camiseta-v",slot:"top",n:"Camiseta verde",p:0,c:"#22B573"},
+  {id:"rayas",slot:"top",n:"Camiseta de rayas",p:25,c:"#FFFFFF",c2:"#FF6B4A"},{id:"uniforme",slot:"top",n:"Uniforme del colegio",p:20,c:"#FFFFFF",c2:"#1E3A8A"},
+  {id:"buso",slot:"top",n:"Buso con capota",p:30,c:"#9D4EDD",c2:"#C9A7F5"},{id:"vestido",slot:"top",n:"Vestido",p:35,c:"#FF7AB6",c2:"#FFD1E6",dress:1},
+  {id:"chaqueta",slot:"top",n:"Chaqueta",p:45,c:"#23253A",c2:"#FFD60A"},{id:"futbol",slot:"top",n:"Camiseta de fútbol",p:50,c:"#FFD60A",c2:"#1E3A8A"},{id:"astronauta",slot:"top",n:"Traje espacial",p:120,c:"#ECEFF1",c2:"#FF6B4A"},
+  {id:"jean",slot:"bottom",n:"Jean",p:0,c:"#3B5BA5"},{id:"short",slot:"bottom",n:"Pantaloneta",p:0,c:"#2F3550",short:1},{id:"falda",slot:"bottom",n:"Falda",p:0,c:"#9D4EDD",skirt:1},
+  {id:"sudadera",slot:"bottom",n:"Sudadera",p:20,c:"#6B7280"},{id:"colores",slot:"bottom",n:"Pantalón naranja",p:30,c:"#FF9F1C"},
+  {id:"tenis",slot:"shoes",n:"Tenis",p:0,c:"#FFFFFF",c2:"#E5484D"},{id:"botas",slot:"shoes",n:"Botas",p:25,c:"#7A4E2D"},{id:"sandalias",slot:"shoes",n:"Sandalias",p:15,c:"#FF9F1C"},{id:"brillantes",slot:"shoes",n:"Tenis brillantes",p:60,c:"#4CC9F0",c2:"#FFD60A"},
+  {id:"gorra",slot:"head",n:"Gorra",p:20,c:"#E5484D"},{id:"gorro",slot:"head",n:"Gorro de lana",p:25,c:"#4D96FF",c2:"#FFFFFF"},{id:"diadema",slot:"head",n:"Diadema con moño",p:15,c:"#FF7AB6"},
+  {id:"vueltiao",slot:"head",n:"Sombrero vueltiao",p:60,c:"#F2E3C0",c2:"#2B2230"},{id:"corona",slot:"head",n:"Corona",p:150,c:"#FFD60A",c2:"#E5484D"},
+  {id:"gafas",slot:"face",n:"Gafas",p:20,c:"#2B2230"},{id:"gafasol",slot:"face",n:"Gafas de sol",p:30,c:"#2B2230"},
+  {id:"morral",slot:"back",n:"Morral",p:30,c:"#FF9F1C"},{id:"capa",slot:"back",n:"Capa de héroe",p:80,c:"#E5484D"}];
+const SLOT_N={top:"Camisa",bottom:"Pantalón",shoes:"Zapatos",head:"Cabeza",face:"Cara",back:"Espalda"};
+const AV_DEF=g=>({g,skin:1,hair:g==="nina"?"largo":"corto",hc:"cafe",top:g==="nina"?"camiseta-r":"camiseta",bottom:g==="nina"?"falda":"jean",shoes:"tenis"});
+/* colores de fichamigo (personalización de la mascota) */
+const TINTS=[{id:"menta",n:"Menta",c:"#7EE0C3",b:"#D7F7EE",p:40},{id:"rosa",n:"Chicle",c:"#FF9AC8",b:"#FFE0EF",p:40},{id:"lila",n:"Lila",c:"#B79CF2",b:"#EDE4FF",p:40},
+  {id:"sol",n:"Sol",c:"#FFD54F",b:"#FFF4C4",p:40},{id:"noche",n:"Noche",c:"#5C6BC0",b:"#C5CAE9",p:60},{id:"fuego",n:"Fuego",c:"#FF7043",b:"#FFD9C7",p:60},{id:"oro",n:"Dorado",c:"#E8B923",b:"#FFF1B8",p:150}];
+/* varios fichamigos: se desbloquean con responsabilidad */
+const PET_UNLOCK=[0,0,25,75];
 const TASK_IDEAS=[["Tarea de matemáticas","escuela",10],["Leer 30 minutos","escuela",8],["Estudiar para el examen","escuela",15],["Entregar trabajo a tiempo","escuela",12],
   ["Tender la cama","casa",3],["Lavar los platos","casa",5],["Ordenar el cuarto","casa",6],["Sacar la basura","casa",3],["Ayudar con el almuerzo","casa",6],
   ["Pasear al perro","deber",5],["Acostarse a la hora","deber",4],["Lavar el uniforme","deber",5]];
@@ -445,7 +502,7 @@ let remote=false, family=null, ver=0, pendingOps=0, isOffline=false;
 try{family=localStorage.getItem("fm-family")}catch(e){}
 async function api(path,payload){const r=await fetch("/api/"+path,payload?{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(payload)}:{cache:"no-store"});
   const j=await r.json().catch(()=>({}));if(!r.ok){const e=new Error(j.error||("http "+r.status));e.status=r.status;e.code=j.error;throw e}return j}
-function applyState(st){if(!st)return;["kids","pets","tasks","ledger","goals"].forEach(c=>S[c]=st[c]||{});S.config=(st.config&&st.config.main)||{};ver=st.v||0;try{localStorage.setItem("fm-cache",JSON.stringify(st))}catch(e){}}
+function applyState(st){if(!st)return;["kids","pets","tasks","ledger","goals","school"].forEach(c=>S[c]=st[c]||{});S.config=(st.config&&st.config.main)||{};ver=st.v||0;try{localStorage.setItem("fm-cache",JSON.stringify(st))}catch(e){}}
 function setFamily(f){family=f;try{f?localStorage.setItem("fm-family",f):localStorage.removeItem("fm-family")}catch(e){}}
 function offline(on){if(on===isOffline)return;isOffline=on;$("#notice").innerHTML=on?'<div class="notice">Sin conexión. Revisa tu internet; lo que ves puede estar desactualizado.</div>':""}
 async function poll(force){if(!remote||!family)return;if(pendingOps&&!force)return;
@@ -474,7 +531,7 @@ async function setConfig(patch){
 const ledger=(kidId,type,amount,label,cat,cur)=>put("ledger",uid(),{kidId,type,amount,label,cat:cat||null,cur:cur||(type==="juego"?"m":"f"),createdAt:Date.now()});
 const RATE=5;
 const curOf=l=>l.cur||(l.type==="juego"?"m":"f");
-const cI=cur=>`<span class="coin${cur==="m"?" m":""}" aria-hidden="true"></span>`;
+const cI=cur=>`<span class="coin${cur==="m"?" m":cur==="e"?" e":""}" aria-hidden="true"></span>`;
 const mon=n=>`<span class="tok num">${cI("m")}${n}</span>`;
 
 async function start(){
@@ -483,10 +540,11 @@ async function start(){
   try{if(window.claude&&window.claude.use)found=await window.claude.use("db")}catch(e){}
   if(!found&&/^https?:/.test(location.protocol)){try{await api("ping");remote=true}catch(e){}}
   if(remote){
-    if(family){try{applyState(JSON.parse(localStorage.getItem("fm-cache")||"null"))}catch(e){}loading=false;render();await poll(true)}else{loading=false;render()}
+    if(family){let c=null;try{c=JSON.parse(localStorage.getItem("fm-cache")||"null")}catch(e){}if(c){applyState(c);loading=false;render()}await poll(true);if(loading){loading=false;render()}}else{loading=false;render()}
     setInterval(()=>{if(document.visibilityState==="visible")poll()},3000);
     document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")poll(true)});
     if(role&&role.r==="kid"&&role.pair)pairPoll();
+    if(role&&role.r==="teacher")tLoad();
     return}
   if(!found){localMode=true;loading=false;loadLocal();render();return}
   db=found;
@@ -517,8 +575,17 @@ function moodOf(st){
   if(st.h<=0||st.c<15)return"sick";if(st.h<30)return"hungry";if(st.c<35)return"dirty";if(st.hp<30)return"sad";
   return isNight()&&performance.now()>awakeUntil?"sleep":"happy";
 }
-function xpInfo(kidId){
-  const p=S.pets[kidId]||{}, since=p.bornAt||0;
+/* ---------- varios fichamigos por joven ---------- */
+const kidOfPet=id=>(S.pets[id]&&S.pets[id].kidId)||String(id).split("~")[0];
+function petsOf(kidId){const out=[];if(S.pets[kidId])out.push({id:kidId,p:S.pets[kidId],slot:1});for(let n=2;n<=3;n++){const id=kidId+"~"+n;if(S.pets[id])out.push({id,p:S.pets[id],slot:n})}return out}
+const approvedCount=kidId=>arr("ledger").filter(l=>l.kidId===kidId&&l.type==="tarea").length;
+function petSlots(kidId){const mx=(S.kids[kidId]||{}).maxPets,n=approvedCount(kidId);if(mx&&mx!=="auto")return Math.max(1,Math.min(3,+mx));return 1+(n>=PET_UNLOCK[2])+(n>=PET_UNLOCK[3])}
+let selPets={};try{selPets=JSON.parse(localStorage.getItem("fm-sel")||"{}")}catch(e){}
+function selPet(kidId){const s=selPets[kidId];return s&&S.pets[s]&&S.pets[s].species&&kidOfPet(s)===kidId?s:kidId}
+function setSel(kidId,id){selPets[kidId]=id;try{localStorage.setItem("fm-sel",JSON.stringify(selPets))}catch(e){}}
+const avOf=kidId=>(S.pets[kidId]||{}).avatar||null;
+function xpInfo(petId){
+  const p=S.pets[petId]||{}, kidId=kidOfPet(petId), since=p.bornAt||0;
   const by={escuela:0,casa:0,deber:0};let xp=0;
   arr("ledger").forEach(l=>{if(l.kidId===kidId&&l.type==="tarea"&&l.createdAt>=since){xp+=+l.amount||0;if(by[l.cat]!=null)by[l.cat]+=+l.amount||0}});
   let stage=!p.hatchedAt?0:xp<XP_STEPS[1]?1:xp<XP_STEPS[2]?2:xp<XP_STEPS[3]?3:4;
@@ -528,12 +595,13 @@ function xpInfo(kidId){
   return {xp,stage,form,next,by};
 }
 function money(kidId){
-  let earned=0,pet=0,metas=0,game=0,monSpent=0;
-  arr("ledger").forEach(l=>{if(l.kidId!==kidId)return;const a=+l.amount||0,m=curOf(l)==="m";
+  let earned=0,pet=0,metas=0,game=0,monSpent=0,school=0;
+  arr("ledger").forEach(l=>{if(l.kidId!==kidId)return;const a=+l.amount||0,cu=curOf(l),m=cu==="m";
+    if(cu==="e"){school+=a;return}
     if(m){if(l.type==="compra")monSpent+=-a;else game+=a;return}
     if(l.type==="tarea"||l.type==="bono")earned+=a;else if(l.type==="compra")pet+=-a;else if(l.type==="meta")metas+=-a});
-  const one=!!S.config.unaBolsa;
-  return {earned,pet,metas,game,monSpent,mon:game-monSpent,wallet:earned-pet-(one?metas:0),goalPts:earned-metas-(one?pet:0)};
+  const one=!!S.config.unaBolsa, conv=Math.floor(school*(S.config.eRate??1));earned+=conv;
+  return {earned,pet,metas,game,monSpent,school,conv,mon:game-monSpent,wallet:earned-pet-(one?metas:0),goalPts:earned-metas-(one?pet:0)};
 }
 const stageLabel=(xi)=>xi.stage===4&&xi.form?FORMS[xi.form]:STAGES[xi.stage];
 
@@ -697,7 +765,7 @@ function tri(x,yBase,w,h,dir){/* triángulo hacia arriba; dir -1 inclinado a la 
   for(let i=0;i<h;i++){const ww=Math.max(1,Math.round(w*(1-i/h)));const off=dir===0?Math.floor((w-ww)/2):dir<0?0:w-ww;for(let k=0;k<ww;k++)p.push([x+off+k,yBase-i])}return p}
 function ring(cx,cy,rw,rh){const a=new Set(ellPts(cx,cy,rw,rh).map(p=>p+""));return ellPts(cx,cy,rw,rh).filter(([x,y])=>[[1,0],[-1,0],[0,1],[0,-1]].some(([d,e])=>!a.has([x+d,y+e]+"")))}
 function drawPet(c,o){
-  const sp=SPECIES[o.sp]?o.sp:"blob", SP=SPECIES[sp], stage=Math.max(1,o.stage||1), [rw,rh]=SIZES[stage], [ew,eh]=EYES[stage], t=o.t||1000;
+  const sp=SPECIES[o.sp]?o.sp:"blob", TN=o.tint&&TINTS.find(x=>x.id===o.tint), SP=TN?{...SPECIES[sp],c:TN.c,b:TN.b}:SPECIES[sp], stage=Math.max(1,o.stage||1), [rw,rh]=SIZES[stage], [ew,eh]=EYES[stage], t=o.t||1000;
   const eq={...(o.equip||{})};
   if(stage===4){const f=o.form;if(f==="escuela"&&!eq.face)eq.face="gafas";if(f==="casa"&&!eq.head)eq.head="casco";if(f==="deber"&&!eq.back)eq.back="capa";if(f==="leyenda"&&!eq.head)eq.head="corona"}
   let jump=0, shift=0;const ac=o.action;
@@ -858,8 +926,137 @@ function drawFood(c,id,x,y){
   if(id==="banquete"){R(c,x-1,y+5,9,1,"#ECEFF1");R(c,x,y+6,7,1,"#B0BEC5");shape(c,ellPts(x+2,y+3,2,2),"#A1662F","#5D3A1A");R(c,x+5,y+1,2,4,"#E53935");R(c,x+5,y+1,2,1,"#FFFFFF")}
 }
 
+/* ================= Personaje humano (low poly en píxeles) ================= */
+const OF=id=>OUTFIT.find(o=>o.id===id);
+const hairCol=av=>(HAIRC.find(h=>h.id===av.hc)||HAIRC[1]).c;
+const rp=(x,y,w,h)=>{const p=[];for(let j=0;j<h;j++)for(let i=0;i<w;i++)p.push([Math.round(x)+i,Math.round(y)+j]);return p};
+function octo(cx,cy,rw,rh,cut){const p=[];for(let y=-rh;y<=rh;y++)for(let x=-rw;x<=rw;x++){const dx=Math.max(0,Math.abs(x)-(rw-cut)),dy=Math.max(0,Math.abs(y)-(rh-cut));if(dx+dy<=cut)p.push([cx+x,cy+y])}return p}
+/* sombreado facetado: luz arriba a la izquierda, sombra abajo a la derecha */
+function lpShade(c,pts,col,cx,cy,rw,rh){const lt=mix(col,"#FFFFFF",.24),dk=mix(col,"#1B1F3B",.24);
+  pts.forEach(([x,y])=>{const nx=(x-cx)/rw,ny=(y-cy)/rh;R(c,x,y,1,1,nx+ny<-.62?lt:nx*.9+ny*.4>.48?dk:col)})}
+function part(c,pts,col,cx,cy,rw,rh){shape(c,pts,col,OL);lpShade(c,pts,col,cx,cy,rw,rh)}
+function avLook(av){av=av||AV_DEF("nino");const g=k=>OF(av[k]);return {av,skin:SKINS[av.skin|0]||SKINS[1],H:hairCol(av),top:g("top")||OF("camiseta"),bot:g("bottom")||OF("jean"),shoe:g("shoes")||OF("tenis"),head:g("head"),face:g("face"),back:g("back")}}
+/* o: x, base, av, face(-1|0|1), pose(idle|walk|crouch|jump|cheer|reach|scrub|wave), t, hold(comida) */
+function drawHuman(c,o){
+  const L=avLook(o.av), av=L.av, t=o.t||1000, cx=Math.round(o.x), f=o.face||0, pose=o.pose||"idle";
+  const step=Math.floor(t/140)%2, walk=pose==="walk";
+  let lift=0;if(pose==="jump")lift=Math.round(Math.abs(Math.sin(t/130))*9);if(pose==="cheer")lift=(Math.floor(t/220)%2)*2;if(walk)lift=step;
+  const b=Math.round(o.base)-lift, U=pose==="crouch"?6:0, hy=b-30+U, tc=L.top, dress=!!tc.dress;
+  const H=L.H, sk=L.skin, top=tc.c, bc=L.bot.c;
+  /* --- detrás del cuerpo --- */
+  if(L.back&&L.back.id==="capa"){const p=[];for(let y=b-21+U;y<=b-3;y++){const w=7+Math.round((y-(b-21+U))*.22);for(let x=-w;x<=w-1;x++)p.push([cx+x,y])}
+    const wav=Math.floor(t/260)%2;shape(c,p,L.back.c,OL);p.forEach(([x,y])=>{if(x>cx+3)R(c,x,y,1,1,mix(L.back.c,"#1B1F3B",.25));if(y>=b-4&&(x+wav)%3===0)R(c,x,y,1,1,mix(L.back.c,"#1B1F3B",.35))})}
+  if(L.back&&L.back.id==="morral")part(c,rp(cx-8,b-20+U,16,9),L.back.c,cx,b-16+U,8,5);
+  const longHair=av.hair==="largo"||av.hair==="trenza";
+  if(longHair)part(c,rp(cx-9,hy-6,19,av.hair==="trenza"?12:17),H,cx,hy+2,9,9);
+  if(av.hair==="crespo")part(c,ellPts(cx,hy-3,11,10),H,cx,hy-3,11,10);
+  if(av.hair==="colitas")[-1,1].forEach(s=>{part(c,ellPts(cx+s*11,hy-1,3,5),H,cx+s*11,hy-1,3,5);R(c,cx+s*9-(s<0?1:0),hy-3,2,2,"#FF7AB6")});
+  /* --- piernas y zapatos --- */
+  const sh2=L.shoe, shoeC=sh2.c;
+  if(pose==="crouch"){part(c,rp(cx-7,b-6,5,4),bc,cx,b-4,7,3);part(c,rp(cx+2,b-6,5,4),bc,cx,b-4,7,3);
+    [[cx-7,b-2],[cx+3,b-2]].forEach(([x,y])=>{shape(c,rp(x,y,4,2),shoeC,OL);if(sh2.c2)R(c,x+1,y,2,1,sh2.c2)})}
+  else{const legs=[[cx-5,walk&&step?-1:0],[cx+2,walk&&!step?-1:0]];
+    legs.forEach(([x,up])=>{const y0=b-10,hgt=8+up;const skinLeg=dress||L.bot.skirt;const p=rp(x,y0,3,hgt);shape(c,p,skinLeg?sk:bc,OL);
+      if(L.bot.short&&!dress){R(c,x,y0+3,3,hgt-3,sk)}else if(!skinLeg)R(c,x+2,y0,1,hgt,mix(bc,"#1B1F3B",.22));
+      const sy=b-2+up;shape(c,rp(x-1,sy,4,sh2.id==="botas"?3:2).map(([a,bb])=>[a,bb-(sh2.id==="botas"?1:0)]),shoeC,OL);
+      if(sh2.c2)R(c,x,sy,2,1,sh2.c2);if(sh2.id==="sandalias")R(c,x,sy,3,1,sk);if(sh2.id==="brillantes"&&Math.floor(t/300+x)%3===0)R(c,x+1,sy-1,1,1,"#FFFFFF")})}
+  /* --- torso --- */
+  const ty=b-21+U, torso=rp(cx-6,ty,12,11);
+  if(L.bot.skirt&&!dress&&pose!=="crouch"){const p=[];for(let y=0;y<5;y++)for(let x=-6-Math.floor(y/2);x<6+Math.floor(y/2);x++)p.push([cx+x,b-11+y]);part(c,p,bc,cx,b-9,7,3)}
+  if(dress){const p=[];for(let y=0;y<(pose==="crouch"?4:7);y++)for(let x=-6-Math.floor(y*.6);x<6+Math.floor(y*.6);x++)p.push([cx+x,ty+11+y]);part(c,p,top,cx,ty+13,9,5);for(let x=-8;x<8;x+=2)R(c,cx+x,ty+(pose==="crouch"?14:17),1,1,tc.c2||"#FFFFFF")}
+  part(c,torso,top,cx,ty+4,7,7);
+  if(tc.id==="rayas")for(let y=ty+1;y<ty+11;y+=3)R(c,cx-6,y,12,1,tc.c2);
+  if(tc.id==="uniforme"){R(c,cx-2,ty,1,2,tc.c2);R(c,cx+1,ty,1,2,tc.c2);R(c,cx-1,ty+2,2,1,tc.c2);R(c,cx,ty+3,1,5,tc.c2);R(c,cx-6,ty+9,12,2,"#1E3A8A")}
+  if(tc.id==="buso"){R(c,cx-3,ty+6,6,3,tc.c2);R(c,cx-6,ty,2,2,tc.c2);R(c,cx+4,ty,2,2,tc.c2)}
+  if(tc.id==="chaqueta"){R(c,cx,ty,1,11,tc.c2);R(c,cx-2,ty,5,1,"#FFFFFF")}
+  if(tc.id==="futbol"){R(c,cx-6,ty+4,12,2,tc.c2);R(c,cx-1,ty+7,1,3,tc.c2);R(c,cx+1,ty+7,2,3,tc.c2)}
+  if(tc.id==="astronauta"){R(c,cx-4,ty+2,3,3,tc.c2);R(c,cx+2,ty+3,3,1,"#4D96FF");R(c,cx-6,ty+8,12,1,"#B0BEC5")}
+  if(!dress&&!["uniforme","buso"].includes(tc.id))R(c,cx-2,ty,4,1,sk);
+  if(L.back&&L.back.id==="morral"){R(c,cx-4,ty,1,8,mix(L.back.c,"#1B1F3B",.3));R(c,cx+3,ty,1,8,mix(L.back.c,"#1B1F3B",.3))}
+  /* --- brazos --- */
+  const sleeve=tc.id==="futbol"?tc.c2:top, d=f>=0?1:-1;
+  const arm=(side,kind)=>{const ax=side<0?cx-9:cx+6, sw=walk?(side<0?(step?1:-1):(step?-1:1)):0;
+    if(kind==="up"){const wv=pose==="wave"?Math.round(Math.sin(t/90)*1.5):0,ux=(side<0?cx-12:cx+9)+wv;part(c,rp(ux,ty-6,3,8),sleeve,ux+1,ty-2,2,4);part(c,rp(side<0?ux+2:ux-2,ty+1,3,3),sleeve,ux,ty+2,2,2);shape(c,rp(ux,ty-8,3,2),sk,OL);return}
+    if(kind==="reach"){const ox=pose==="scrub"?Math.round(Math.sin(t/70)*2):0,y=ty+(pose==="crouch"?4:4);const x0=side>0?cx+5+ox:cx-14+ox;
+      part(c,rp(x0,y,9,3),sleeve,x0+4,y+1,5,2);const hx=side>0?x0+9:x0-2;shape(c,rp(hx,y,2,3),sk,OL);
+      if(pose==="scrub"){oval(c,hx+(side>0?2:-1),y+1,2,2,"#FFE45C",OL)}
+      if(o.hold)drawFood(c,o.hold,side>0?hx-1:hx-5,y-7);return}
+    part(c,rp(ax,ty+1+sw,3,7),sleeve,ax+1,ty+4,2,4);shape(c,rp(ax,ty+8+sw,3,2),sk,OL)};
+  if(pose==="jump"||pose==="cheer"){arm(-1,"up");arm(1,"up")}
+  else if(pose==="wave"){arm(-1,"down");arm(1,"up")}
+  else if(pose==="reach"||pose==="scrub"||(pose==="crouch"&&o.reach)){arm(-d,"down");arm(d,"reach")}
+  else{arm(-1,"down");arm(1,"down")}
+  /* --- cabeza --- */
+  const head=octo(cx,hy,8,8,3);part(c,head,sk,cx,hy,8,8);
+  const ex=f*2, blink=t%3400<130;
+  const eye=x=>{if(blink){R(c,x,hy+1,2,1,"#2B2230");return}R(c,x,hy-1,2,3,"#2B2230");R(c,x,hy-1,1,1,"#FFFFFF")};
+  eye(cx-5+ex);eye(cx+3+ex);
+  if(av.g==="nina"&&!blink){R(c,cx-6+ex,hy-2,1,1,"#2B2230");R(c,cx+5+ex,hy-2,1,1,"#2B2230")}
+  R(c,cx-7+ex,hy+2,2,1,"#FF9AA8");R(c,cx+5+ex,hy+2,2,1,"#FF9AA8");
+  if(pose==="cheer"||pose==="jump"){R(c,cx-1+ex,hy+3,3,2,"#8E2C2C");R(c,cx+ex,hy+4,1,1,"#FF7A7A")}else{R(c,cx-1+ex,hy+4,3,1,"#B5523B");R(c,cx-2+ex,hy+3,1,1,"#B5523B");R(c,cx+2+ex,hy+3,1,1,"#B5523B")}
+  /* --- pelo (adelante) --- */
+  const hs=av.hair;
+  let cap=head.filter(([x,y])=>y<=hy-4||((x<=cx-7||x>=cx+7)&&y<=hy+(longHair?5:1))||(y===hy-3&&(x-cx+9)%3!==0));
+  if(hs==="cresta")cap=head.filter(([x,y])=>y<=hy-5&&Math.abs(x-cx)<=6);
+  if(hs==="crespo")cap=cap.concat(head.filter(([x,y])=>y===hy-2&&(x-cx+9)%4<2));
+  part(c,cap,H,cx-3,hy-6,9,5);
+  if(hs==="puntas")[-6,-2,2,6].forEach((dx,i)=>part(c,tri(cx+dx-2,hy-8,5,4+(i%2),0),H,cx,hy-10,8,3));
+  if(hs==="mono")part(c,ellPts(cx,hy-11,4,3),H,cx,hy-11,4,3);
+  if(hs==="cresta")part(c,rp(cx-2,hy-13,5,6),H,cx,hy-10,3,3);
+  if(hs==="trenza")for(let i=0;i<4;i++)part(c,ellPts(cx+9,hy+5+i*4,2,2),H,cx+9,hy+5+i*4,2,2);
+  /* --- sombreros y accesorios --- */
+  const hd=L.head;
+  if(hd){const k=hd.c,k2=hd.c2;
+    if(hd.id==="gorra"){part(c,ellPts(cx,hy-6,9,4).filter(([x,y])=>y<=hy-4),k,cx,hy-7,9,3);const bx=f>0?cx+2:f<0?cx-12:cx-7;shape(c,rp(bx,hy-4,f?10:15,2),mix(k,"#1B1F3B",.25),OL);R(c,cx-1,hy-10,2,1,"#FFFFFF")}
+    if(hd.id==="gorro"){part(c,head.filter(([x,y])=>y<=hy-3),k,cx,hy-6,8,4);shape(c,rp(cx-9,hy-4,19,2),k2,OL);oval(c,cx,hy-11,2,2,k2,OL)}
+    if(hd.id==="diadema"){head.filter(([x,y])=>y===hy-6).forEach(([x,y])=>R(c,x,y,1,1,k));shape(c,[[cx+4,hy-9],[cx+5,hy-8],[cx+6,hy-8],[cx+4,hy-8],[cx+4,hy-7],[cx+7,hy-9],[cx+7,hy-8],[cx+7,hy-7],[cx+5,hy-9]],k,OL)}
+    if(hd.id==="vueltiao"){const br=ellPts(cx,hy-5,15,2);shape(c,br,k,OL);br.forEach(([x,y])=>{if(Math.abs(x-cx)>9&&(x+y)%3===0)R(c,x,y,1,1,k2)});
+      const cr=rp(cx-6,hy-13,13,8);shape(c,cr,k,OL);[hy-11,hy-8].forEach(y=>{for(let x=cx-6;x<cx+7;x++)if((x+y)%2===0)R(c,x,y,1,1,k2)})}
+    if(hd.id==="corona"){const p=rp(cx-6,hy-11,13,3).concat(tri(cx-6,hy-12,3,3,0),tri(cx-1,hy-12,3,4,0),tri(cx+4,hy-12,3,3,0));shape(c,p,k,OL);R(c,cx,hy-10,1,1,k2);R(c,cx-4,hy-10,1,1,"#4D96FF");R(c,cx+4,hy-10,1,1,"#22B573")}}
+  if(L.face){const k=L.face.c;[cx-7+ex,cx+2+ex].forEach(x=>{if(L.face.id==="gafasol"){shape(c,rp(x,hy-2,5,4),"#2B2230",OL);R(c,x+1,hy-1,1,1,"#9AA4C7")}else{R(c,x,hy-2,5,1,k);R(c,x,hy+2,5,1,k);R(c,x,hy-2,1,5,k);R(c,x+4,hy-2,1,5,k)}});R(c,cx-2+ex,hy-1,4,1,k)}
+  return {cx,top:hy-9,hy,bottom:b};
+}
+/* versión pequeña para el mundo (cabe en una casilla de 16 px, estilo Pokémon) */
+function drawTrainer(c,sx,sy,av,dir,walk,t){
+  const L=avLook(av), a=L.av, cx=sx+8, fr=walk?Math.floor(t/120)%2:0, H=L.H, sk=L.skin, top=L.top.c, bc=L.bot.c, hy=sy-1+(walk&&fr?-1:0);
+  const up=dir==="up", side=dir==="left"?-1:dir==="right"?1:0;
+  sh(c,cx,sy+15,5,1,.22);
+  const back=()=>{if(L.back&&L.back.id==="capa"){shape(c,rp(cx-4,sy+4,8,9),L.back.c,OL)}if(L.back&&L.back.id==="morral"&&!up&&side)shape(c,rp(cx-side*5-2,sy+5,4,5),L.back.c,OL);
+    if(a.hair==="largo"||a.hair==="trenza")shape(c,rp(cx-5,hy-3,11,9),H,OL);if(a.hair==="crespo")shape(c,ellPts(cx,hy-2,7,6),H,OL);if(a.hair==="colitas")[-1,1].forEach(s=>shape(c,ellPts(cx+s*6,hy,2,3),H,OL))};
+  if(!up)back();
+  const lg=[[cx-3,side?(fr?-1:0):(fr?-1:0)],[cx+1,side?(fr?0:-1):(fr?0:-1)]];
+  lg.forEach(([x,u],i)=>{const xx=side?cx-1+(i?side:0):x;const skinLeg=L.top.dress||L.bot.skirt;shape(c,rp(xx,sy+11,2,3+u),skinLeg?sk:bc,OL);if(L.bot.short)R(c,xx,sy+12,2,1+u,sk);shape(c,rp(xx,sy+14+u,2,1),L.shoe.c,OL)});
+  part(c,rp(cx-4,sy+4,8,7),top,cx,sy+7,4,4);if(L.top.c2&&!["vestido"].includes(L.top.id))R(c,cx-4,sy+7,8,1,L.top.c2);
+  if(L.top.dress||L.bot.skirt)shape(c,rp(cx-5,sy+9,10,2),L.top.dress?top:bc,OL);
+  const sw=walk?(fr?1:-1):0;
+  if(!side){shape(c,rp(cx-5,sy+5+sw,1,4),top,OL);shape(c,rp(cx+4,sy+5-sw,1,4),top,OL);R(c,cx-5,sy+8+sw,1,1,sk);R(c,cx+4,sy+8-sw,1,1,sk)}
+  else{shape(c,rp(cx-side,sy+5,2,4),top,OL);R(c,cx-side,sy+8,2,1,sk)}
+  const head=octo(cx,hy,5,5,2);part(c,head,sk,cx,hy,5,5);
+  if(up){part(c,head,H,cx,hy,5,5)}
+  else{const ex=side*2;if(Math.floor(t/3000)%7||t%3000>150){R(c,cx-3+ex,hy,1,2,"#2B2230");R(c,cx+2+ex,hy,1,2,"#2B2230")}R(c,cx-4+ex,hy+2,1,1,"#FF9AA8");R(c,cx+3+ex,hy+2,1,1,"#FF9AA8");
+    const cap=head.filter(([x,y])=>y<=hy-3||((side>=0?x<=cx-4:false)||(side<=0?x>=cx+4:false))&&y<=hy);part(c,a.hair==="cresta"?head.filter(([x,y])=>y<=hy-4&&Math.abs(x-cx)<=3):cap,H,cx-2,hy-3,5,3)}
+  if(a.hair==="puntas")[-3,0,3].forEach(dx=>shape(c,tri(cx+dx-1,hy-6,3,3,0),H,OL));
+  if(a.hair==="mono")shape(c,ellPts(cx,hy-7,2,2),H,OL);
+  if(a.hair==="cresta")shape(c,rp(cx-1,hy-9,3,4),H,OL);
+  if(up)back();
+  const hd=L.head;if(hd){const k=hd.c;
+    if(hd.id==="gorra"){shape(c,rp(cx-5,hy-6,11,3),k,OL);if(!up)shape(c,rp(side>0?cx+1:side<0?cx-7:cx-4,hy-3,side?6:9,1),mix(k,"#1B1F3B",.25),OL)}
+    if(hd.id==="gorro"){shape(c,rp(cx-5,hy-6,11,4),k,OL);R(c,cx-5,hy-3,11,1,hd.c2);shape(c,ellPts(cx,hy-7,1,1),hd.c2,OL)}
+    if(hd.id==="diadema"){R(c,cx-4,hy-4,9,1,k);R(c,cx+2,hy-6,3,2,k)}
+    if(hd.id==="vueltiao"){shape(c,ellPts(cx,hy-4,8,1),k,OL);shape(c,rp(cx-3,hy-9,7,5),k,OL);R(c,cx-3,hy-7,7,1,hd.c2)}
+    if(hd.id==="corona"){shape(c,rp(cx-3,hy-7,7,2).concat([[cx-3,hy-8],[cx,hy-9],[cx,hy-8],[cx+3,hy-8]]),k,OL);R(c,cx,hy-7,1,1,hd.c2)}}
+  if(L.face&&!up){const ex=side*2;R(c,cx-4+ex,hy,3,1,L.face.c);R(c,cx+1+ex,hy,3,1,L.face.c);if(L.face.id==="gafasol"){R(c,cx-4+ex,hy+1,3,1,"#2B2230");R(c,cx+1+ex,hy+1,3,1,"#2B2230")}}
+}
+
 /* ---------- animación de la pantalla ---------- */
-const walker={x:82,y:106,tx:82,ty:106,wait:0};let act=null; const fx=[];
+const walkers={};function wk(id,i){if(!walkers[id]){const x=[84,52,104][i||0];walkers[id]={x,y:96+(i||0)*8,tx:x,ty:100,wait:(i||0)*12}}return walkers[id]}
+let walker=wk("_demo",0);let act=null; const fx=[];
+/* el personaje humano en la casa */
+const hum={x:38,y:104,tx:38,ty:104,wait:30,face:0,task:null,pose:"idle",poseUntil:0,moving:false};
+let humBox=null, petBoxes={};
+const HDUR={eat:1900,play:1700,clean:1700};
+function humanDo(type,petId,food){const now=performance.now();hum.task={type,pet:petId,food,t0:now};act={type:"wait",pet:petId,start:now,until:now+5000}}
+function humWave(){hum.pose="wave";hum.poseUntil=performance.now()+1400;tune([[659,.06],[880,.08]])}
 const WALK={x0:18,x1:110,y0:68,y1:116};
 const RM=matchMedia("(prefers-reduced-motion: reduce)").matches;
 function fxY(){return petBox?petBox.y/2+2:36}
@@ -883,11 +1080,14 @@ const sceneOff=H=>H>SH?Math.round((H-SH)*.5):0;
 function lcdPoint(e){const cv=document.getElementById("lcd");if(!cv)return null;const r=cv.getBoundingClientRect(),W=cv.width,H=cv.height,sc=Math.min(r.width/W,r.height/H);
   const ox=(r.width-W*sc)/2,oy=(r.height-H*sc)/2;
   return {x:(e.clientX-r.left-ox)/sc,y:(e.clientY-r.top-oy)/sc-sceneOff(H)}}
-function petAlive(){const cv=document.getElementById("lcd");if(!cv||cv.dataset.mode!=="kid")return null;const id=cv.dataset.kid,st=calc(S.pets[id]);return st&&!st.egg&&!st.dead?id:null}
 document.addEventListener("pointerdown",e=>{
-  if(e.target.id!=="lcd")return;const id=petAlive();if(id)wake();if(!id||!petBox)return;const pt=lcdPoint(e);if(!pt)return;
-  const b=petBox, hit=Math.abs(pt.x-b.x)<=b.rw+8&&pt.y>=b.y-10&&pt.y<=b.y+b.rh*2+10;
-  if(!hit){if(petMenu){petMenu=null;render()}return}
+  if(e.target.id!=="lcd"||e.target.dataset.mode!=="kid")return;const kid=e.target.dataset.kid;wake();const pt=lcdPoint(e);if(!pt)return;
+  const hits=Object.entries(petBoxes).filter(([pid,b])=>Math.abs(pt.x-b.x)<=b.rw+8&&pt.y>=b.y-10&&pt.y<=b.y+b.rh*2+10);
+  if(!hits.length){if(humBox&&Math.abs(pt.x-humBox.cx)<=10&&pt.y>=humBox.top&&pt.y<=humBox.bottom+2){humWave();return}if(petMenu){petMenu=null;render()}return}
+  const sel=selPet(kid),hit=hits.find(h=>h[0]===sel)||hits[0],id=hit[0],st=calc(S.pets[id]);
+  if(id!==sel){setSel(kid,id);petMenu=null;foodOpen=false;beep(990,.05);render()}
+  if(!st||st.egg||st.dead)return;
+  walker=wk(id);
   e.preventDefault();ix={mode:"down",id,sx:pt.x,sy:pt.y,t0:performance.now(),px:walker.x,pb:walker.y,gy:walker.y};
   clearTimeout(ix.hold);ix.hold=setTimeout(()=>{if(ix&&ix.mode==="down"){ix.mode="pet";ix.petStart=performance.now();purr()}},450);
 });
@@ -912,11 +1112,11 @@ async function practice(kidId,trick){
   await petWrite(kidId,pp=>({tricks:{...(pp.tricks||{}),[trick]:n},happy:clamp(pp.happy+4)}));
   if(n>=LEARN){setTimeout(()=>tune([[523,.1],[659,.1],[784,.1],[1046,.25]]),600);toast(`¡${p.name||"Tu mascota"} aprendió: ${name}!`)}else toast(`¡Bien! ${name}: ${n} de ${LEARN}`)
 }
-function stepWalker(){
-  if(walker.wait>0){walker.wait--;return false}
-  const dx=walker.tx-walker.x,dy=walker.ty-walker.y,d=Math.hypot(dx,dy);
-  if(d<1.2){walker.wait=10+Math.floor(Math.random()*30);walker.tx=WALK.x0+Math.random()*(WALK.x1-WALK.x0);walker.ty=WALK.y0+Math.random()*(WALK.y1-WALK.y0);return false}
-  walker.x+=dx/d*1.1;walker.y+=dy/d*.8;return true}
+function stepWalker(w=walker){
+  if(w.wait>0){w.wait--;return false}
+  const dx=w.tx-w.x,dy=w.ty-w.y,d=Math.hypot(dx,dy);
+  if(d<1.2){w.wait=10+Math.floor(Math.random()*30);w.tx=WALK.x0+Math.random()*(WALK.x1-WALK.x0);w.ty=WALK.y0+Math.random()*(WALK.y1-WALK.y0);return false}
+  w.x+=dx/d*1.1;w.y+=dy/d*.8;return true}
 let lastT=0;
 function loop(ts){requestAnimationFrame(loop);if(ts-lastT<75)return;lastT=ts;
   const cv=document.getElementById("lcd");if(!cv)return;const c=cv.getContext("2d");
@@ -931,49 +1131,85 @@ function drawKidScene(c,kidId,ts,live){
 function petActor(c,o){/* o: sp,stage,form,mood,equip,x,gy,pb,t,ac,walking,still,closed,rot */
   const [RW,RH]=SIZES[o.stage];let out;
   return {y:o.gy,draw:()=>{const lift=o.gy-o.pb;sh(c,Math.round(o.x),Math.round(o.gy)+1,Math.max(5,Math.round(RW*.85-lift/6)),Math.max(1,3-Math.floor(lift/14)),.26);
-    const draw=()=>drawPet(c,{sp:o.sp,stage:o.stage,form:o.form,mood:o.mood,equip:o.equip,x:Math.round(o.x),base:Math.round(o.pb),t:o.t,action:o.ac,walking:o.walking,still:o.still,closed:o.closed});
+    const draw=()=>drawPet(c,{sp:o.sp,tint:o.tint,stage:o.stage,form:o.form,mood:o.mood,equip:o.equip,x:Math.round(o.x),base:Math.round(o.pb),t:o.t,action:o.ac,walking:o.walking,still:o.still,closed:o.closed});
     if(o.rot){const pcx=Math.round(o.x),pcy=Math.round(o.pb)-RH-2;c.save();c.translate(pcx,pcy);c.rotate(o.rot);c.translate(-pcx,-pcy);draw();c.restore();out={cx:pcx,top:pcy-RH}}else out=draw();
     o.done&&o.done(out)}}}
+function drawSelArrow(c,x,y,t){y-=Math.floor(t/300)%2;shape(c,[[x-2,y],[x-1,y],[x,y],[x+1,y],[x+2,y],[x-1,y+1],[x,y+1],[x+1,y+1],[x,y+2]],"#FFE45C",OL)}
+function taskFx(type){if(type==="eat"){tune([[523,.07],[659,.07],[784,.1]]);setTimeout(()=>addFx("heart",2),700)}else if(type==="play"){tune([[784,.06],[988,.06],[1175,.08]]);addFx("heart",3)}else{tune([[1046,.05],[1318,.05],[1568,.07]]);addFx("spark",5)}}
+const SPOTS=[[64,98],[38,94],[96,100]], STATIC=[[86,98],[108,106],[62,110]];
 function sceneCore(c,kidId,ts,live,top,bottom){
-  const p=S.pets[kidId], st=calc(p), xi=xpInfo(kidId), actors=[];
-  if(st&&!st.egg&&!st.dead){const n=(st.c<70)+(st.c<45)+(st.c<20);[[36,104],[98,112],[70,80]].slice(0,n).forEach(([x,y])=>actors.push({y,draw:()=>{sh(c,x,y+1,5,1,.2);lo(c,()=>drawPoop(c,x/2,y/2,ts))}}))}
-  if(st&&st.egg)actors.push({y:98,draw:()=>{sh(c,64,98,9,2);lo(c,()=>drawEgg(c,32,49,p.species,ts))}});
-  if(st&&st.dead)actors.push({y:98,draw:()=>{sh(c,64,98,8,2,.15);lo(c,()=>{c.translate(0,14);drawGhost(c,32,ts)})}});
-  if(live)WALK.y1=Math.max(112,Math.min(bottom-10,150));
-  let r=null,mood=null,acting=false,ac=null;const [RW,RH]=SIZES[Math.max(1,xi.stage)];
-  if(st&&!st.egg&&!st.dead){
-    mood=moodOf(st);acting=live&&act&&act.until>ts;
-    const moving=live&&!RM&&!acting&&!ix&&!petMenu&&(mood==="happy"||mood==="dirty")&&stepWalker();
-    let px=live?walker.x:64, gy=live?walker.y:96, pb=gy, rot=0, closed=false;ac=acting?act.type:null;
-    if(live&&ix&&(ix.mode==="drag"||ix.mode==="fall")){px=ix.px;pb=ix.pb;gy=ix.gy;ac="drag"}
-    if(live&&ix&&ix.mode==="pet"){closed=true;ac=null}
-    if(acting){const pr=Math.min(1,(ts-act.start)/(act.until-act.start));
+  const main=S.pets[kidId], pets=petsOf(kidId).filter(o=>o.p.species||o.id===kidId), sel=selPet(kidId), actors=[], av=avOf(kidId);
+  if(live){walker=wk(sel,Math.max(0,pets.findIndex(o=>o.id===sel)));WALK.y1=Math.max(112,Math.min(bottom-10,150));petBoxes={};humBox=null}
+  const many=pets.filter(o=>o.p.species).length>1;
+  let selR=null, selInfo=null;
+  pets.forEach((o,i)=>{const p=o.p,st=calc(p),xi=xpInfo(o.id),isSel=o.id===sel,w=wk(o.id,i);
+    if(st&&!st.egg&&!st.dead){const n=(st.c<70)+(st.c<45)+(st.c<20);[[36,104],[98,112],[70,80]].slice(0,n).forEach(([x,y])=>{x=Math.max(10,Math.min(118,x+i*11));y=Math.min(116,y+i*3);actors.push({y,draw:()=>{sh(c,x,y+1,5,1,.2);lo(c,()=>drawPoop(c,x/2,y/2,ts))}})})}
+    const [sx,sy]=live?SPOTS[i]:STATIC[i];
+    if(st&&st.egg){actors.push({y:sy,draw:()=>{sh(c,sx,sy,9,2);lo(c,()=>drawEgg(c,Math.round(sx/2),Math.round(sy/2),p.species,ts+i*700));if(live&&isSel&&many)drawSelArrow(c,sx,sy-24,ts)}});if(live)petBoxes[o.id]={x:sx,y:sy-18,rw:6,rh:8};return}
+    if(st&&st.dead){actors.push({y:sy,draw:()=>{sh(c,sx,sy,8,2,.15);lo(c,()=>{c.translate(0,14);drawGhost(c,Math.round(sx/2),ts)})}});if(live)petBoxes[o.id]={x:sx,y:sy-30,rw:6,rh:8};return}
+    if(!st)return;
+    const mood=moodOf(st), myAct=live&&act&&act.until>ts&&act.pet===o.id?act:null, acting=!!myAct&&myAct.type!=="wait";
+    const drag=live&&ix&&ix.id===o.id;
+    const moving=live&&!RM&&!myAct&&!drag&&!(isSel&&petMenu)&&(mood==="happy"||mood==="dirty")&&stepWalker(w);
+    let px=live?w.x:sx, gy=live?w.y:sy, pb=gy, rot=0, closed=false, ac=acting?myAct.type:null;
+    if(drag&&(ix.mode==="drag"||ix.mode==="fall")){px=ix.px;pb=ix.pb;gy=ix.gy;ac="drag"}
+    if(drag&&ix.mode==="pet"){closed=true;ac=null}
+    if(acting){const pr=Math.min(1,(ts-myAct.start)/(myAct.until-myAct.start));
       if(ac==="spin"){rot=Math.floor(pr*4)%4*Math.PI/2;pb=gy-Math.round(Math.sin(pr*Math.PI)*16)}
       if(ac==="handstand"){rot=pr>.15&&pr<.85?Math.PI:0;if(rot)pb=gy-6}
-      if(ac==="playdead"){rot=pr>.12&&pr<.9?Math.PI/2:0;if(rot){pb=gy-RW+RH+2;closed=true}}}
-    actors.push(petActor(c,{sp:p.species,stage:xi.stage,form:xi.form,mood,equip:p.equip,x:px,gy,pb,t:ts,ac,walking:moving,still:!live,closed,rot,done:o=>{r=o}}));
+      if(ac==="playdead"){rot=pr>.12&&pr<.9?Math.PI/2:0;if(rot){pb=gy-SIZES[Math.max(1,xi.stage)][0]+SIZES[Math.max(1,xi.stage)][1]+2;closed=true}}
+      if(ac==="eat"&&pr<.3)ac=null;if(ac==="clean")ac=null}
+    const [RW,RH]=SIZES[Math.max(1,xi.stage)];
+    actors.push(petActor(c,{sp:p.species,tint:p.tint,stage:xi.stage,form:xi.form,mood,equip:p.equip,x:px,gy,pb,t:ts+i*333,ac,walking:moving,still:!live,closed,rot,done:r=>{
+      if(live)petBoxes[o.id]={x:r.cx,y:r.top,rw:RW,rh:RH};
+      if(isSel){selR=r;selInfo={RW,RH,acting,ac:acting?myAct.type:null}}
+      if(!acting&&(mood==="hungry"||mood==="sick"))lo(c,()=>drawBubble(c,Math.min(53,Math.round(r.cx/2+RW/2+3)),Math.round(r.top/2-11),mood));
+      if(live&&isSel&&many&&!drag)drawSelArrow(c,r.cx,r.top-(mood==="hungry"||mood==="sick"?28:8),ts)}}));
+  });
+  /* --- el personaje humano --- */
+  if(av){
+    let hx=live?hum.x:40, hy=live?hum.y:104, pose="idle", face=live?hum.face:1, hold=null, reach=false;
+    if(live){const now=ts, selW=walkers[sel];
+      if(hum.task){const tw=walkers[hum.task.pet];
+        if(!tw||!S.pets[hum.task.pet])hum.task=null;
+        else if(!hum.task.start){let side=hum.x<=tw.x?-1:1,tx=tw.x+side*17;if(tx<8||tx>120){side=-side;tx=tw.x+side*17}const ty=tw.y+1,dx=tx-hum.x,dy=ty-hum.y,d=Math.hypot(dx,dy);
+          if(d<2||RM||now-hum.task.t0>2600){hum.x=tx;hum.y=ty;hum.task.start=now;hum.task.side=side;act={type:hum.task.type,food:hum.task.food,pet:hum.task.pet,start:now,until:now+HDUR[hum.task.type]};taskFx(hum.task.type)}
+          else{hum.x+=dx/d*Math.min(d,4.5);hum.y+=dy/d*Math.min(d,3.4);face=dx>0?1:-1;pose="walk"}}
+        if(hum.task&&hum.task.start){const k=(now-hum.task.start)/HDUR[hum.task.type];face=-hum.task.side;
+          if(k>=1)hum.task=null;else{const tt=hum.task.type;if(tt==="eat"){pose="crouch";reach=true;if(k<.32)hold=hum.task.food}else if(tt==="play")pose="jump";else pose="scrub"}}}
+      if(!hum.task){
+        if(hum.poseUntil>now)pose=hum.pose;
+        else if(act&&act.until>now&&act.pet===sel&&!["wait","confused","eat","play","clean"].includes(act.type))pose="cheer";
+        else if(!RM&&!ix&&!petMenu){if(hum.wait>0)hum.wait--;else{const dx=hum.tx-hum.x,dy=hum.ty-hum.y,d=Math.hypot(dx,dy);
+          if(d<1.5){hum.wait=40+Math.floor(Math.random()*70);const s2=selW||{x:64,y:100};hum.tx=Math.max(WALK.x0,Math.min(WALK.x1,s2.x+(Math.random()<.5?-1:1)*(20+Math.random()*22)));hum.ty=Math.max(WALK.y0+8,Math.min(WALK.y1,s2.y+(Math.random()*14-7)))}
+          else{hum.x+=dx/d*.9;hum.y+=dy/d*.7;pose="walk";face=dx>0?1:-1}}}
+        if(pose==="idle"&&selW)face=Math.abs(selW.x-hum.x)<6?0:selW.x>hum.x?1:-1}
+      hum.face=face;hx=hum.x;hy=hum.y}
+    const fx2=Math.round(hx),fy2=Math.round(hy);
+    actors.push({y:fy2,draw:()=>{sh(c,fx2,fy2+1,8,2,.24);const r=drawHuman(c,{x:fx2,base:fy2,av,face,pose,t:ts,hold,reach});if(live)humBox=r}});
   }
-  drawWorld(c,p,ts,actors,top,bottom);
-  if(!r)return;
-  petBox={x:r.cx,y:r.top,rw:RW,rh:RH};
-  const rw=RW/2;
+  drawWorld(c,main,ts,actors,top,bottom);
+  if(!selR)return;
+  const RW=selInfo.RW,RH=selInfo.RH,rw=RW/2;
+  petBox={x:selR.cx,y:selR.top,rw:RW,rh:RH};
   lo(c,()=>{
-    if(acting&&act.type==="eat"&&act.food)drawFood(c,act.food,r.cx/2+rw+2,r.top/2+RH/2+2);
-    if(!acting&&(mood==="hungry"||mood==="sick"))drawBubble(c,Math.min(53,r.cx/2+rw+3),r.top/2-11,mood);
-    if(acting&&ac==="shout")drawShout(c,Math.min(51,r.cx/2+rw+2),r.top/2-12,ts);
-    if(acting&&ac==="confused")drawQ(c,Math.min(54,r.cx/2+rw+1),r.top/2-10);
+    if(selInfo.acting&&selInfo.ac==="eat"&&act.food&&(ts-act.start)/(act.until-act.start)>.3)drawFood(c,act.food,selR.cx/2+rw+2,selR.top/2+RH/2+2);
+    if(selInfo.acting&&selInfo.ac==="shout")drawShout(c,Math.min(51,selR.cx/2+rw+2),selR.top/2-12,ts);
+    if(selInfo.acting&&selInfo.ac==="confused")drawQ(c,Math.min(54,selR.cx/2+rw+1),selR.top/2-10);
     if(live){for(let i=fx.length-1;i>=0;i--){const f=fx[i],age=ts-f.born;if(age<0)continue;if(age>1400){fx.splice(i,1);continue}
       const yy=f.y-age/60;if(f.type==="heart")heart(c,f.x,yy);else if(f.type==="note")note(c,f.x+Math.sin(age/150)*2,yy);else spark(c,f.x,yy)}}
   });
 }
+const DEMO_AV=[AV_DEF("nina"),{g:"nino",skin:3,hair:"crespo",hc:"negro",top:"futbol",bottom:"short",shoes:"brillantes"},{g:"nina",skin:4,hair:"colitas",hc:"negro",top:"vestido",bottom:"jean",shoes:"sandalias",head:"diadema"},{g:"nino",skin:0,hair:"puntas",hc:"rubio",top:"rayas",bottom:"jean",shoes:"tenis",head:"gorra"}];
 const DEMO_ROOM={house:2,owned:["cama","planta","cuadro","lampara","alfombra","ventana","tv","globos","puff","estante","pelota"]};
 function drawDemo(c,ts){
   const H=c.canvas.height,off=sceneOff(H);c.save();c.translate(0,off);
   const sps=Object.keys(SPECIES), i=Math.floor(ts/4000)%sps.length;
-  if(!RM)stepWalker();
+  walker=wk("_demo",0);const mv=!RM&&stepWalker();
   const eq=[{head:"gorra",neck:"bufanda"},{face:"gafasol",neck:"corbatin"},{head:"corona",back:"capa"},{head:"audifonos",face:"gafas"}][i];
-  let r=null;
-  drawWorld(c,{...DEMO_ROOM,wall:["celeste","lavanda","menta","arcoiris"][i]},ts,[petActor(c,{sp:sps[i],stage:4,mood:"happy",equip:eq,x:walker.x,gy:walker.y,pb:walker.y,t:ts,walking:true,done:o=>{r=o}})],-off,H-off);
+  let r=null;const side=walker.x>64?-1:1,hx=Math.round(walker.x+side*20),hy=Math.round(walker.y+2);
+  const human={y:hy,draw:()=>{sh(c,hx,hy+1,8,2,.24);drawHuman(c,{x:hx,base:hy,av:DEMO_AV[i],face:-side,pose:mv?"walk":Math.floor(ts/1800)%3===0?"cheer":"idle",t:ts})}};
+  drawWorld(c,{...DEMO_ROOM,wall:["celeste","lavanda","menta","arcoiris"][i]},ts,[human,petActor(c,{sp:sps[i],stage:3,mood:"happy",equip:eq,x:walker.x,gy:walker.y,pb:walker.y,t:ts,walking:mv,done:o=>{r=o}})],-off,H-off);
   if(r&&Math.floor(ts/1800)%3===0)lo(c,()=>heart(c,r.cx/2+8,r.top/2+4-Math.floor((ts%1800)/200)));
   c.restore();
 }
@@ -987,7 +1223,14 @@ function paintAll(){
       c.globalCompositeOperation="destination-over";oval(c,32,40,18,4,known?"#9ED36A":"#C9CFDD");R(c,0,0,64,48,known?"#E3F6E7":"#E6E9F2");c.globalCompositeOperation="source-over"}
     else if(k==="species"){drawWorld(c,{wall:"celeste",owned:["alfombra","ventana"]},1000,[petActor(c,{sp:a,stage:3,mood:"happy",x:64,gy:96,pb:96,t:1000,still:true})],0,SH)}
     else if(k==="wear"){const p=S.pets[b]||{},it=WEAR.find(w=>w.id===a);wallPaint(c,WALLS[0],0,60,1000);floorPaint(c,1,60,96);sh(c,64,88,14,3);
-      drawPet(c,{sp:p.species||"blob",stage:4,mood:"happy",equip:{[it.slot]:a},x:64,base:87,t:1000,still:true})}
+      drawPet(c,{sp:p.species||"blob",tint:p.tint,stage:4,mood:"happy",equip:{[it.slot]:a},x:64,base:87,t:1000,still:true})}
+    else if(k==="tint"){const p=S.pets[b]||{};wallPaint(c,WALLS[0],0,60,1000);floorPaint(c,1,60,96);sh(c,64,88,14,3);
+      drawPet(c,{sp:p.species||"blob",tint:a||null,stage:4,mood:"happy",equip:p.equip,x:64,base:87,t:1000,still:true})}
+    else if(k==="avdraft"||k==="avme"||k==="avtry"){let av;
+      if(k==="avdraft")av={...(avDraft||AV_DEF("nino")),g:(avDraft&&avDraft.g)||"nino"};
+      else{av={...(avOf(a)||AV_DEF("nino"))};if(k==="avtry"){const key=cv.dataset.paint.split(":").slice(2).join(":"),it=AVSEC.flatMap(([x])=>avItems(x)).find(i=>i.key===key);if(it)av=it.apply(av)}}
+      R(c,0,0,72,80,"#CFE8F2");for(let y=0;y<80;y+=8)R(c,0,y,72,1,"#C3E0EC");R(c,0,62,72,18,"#E0B98A");R(c,0,62,72,1,"#C99A62");sh(c,36,71,10,2,.25);
+      drawHuman(c,{x:36,base:70,av,face:0,pose:"idle",t:1000})}
     else if(k==="furn"){const f=FURN.find(x=>x.id===a);wallPaint(c,WALLS[0],0,FY0,1000);R(c,0,FY0-3,128,3,"#F5EDE3");floorPaint(c,1,FY0,SH);
       c.save();c.translate(Math.round(64-f.cx),f.wall?16:(f.f>90?-22:f.f>60?-8:4));FD[a](c,1000);c.restore()}
     else if(k==="wall"){drawWorld(c,{wall:a},1000,[],0,SH)}
@@ -997,60 +1240,73 @@ function paintAll(){
 
 let G=null;
 /* ================= Minijuego: Explorar ================= */
-const TS=16, MW=40, MH=32, STEP_MS=210, ENERGY=150;
+const TS=16, MW=64, MH=48, STEP_MS=200, ENERGY=260;
 function rng(seed){return ()=>{seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
-const CRIT=[{id:"babosin",n:"Babosín",z:["Bosque Susurro","Pradera Brillante"],d:.30,c:"#7BE495"},{id:"mariposin",n:"Mariposín",z:["Pradera Brillante"],d:.26,c:"#FF8FC7"},
-  {id:"mariquin",n:"Mariquín",z:["Bosque Susurro","Pradera Brillante"],d:.24,c:"#FF5A5F"},{id:"orejitas",n:"Orejitas",z:["Pradera Brillante","Bosque Susurro"],d:.20,c:"#F2F2F7"},
-  {id:"hongui",n:"Honguí",z:["Bosque Susurro"],d:.18,c:"#E5484D"},{id:"estrellin",n:"Estrellín",z:["Bosque Susurro","Pradera Brillante"],d:.12,c:"#FFD60A",rare:1}];
+const ZALL=["Bosque Susurro","Pradera Brillante","Lago Espejo","Montaña Nevada","Desierto Dorado","Playa Coral"];
+const CRIT=[{id:"babosin",n:"Babosín",z:["Bosque Susurro","Pradera Brillante","Lago Espejo"],d:.30,c:"#7BE495"},{id:"mariposin",n:"Mariposín",z:["Pradera Brillante","Lago Espejo"],d:.26,c:"#FF8FC7"},
+  {id:"mariquin",n:"Mariquín",z:["Bosque Susurro","Pradera Brillante"],d:.24,c:"#FF5A5F"},{id:"orejitas",n:"Orejitas",z:["Pradera Brillante","Bosque Susurro","Montaña Nevada"],d:.20,c:"#F2F2F7"},
+  {id:"hongui",n:"Honguí",z:["Bosque Susurro"],d:.18,c:"#E5484D"},{id:"pinguin",n:"Pingüinín",z:["Montaña Nevada"],d:.22,c:"#2B3A55"},
+  {id:"cactin",n:"Cactín",z:["Desierto Dorado"],d:.22,c:"#5BBF6A"},{id:"cangrejin",n:"Cangrejín",z:["Playa Coral"],d:.22,c:"#FF6B4A"},
+  {id:"estrellin",n:"Estrellín",z:ZALL,d:.12,c:"#FFD60A",rare:1}];
 let WORLD=null;
+function zoneAt(x,y){return x>=52&&y>=14?"Playa Coral":y<16&&x>=40?"Montaña Nevada":y<14?"Bosque Susurro":x<15&&y<31?"Lago Espejo":y>=32&&x>=31?"Desierto Dorado":y>=32?"Pradera Brillante":"Pueblo Fichas"}
 function buildWorld(){
-  const r=rng(20261111),m=[];for(let y=0;y<MH;y++)m.push(new Array(MW).fill("."));
+  const r=rng(20261115),m=[],z=[];for(let y=0;y<MH;y++){m.push(new Array(MW).fill("."));z.push(new Array(MW).fill(""))}
   const set=(x,y,c)=>{if(x>=0&&y>=0&&x<MW&&y<MH)m[y][x]=c},get=(x,y)=>m[y]&&m[y][x];
-  for(let y=0;y<MH;y++)for(let x=26;x<MW;x++){const sh=30+Math.round(Math.sin(y/3)*1.3);set(x,y,x<sh?":":"~")}
-  for(let y=1;y<10;y++)for(let x=1;x<26;x++){const v=r();set(x,y,v<.34?"T":v<.52?",":v<.56?"m":".")}
-  for(let y=20;y<MH-1;y++)for(let x=1;x<26;x++){const v=r();set(x,y,v<.4?",":v<.52?"*":v<.555?"R":".")}
-  for(let y=23;y<30;y++)for(let x=15;x<24;x++)if(((x-19.5)/3.8)**2+((y-26.5)/2.8)**2<1)set(x,y,"~");
-  for(let y=10;y<20;y++)for(let x=1;x<26;x++)set(x,y,r()<.08?"*":".");
+  for(let y=0;y<MH;y++)for(let x=0;x<MW;x++){const Z=zoneAt(x,y),v=r();z[y][x]=Z;let t=".";
+    if(Z==="Bosque Susurro")t=v<.32?"T":v<.52?",":v<.56?"m":".";
+    else if(Z==="Montaña Nevada")t=v<.2?"T":v<.38?",":v<.42?"R":".";
+    else if(Z==="Lago Espejo")t=v<.1?"T":v<.3?",":v<.36?"*":".";
+    else if(Z==="Pradera Brillante")t=v<.4?",":v<.52?"*":v<.545?"R":".";
+    else if(Z==="Desierto Dorado")t=v<.07?"T":v<.25?",":v<.3?"R":".";
+    else if(Z==="Playa Coral")t=x>=58+Math.round(Math.sin(y/3)*1.3)?"~":v<.04?"R":v<.08?"T":":";
+    else t=v<.06?"*":".";
+    m[y][x]=t}
+  for(let y=14;y<29;y++)for(let x=1;x<15;x++)if(((x-7.5)/5.6)**2+((y-21)/4.6)**2<1)set(x,y,"~");
+  for(let y=18;y<20;y++)for(let x=7;x<10;x++)set(x,y,".");
   for(let x=0;x<MW;x++){if(get(x,0)!=="~")set(x,0,"T");if(get(x,MH-1)!=="~")set(x,MH-1,"T")}
-  for(let y=0;y<MH;y++)set(0,y,"T");
-  for(let x=1;x<30;x++)set(x,15,"=");for(let y=2;y<MH-2;y++)set(12,y,"=");for(let y=15;y<29;y++)set(5,y,"=");for(let x=5;x<12;x++)set(x,28,"=");
-  for(let x=3;x<12;x++)if(get(x,3)==="T")set(x,3,",");for(let x=6;x<12;x++)set(x,5,".");for(let y=4;y<7;y++)for(let x=5;x<8;x++)set(x,y,".");
-  for(let x=29;x<36;x++)set(x,8,"B");for(let y=5;y<12;y++)for(let x=35;x<39;x++)set(x,y,":");
-  for(let x=3;x<6;x++)set(x,29,",");
-  const houses=[{x:7,y:11,c:"#E5484D",home:1},{x:15,y:11,c:"#4D96FF"},{x:20,y:16,c:"#9D4EDD"},{x:7,y:16,c:"#FF9F1C"}];
-  houses.forEach(h=>{for(let y=h.y;y<h.y+3;y++)for(let x=h.x;x<h.x+4;x++)set(x,y,".")});
-  [[14,19],[15,19],[16,19],[17,19],[18,19],[2,14],[3,14],[4,14]].forEach(([x,y])=>set(x,y,"F"));
-  const npcs=[{x:17,y:14,n:"Abuela Rosa",hair:"#ECEFF1",shirt:"#E5484D",t:["¡Hola, pequeño explorador!","En la hierba alta viven bichitos. Si juegas bien con ellos, se vuelven tus amigos."]},
-    {x:29,y:12,n:"Pescador Tito",hair:"#5D4037",shirt:"#4D96FF",t:["¡Qué buen día para pescar!","Cruza el puente del norte. Dicen que en la isla hay un cofre."]},
-    {x:6,y:5,n:"Exploradora Lu",hair:"#FF9F1C",shirt:"#43A047",t:["Shhh… el bosque está lleno de secretos.","Sigue el camino de la hierba: al final hay un cofre escondido."]},
-    {x:9,y:22,n:"Profe Nico",hair:"#263238",shirt:"#9D4EDD",t:["¡Recuerda hacer tus deberes!","Cada deber te da fichas para cuidar a tu mascota. Explorar es el premio extra."]}];
-  npcs.forEach(n=>set(n.x,n.y,"."));
-  const signs=[{x:13,y:14,t:["↑ Bosque Susurro   → Playa Coral   ↓ Pradera Brillante"]},{x:11,y:14,t:["Casa de tu mascota. Entra por la puerta roja para volver."]}];
-  signs.forEach(s=>set(s.x,s.y,"."));
-  const chests=[{x:3,y:3,v:6},{x:37,y:8,v:8},{x:3,y:29,v:6}];chests.forEach(c=>set(c.x,c.y,"."));
-  WORLD={m,houses,npcs,signs,chests,door:{x:8,y:13},start:{x:8,y:14}};
+  for(let y=0;y<MH;y++){set(0,y,"T");set(MW-1,y,y>=14?"~":"T")}
+  const path=(x0,y0,x1,y1)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){const t=get(x,y);set(x,y,t==="~"||t==="B"?"B":"=")}};
+  path(1,24,56,24);path(28,1,28,46);path(4,8,54,8);path(48,8,48,24);path(3,38,50,38);path(8,20,8,38);
+  const clear=(cx,cy,rr=1)=>{for(let y=cy-rr;y<=cy+rr;y++)for(let x=cx-rr;x<=cx+rr;x++){const t=get(x,y);if(t&&"T,Rm*F".includes(t)&&x>0&&y>0&&x<MW-1&&y<MH-1)set(x,y,".")}};
+  const houses=[{x:19,y:18,c:"#E5484D",home:1},{x:32,y:18,c:"#4D96FF"},{x:37,y:18,c:"#22B573"},{x:19,y:27,c:"#9D4EDD"},{x:33,y:27,c:"#FF9F1C"}];
+  houses.forEach(h=>{for(let y=h.y-1;y<h.y+5;y++)for(let x=h.x-1;x<h.x+5;x++){const t=get(x,y);if(t!=="="&&t!=="B")set(x,y,".")}});
+  for(let x=23;x<27;x++)set(x,31,"F");for(let x=30;x<34;x++)set(x,31,"F");for(let y=26;y<30;y++)set(17,y,"F");
+  const npcs=[{x:24,y:21,n:"Abuela Rosa",hair:"#ECEFF1",shirt:"#E5484D",t:["¡Hola, pequeño explorador!","En la hierba alta viven bichitos. Si juegas bien con ellos, se vuelven tus amigos."]},
+    {x:55,y:30,n:"Pescador Tito",hair:"#5D4037",shirt:"#4D96FF",t:["¡Qué buen día para pescar!","En la arena de la playa se esconden los Cangrejines."]},
+    {x:14,y:6,n:"Exploradora Lu",hair:"#FF9F1C",shirt:"#43A047",t:["Shhh… el bosque está lleno de secretos.","Sigue el camino hacia el oeste: hay un cofre escondido en la esquina."]},
+    {x:14,y:40,n:"Profe Nico",hair:"#263238",shirt:"#9D4EDD",t:["¡Recuerda hacer tus deberes!","Cada deber te da fichas para cuidar a tus fichamigos. Explorar es el premio extra."]},
+    {x:52,y:5,n:"Montañista Sara",hair:"#8D5A2B",shirt:"#4CC9F0",t:["¡Brr, qué frío hace en la montaña!","Los Pingüinines solo viven en la nieve. Búscalos en la hierba escarchada."]},
+    {x:40,y:42,n:"Arqueólogo Beto",hair:"#5D4037",shirt:"#E3BD6D",t:["Este desierto guarda tesoros antiguos.","Dicen que hay un cofre al fondo, cerca de la playa."]}];
+  const signs=[{x:27,y:23,t:["↑ Bosque Susurro   → Montaña y Playa   ↓ Pradera y Desierto   ← Lago Espejo"]},{x:22,y:21,t:["Casa de tu familia. Entra por la puerta roja para volver."]},
+    {x:47,y:9,t:["Montaña Nevada: abrígate bien."]},{x:9,y:25,t:["Lago Espejo. El puente lleva a la isla."]},{x:29,y:39,t:["→ Desierto Dorado   ← Pradera Brillante"]}];
+  const chests=[{x:3,y:3,v:8},{x:8,y:18,v:12},{x:60,y:2,v:12},{x:3,y:45,v:8},{x:49,y:45,v:10},{x:55,y:45,v:8},{x:36,y:3,v:6}];
+  npcs.concat(signs,chests).forEach(o=>{clear(o.x,o.y,1);set(o.x,o.y,".")});
+  const door={x:20,y:20},start={x:20,y:21};set(start.x,start.y,".");
+  WORLD={m,z,houses,npcs,signs,chests,door,start};
 }
-function zoneAt(x,y){return x>=26?"Playa Coral":y<10?"Bosque Susurro":y>=20?"Pradera Brillante":"Pueblo Fichas"}
 function blockedAt(x,y){if(x<0||y<0||x>=MW||y>=MH)return true;const t=WORLD.m[y][x];if("T~RF".includes(t))return true;
   if(WORLD.houses.some(h=>x>=h.x&&x<h.x+4&&y>=h.y&&y<h.y+3))return true;
   if(WORLD.npcs.some(n=>n.x===x&&n.y===y)||WORLD.signs.some(s=>s.x===x&&s.y===y)||WORLD.chests.some(c=>c.x===x&&c.y===y))return true;return false}
+function gameTeam(kidId){return petsOf(kidId).filter(o=>{const st=calc(o.p);return o.p.species&&st&&!st.egg&&!st.dead&&st.h>=20&&moodOf(st)!=="sick"}).map(o=>o.id)}
 function startGame(kidId){
-  if(!WORLD)buildWorld();const st=calc(S.pets[kidId]);
-  if(!st||st.egg||st.dead){toast("Tu mascota todavía no puede salir.");return}
-  if(st.h<20){toast("Tiene mucha hambre para salir. Dale de comer primero.");return}
-  if(moodOf(st)==="sick"){toast("Está enfermo. Cuídalo antes de salir.");return}
+  if(!WORLD)buildWorld();
+  const all=petsOf(kidId).filter(o=>o.p.species), team=gameTeam(kidId);
   const r=rng(Date.now()|0),coins=new Map();let tries=0;
-  while(coins.size<20&&tries<4000){tries++;const x=1+Math.floor(r()*(MW-2)),y=1+Math.floor(r()*(MH-2));const t=WORLD.m[y][x];
-    if(blockedAt(x,y)||!".,*:=mB".includes(t)||(x===WORLD.start.x&&y===WORLD.start.y))continue;coins.set(x+","+y,coins.size<4?"gem":"coin")}
-  G={kid:kidId,x:WORLD.start.x,y:WORLD.start.y,face:"down",mv:null,dir:null,coins:0,energy:ENERGY,steps:0,coinsMap:coins,opened:new Set(),friends:new Set(),npcPlayed:new Set(),dialog:null,enc:null,zone:"Pueblo Fichas",end:null,banner:{t:"Pueblo Fichas",until:performance.now()+1800}};
+  while(coins.size<42&&tries<8000){tries++;const x=1+Math.floor(r()*(MW-2)),y=1+Math.floor(r()*(MH-2));const t=WORLD.m[y][x];
+    if(blockedAt(x,y)||!".,*:=mB".includes(t)||(x===WORLD.start.x&&y===WORLD.start.y))continue;coins.set(x+","+y,coins.size<7?"gem":"coin")}
+  const st0=WORLD.start,dr=WORLD.door;
+  G={kid:kidId,team,x:st0.x,y:st0.y,face:"down",mv:null,dir:null,coins:0,energy:ENERGY,steps:0,coinsMap:coins,opened:new Set(),friends:new Set(),npcPlayed:new Set(),dialog:null,enc:null,zone:"Pueblo Fichas",end:null,
+    hist:[{x:st0.x,y:st0.y},{x:dr.x,y:dr.y},{x:dr.x,y:dr.y},{x:dr.x,y:dr.y}],banner:{t:"Pueblo Fichas",until:performance.now()+1800}};
   menuOpen=false;foodOpen=false;petMenu=null;wake();tune([[523,.08],[659,.08],[784,.08],[1046,.12]]);render();requestAnimationFrame(gameLoop);startWorld();
+  if(all.length&&team.length<all.length){const left=all.filter(o=>!team.includes(o.id)).map(o=>o.p.name||"Tu fichamigo");setTimeout(()=>toast(team.length?`${left.join(" y ")} se queda en casa: tiene hambre, está enfermo o no ha nacido.`:"Tus fichamigos se quedan en casa (tienen hambre, están enfermos o no han nacido). Sales tú solo."),400)}
 }
 const DIRS={up:[0,-1],down:[0,1],left:[-1,0],right:[1,0]};
 function gSay(lines,opts={}){G.dialog={lines,i:0,...opts};G.dir=null;render()}
 function gInteract(){if(!G||G.end||G.enc)return;
   if(G.dialog){const d=G.dialog;if(d.ask)return;d.i++;beep(880,.04);if(d.i>=d.lines.length){G.dialog=null;render();d.after&&d.after();return}render();return}
   const [dx,dy]=DIRS[G.face],tx=G.x+dx,ty=G.y+dy;
-  const op=otherAt(tx,ty);if(op){beep(660,.05);G.dialog={lines:[`Es ${op.nick}, otra mascota que está explorando.`+(op.fr==="ok"?" ¡Es tu amigo!":op.fr==="req"?" Ya pediste ser su amigo; faltan los permisos de los papás.":"")],i:0,ask:"player",op};G.dir=null;render();return}
+  const op=otherAt(tx,ty);if(op){beep(660,.05);G.dialog={lines:[`Es ${op.nick}, otro jugador que está explorando.`+(op.fr==="ok"?" ¡Es tu amigo!":op.fr==="req"?" Ya pediste ser su amigo; faltan los permisos de los papás.":"")],i:0,ask:"player",op};G.dir=null;render();return}
   const n=WORLD.npcs.find(o=>o.x===tx&&o.y===ty);if(n){beep(660,.05);gSay(n.t.map(l=>n.n+": "+l),{after:()=>{if(!G.npcPlayed.has(n.n))gSay([`${n.n}: ¿Jugamos a ${MINIS[NPC_GAME[n.n]].n}?`],{ask:"npc",npc:n})}});return}
   const s=WORLD.signs.find(o=>o.x===tx&&o.y===ty);if(s){beep(660,.05);gSay(s.t);return}
   const ch=WORLD.chests.find(o=>o.x===tx&&o.y===ty);if(ch){const k=ch.x+","+ch.y;if(G.opened.has(k)){gSay(["El cofre está vacío."]);return}
@@ -1067,13 +1323,15 @@ function gameStep(now){
   G.mv={fx:G.x,fy:G.y,tx,ty,start:now};
 }
 function afterStep(){
+  G.hist.unshift({x:G.x,y:G.y});G.hist.length=Math.min(G.hist.length,5);
   G.steps++;G.energy=Math.max(0,G.energy-1);
   const k=G.x+","+G.y,c=G.coinsMap.get(k);
   if(c){G.coinsMap.delete(k);const v=c==="gem"?3:1;G.coins+=v;if(c==="gem")tune([[988,.05],[1318,.05],[1760,.1]]);else tune([[988,.04],[1318,.07]]);G.pop={x:G.x,y:G.y,v,t:performance.now()}}
   const z=zoneAt(G.x,G.y);if(z!==G.zone){G.zone=z;G.banner={t:z,until:performance.now()+1800};beep(660,.05)}
   gHud();
-  if(G.energy<=0){G.dir=null;gSay(["¡Uf! Tu mascota está cansada. Es hora de volver a casa."],{after:()=>finishGame()});return}
-  if(WORLD.m[G.y][G.x]===","&&G.steps>3&&Math.random()<.13)startEncounter();
+  if(G.energy<=0){G.dir=null;gSay(["¡Uf! Ya caminaste mucho. Es hora de volver a casa."],{after:()=>finishGame()});return}
+  const tt=WORLD.m[G.y][G.x];
+  if(G.steps>3&&((tt===","&&Math.random()<.13)||(tt===":"&&G.zone==="Playa Coral"&&Math.random()<.05)))startEncounter();
 }
 function startEncounter(){
   const pool=CRIT.filter(c=>c.z.includes(G.zone));if(!pool.length)return;
@@ -1085,28 +1343,37 @@ async function finishGame(){
   const p=S.pets[kid],old=new Set(p.friends||[]),nf=[...G.friends].filter(f=>!old.has(f));
   G.end={coins:G.coins,award,nf};G.dialog=null;G.enc=null;render();
   try{if(award>0)await ledger(kid,"juego",award,"Exploración",null,"m");
-    await petWrite(kid,pp=>({hunger:clamp(pp.hunger-10),happy:clamp(pp.happy+15),friends:[...new Set([...(pp.friends||[]),...G?G.friends:[]])]}))}catch(e){}
+    const fr=G?[...G.friends]:[];await petWrite(kid,pp=>({friends:[...new Set([...(pp.friends||[]),...fr])]}));
+    for(const id of (G&&G.team)||[])await petWrite(id,pp=>({hunger:clamp(pp.hunger-10),happy:clamp(pp.happy+15)}))}catch(e){}
 }
 function gHud(){if(!G)return;const a=document.getElementById("gcoins");if(a)a.textContent=G.coins;const e=document.getElementById("genergy");if(e)e.style.width=(G.energy/ENERGY*100)+"%";const z=document.getElementById("gzone");if(z)z.textContent=G.zone}
 
 /* ---- dibujo del mundo ---- */
 const hsh=(x,y)=>((x*73856093)^(y*19349663))>>>0;
 function gTile(c,t,x,y,sx,sy,ts){
-  const h=hsh(x,y);
+  const h=hsh(x,y);if(t==="."&&WORLD.z[y][x]==="Playa Coral")t=":";
   if(t==="~"||t==="B"){R(c,sx,sy,16,16,"#4FB8F0");const o=Math.floor(ts/350+h)%4;R(c,sx+(h%9),sy+3+o,5,1,"#8FD6FF");R(c,sx+((h>>4)%8)+3,sy+10+(o%2),4,1,"#8FD6FF");
     if(y>0&&!"~B".includes(WORLD.m[y-1][x])){R(c,sx,sy,16,2,"#D6F3FF");R(c,sx,sy+2,16,1,"#A7E3FF")}
     if(t==="B"){R(c,sx,sy+3,16,10,"#B07A4F");for(let i=0;i<16;i+=4)R(c,sx+i,sy+3,1,10,"#7A4E2D");R(c,sx,sy+2,16,1,"#7A4E2D");R(c,sx,sy+13,16,1,"#7A4E2D");R(c,sx,sy+3,16,1,"#D29A65")}return}
   if(t===":"){R(c,sx,sy,16,16,"#F6DBA3");R(c,sx+(h%13),sy+((h>>3)%13),1,1,"#E4BE7C");R(c,sx+((h>>6)%13),sy+((h>>9)%13),2,1,"#FFF0CF");return}
   if(t==="="){R(c,sx,sy,16,16,"#E6BE85");R(c,sx+(h%12)+1,sy+((h>>3)%12)+1,2,1,"#C99A5F");R(c,sx+((h>>5)%12)+2,sy+((h>>8)%12)+2,1,1,"#F7DAB0");
     const g=(xx,yy)=>!WORLD.m[yy]||!"=".includes(WORLD.m[yy][xx]||"=");if(g(x,y-1))R(c,sx,sy,16,1,"#C99A5F");if(g(x,y+1))R(c,sx,sy+15,16,1,"#C99A5F");if(g(x-1,y))R(c,sx,sy,1,16,"#C99A5F");if(g(x+1,y))R(c,sx+15,sy,1,16,"#C99A5F");return}
-  R(c,sx,sy,16,16,t===","?"#6CC77B":"#7ED38A");
-  R(c,sx+(h%14),sy+((h>>4)%13),1,2,"#5DBB6E");R(c,sx+((h>>8)%14),sy+((h>>12)%13),1,1,"#A2E6AC");R(c,sx+((h>>16)%14),sy+((h>>20)%13),1,2,"#5DBB6E");
+  const P=zpal(x,y);R(c,sx,sy,16,16,t===","?P.tg:P.g);
+  R(c,sx+(h%14),sy+((h>>4)%13),1,2,P.d1);R(c,sx+((h>>8)%14),sy+((h>>12)%13),1,1,P.d2);R(c,sx+((h>>16)%14),sy+((h>>20)%13),1,2,P.d1);
   if(t==="*"){const cols=["#FF5A8A","#FFD60A","#FFFFFF","#C77DFF"];[[3,4],[10,9],[6,12]].forEach(([a,b],i)=>{const col=cols[(h>>i)%4];R(c,sx+a-1,sy+b,3,1,col);R(c,sx+a,sy+b-1,1,3,col);R(c,sx+a,sy+b,1,1,"#FFB300")})}
   if(t==="m"){const a=4+(h%7);R(c,sx+a+1,sy+9,2,4,"#FFF3E0");oval(c,sx+a+2,sy+8,3,2,"#E5484D",OL);R(c,sx+a+1,sy+7,1,1,"#FFFFFF");R(c,sx+a+3,sy+8,1,1,"#FFFFFF")}
 }
-function grassBlades(c,sx,sy,x,y,ts,front){const sw=(Math.floor(ts/450)+x+y)%2;for(let i=0;i<4;i++){const bx=sx+1+i*4;const y0=front?sy+9:sy+4;
-  R(c,bx,y0+2,1,16-(y0-sy)-2,"#2F9E58");R(c,bx+1,y0+sw,1,16-(y0-sy)-sw,"#3FB86A");R(c,bx+2,y0+3,1,16-(y0-sy)-3,"#2F9E58");R(c,bx+1,y0+sw,1,1,"#A6F0B8")}}
-function gTree(c,sx,sy,h){sh(c,sx+8,sy+15,7,2);R(c,sx+6,sy+8,4,8,OL);R(c,sx+7,sy+8,2,7,"#8A5A33");oval(c,sx+8,sy+2,9,8,h%3?"#2E9E5B":"#289152",OL);oval(c,sx+8,sy+4,8,5,"#2E9E5B");oval(c,sx+5,sy-1,4,3,"#4CC274");R(c,sx+4,sy-2,2,1,"#7FE0A0");R(c,sx+11,sy+6,2,1,"#1F7A45")}
+const ZPAL={"Montaña Nevada":{g:"#EAF4FF",tg:"#D3E6F5",d1:"#C9DDF0",d2:"#FFFFFF",b1:"#9CC3E0",b2:"#BFDDF2",b3:"#FFFFFF"},"Desierto Dorado":{g:"#F2D38B",tg:"#E8C46E",d1:"#E0B867",d2:"#FBE6B0",b1:"#B98F2E",b2:"#D6AE4C",b3:"#F4DB93"}};
+const ZDEF={g:"#7ED38A",tg:"#6CC77B",d1:"#5DBB6E",d2:"#A2E6AC",b1:"#2F9E58",b2:"#3FB86A",b3:"#A6F0B8"};
+const zpal=(x,y)=>ZPAL[WORLD.z&&WORLD.z[y]&&WORLD.z[y][x]]||ZDEF;
+function grassBlades(c,sx,sy,x,y,ts,front){const P=zpal(x,y),sw=(Math.floor(ts/450)+x+y)%2;for(let i=0;i<4;i++){const bx=sx+1+i*4;const y0=front?sy+9:sy+4;
+  R(c,bx,y0+2,1,16-(y0-sy)-2,P.b1);R(c,bx+1,y0+sw,1,16-(y0-sy)-sw,P.b2);R(c,bx+2,y0+3,1,16-(y0-sy)-3,P.b1);R(c,bx+1,y0+sw,1,1,P.b3)}}
+function gTree(c,sx,sy,h,Z){
+  if(Z==="Montaña Nevada"){sh(c,sx+8,sy+15,6,2);R(c,sx+7,sy+11,2,5,"#6D4C41");[[sy-6,4],[sy-2,6],[sy+3,8]].forEach(([y,w])=>{shape(c,tri(sx+8-w,y+6,w*2+1,7,0),"#2E7D5B",OL);R(c,sx+8-Math.floor(w/2),y+1,w,1,"#FFFFFF");R(c,sx+7,y,2,1,"#FFFFFF")});return}
+  if(Z==="Desierto Dorado"){sh(c,sx+8,sy+15,5,1);const g="#4FAF5E";shape(c,rp(sx+6,sy-2,5,17),g,OL);shape(c,rp(sx+2,sy+4,3,3).concat(rp(sx+2,sy+1,2,3)),g,OL);shape(c,rp(sx+11,sy+6,3,3).concat(rp(sx+12,sy+2,2,4)),g,OL);
+    R(c,sx+7,sy-1,1,15,"#7FD58A");for(let i=0;i<5;i++)R(c,sx+6+(i%2)*4,sy+1+i*3,1,1,"#2E6B37");if(h%3===0){R(c,sx+7,sy-4,3,2,"#FF7AB6");R(c,sx+8,sy-5,1,1,"#FFD60A")}return}
+  if(Z==="Playa Coral"){sh(c,sx+8,sy+15,6,2);for(let i=0;i<14;i++)R(c,sx+7+Math.round(Math.sin(i/5)*2),sy+1+i,3,1,i%3?"#B07A4F":"#8A5A33");
+    [[-7,-1],[7,-1],[-5,2],[5,2],[0,-3]].forEach(([dx,dy])=>shape(c,ellPts(sx+9+dx,sy+dy,5,2),"#2E9E5B",OL));oval(c,sx+9,sy+2,2,2,"#7A4E2D");return}sh(c,sx+8,sy+15,7,2);R(c,sx+6,sy+8,4,8,OL);R(c,sx+7,sy+8,2,7,"#8A5A33");oval(c,sx+8,sy+2,9,8,h%3?"#2E9E5B":"#289152",OL);oval(c,sx+8,sy+4,8,5,"#2E9E5B");oval(c,sx+5,sy-1,4,3,"#4CC274");R(c,sx+4,sy-2,2,1,"#7FE0A0");R(c,sx+11,sy+6,2,1,"#1F7A45")}
 function gHouse(c,h,sx,sy,ts){
   sh(c,sx+32,sy+47,30,3);R(c,sx+3,sy+18,58,30,OL);R(c,sx+4,sy+19,56,28,"#FFF4E0");R(c,sx+4,sy+19,56,2,"#F1DFC2");
   for(let i=0;i<20;i++){const w=60+Math.round(i*.2);R(c,sx+32-Math.floor(w/2)-1,sy+i,w+2,1,OL);R(c,sx+32-Math.floor(w/2),sy+i,w,1,i%4===3?mix(h.c,"#000000",.2):i<2?mix(h.c,"#FFFFFF",.3):h.c)}
@@ -1128,7 +1395,13 @@ function drawCritter(c,id,cx,cy,t){const bob=Math.round(Math.sin(t/220)*2);cy+=b
   if(id==="orejitas"){oval(c,cx-4,cy-14,2,7,"#F2F2F7",OL);oval(c,cx+4,cy-14,2,7,"#F2F2F7",OL);R(c,cx-4,cy-17,1,6,"#FFB3C1");R(c,cx+4,cy-17,1,6,"#FFB3C1");const p=ellPts(cx,cy,11,9);shape(c,p,"#F2F2F7",OL);shadeFill(c,p,cx,cy,11,9,"#F2F2F7");R(c,cx-1,cy+2,3,2,"#FF8FAB")}
   if(id==="hongui"){R(c,cx-5,cy,10,10,OL);R(c,cx-4,cy,8,9,"#FFF3E0");oval(c,cx,cy-3,13,7,"#E5484D",OL);[[-7,-5],[4,-6],[0,-2],[8,-2]].forEach(([a,b])=>oval(c,cx+a,cy+b,2,1,"#FFFFFF"))}
   if(id==="estrellin"){const pts=[];for(let y=-13;y<=13;y++)for(let x=-13;x<=13;x++){const a=Math.atan2(y,x),r=Math.hypot(x,y),k=8+5*Math.cos(5*(a+Math.PI/2));if(r<=k)pts.push([cx+x,cy+y])}shape(c,pts,"#FFD60A",OL);shadeFill(c,pts,cx,cy,12,12,"#FFD60A");spark(c,cx+14,cy-12,"#FFFFFF")}
-  const ey=id==="hongui"?cy+3:id==="mariquin"?cy-8:cy-1,ec=id==="mariquin"?"#FFFFFF":OL;R(c,cx-4,ey,2,3,ec);R(c,cx+3,ey,2,3,ec);if(id!=="mariquin")R(c,cx-4,ey,1,1,"#FFFFFF")}
+  if(id==="pinguin"){const p=ellPts(cx,cy,10,12);shape(c,p,"#2B3A55",OL);shadeFill(c,p,cx,cy,10,12,"#2B3A55");oval(c,cx,cy+3,6,8,"#FFFFFF");[-1,1].forEach(s=>shape(c,ellPts(cx+s*11,cy+2,2,6),"#22304A",OL));
+    shape(c,[[cx-1,cy-1],[cx,cy-1],[cx+1,cy-1],[cx,cy]],"#FF9F1C",OL);R(c,cx-6,cy+12,5,2,"#FF9F1C");R(c,cx+2,cy+12,5,2,"#FF9F1C");R(c,cx-6,cy-9,3,1,"#4D96FF");R(c,cx-6,cy-10,13,1,"#E5484D")}
+  if(id==="cactin"){const p=rp(cx-7,cy-12,14,24);shape(c,p,"#5BBF6A",OL);shadeFill(c,p,cx,cy,7,12,"#5BBF6A");shape(c,rp(cx-13,cy-2,5,4).concat(rp(cx-13,cy-7,3,5)),"#5BBF6A",OL);shape(c,rp(cx+8,cy,5,4).concat(rp(cx+10,cy-5,3,5)),"#5BBF6A",OL);
+    for(let i=0;i<6;i++)R(c,cx-5+(i%3)*5,cy+3+Math.floor(i/3)*5,1,1,"#2E6B37");oval(c,cx,cy-14,3,2,"#FF7AB6",OL);R(c,cx,cy-14,1,1,"#FFD60A");R(c,cx-2,cy+2,5,1,"#2E6B37")}
+  if(id==="cangrejin"){const k=Math.floor(t/250)%2;oval(c,cx,cy+3,12,7,"#FF6B4A",OL);oval(c,cx-2,cy+1,6,3,"#FF8F70");[-1,1].forEach(s=>{line(c,cx+s*10,cy+4,cx+s*15,cy-2,OL);oval(c,cx+s*16,cy-4-k,4,4,"#FF6B4A",OL);R(c,cx+s*16-(s<0?2:0),cy-5-k,3,1,OL);
+      for(let i=0;i<3;i++)line(c,cx+s*(5+i*3),cy+9,cx+s*(7+i*3),cy+13,OL)});R(c,cx-4,cy-6,1,4,OL);R(c,cx+4,cy-6,1,4,OL);oval(c,cx-4,cy-8,2,2,"#FFFFFF",OL);oval(c,cx+4,cy-8,2,2,"#FFFFFF",OL);R(c,cx-4,cy-8,1,1,OL);R(c,cx+4,cy-8,1,1,OL);R(c,cx-2,cy+5,5,1,"#B5523B");return}
+  const ey=id==="hongui"?cy+3:id==="mariquin"?cy-8:id==="pinguin"?cy-5:id==="cactin"?cy-6:cy-1,ec=id==="mariquin"||id==="pinguin"?"#FFFFFF":OL;R(c,cx-4,ey,2,3,ec);R(c,cx+3,ey,2,3,ec);if(id!=="mariquin")R(c,cx-4,ey,1,1,"#FFFFFF")}
 function drawGame(c,ts){
   const W=128,H=c.canvas.height,kid=G.kid,p=S.pets[kid]||{};
   let px=G.x*TS,py=G.y*TS;if(G.mv){const k=Math.min(1,(ts-G.mv.start)/STEP_MS);px=(G.mv.fx+(G.mv.tx-G.mv.fx)*k)*TS;py=(G.mv.fy+(G.mv.ty-G.mv.fy)*k)*TS}
@@ -1138,7 +1411,7 @@ function drawGame(c,ts){
   for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){const t=WORLD.m[y][x];gTile(c,t==="T"||t==="R"||t==="F"?".":t,x,y,x*TS-camX,y*TS-camY,ts);if(t===",")grassBlades(c,x*TS-camX,y*TS-camY,x,y,ts,false)}
   const obj=[];
   for(let y=y0;y<=y1+1&&y<MH;y++)for(let x=x0;x<=x1;x++){const t=WORLD.m[y][x],sx=x*TS-camX,sy=y*TS-camY;
-    if(t==="T")obj.push({y:y*TS+15,d:()=>gTree(c,sx,sy,hsh(x,y))});
+    if(t==="T")obj.push({y:y*TS+15,d:()=>gTree(c,sx,sy,hsh(x,y),WORLD.z[y][x])});
     if(t==="R")obj.push({y:y*TS+12,d:()=>{sh(c,sx+8,sy+14,7,2);oval(c,sx+8,sy+10,7,5,"#A7B1BD",OL);oval(c,sx+6,sy+8,3,2,"#C9D1DA");R(c,sx+10,sy+11,2,1,"#7E8A97")}});
     if(t==="F")obj.push({y:y*TS+12,d:()=>{R(c,sx+1,sy+4,3,11,OL);R(c,sx+2,sy+5,1,10,"#D29A65");R(c,sx+12,sy+4,3,11,OL);R(c,sx+13,sy+5,1,10,"#D29A65");R(c,sx,sy+6,16,3,OL);R(c,sx,sy+7,16,1,"#E6B07A");R(c,sx,sy+11,16,3,OL);R(c,sx,sy+12,16,1,"#E6B07A")}});
     const ck=G.coinsMap.get(x+","+y);if(ck)obj.push({y:y*TS+8,d:()=>gCoin(c,sx,sy,ck,ts,hsh(x,y)%7)})}
@@ -1147,16 +1420,22 @@ function drawGame(c,ts){
   drawOthers(obj,c,camX,camY,ts);
   WORLD.signs.forEach(s=>obj.push({y:s.y*TS+14,d:()=>{const sx=s.x*TS-camX,sy=s.y*TS-camY;sh(c,sx+8,sy+15,5,1);R(c,sx+7,sy+8,2,8,"#7A4E2D");R(c,sx+1,sy+2,14,8,OL);R(c,sx+2,sy+3,12,6,"#E6B07A");R(c,sx+4,sy+5,8,1,"#9C6236");R(c,sx+4,sy+7,6,1,"#9C6236")}}));
   WORLD.chests.forEach(o=>obj.push({y:o.y*TS+14,d:()=>gChest(c,o.x*TS-camX,o.y*TS-camY,G.opened.has(o.x+","+o.y))}));
-  const xi=xpInfo(kid),walking=!!G.mv,psx=Math.round(px-camX),psy=Math.round(py-camY);
-  obj.push({y:py+15,d:()=>{sh(c,psx+8,psy+15,7,2);drawPet(c,{sp:p.species,stage:1,mood:"happy",equip:p.equip,x:psx+8,base:psy+14,t:ts,walking,still:false});
-    const tx=Math.round(px/TS),ty=Math.round(py/TS);if(WORLD.m[ty]&&WORLD.m[ty][tx]===",")grassBlades(c,tx*TS-camX,ty*TS-camY,tx,ty,ts,true)}});
+  const walking=!!G.mv,psx=Math.round(px-camX),psy=Math.round(py-camY),av=avOf(kid),k=G.mv?Math.min(1,(ts-G.mv.start)/STEP_MS):0;
+  const grassFront=(wx,wy)=>{const tx=Math.round(wx/TS),ty=Math.round(wy/TS);if(WORLD.m[ty]&&WORLD.m[ty][tx]===",")grassBlades(c,tx*TS-camX,ty*TS-camY,tx,ty,ts,true)};
+  (G.team||[]).forEach((pid,i)=>{const pp=S.pets[pid];if(!pp)return;const a=G.hist[i+1]||G.hist[G.hist.length-1],b=G.hist[i]||a;
+    const fx2=(G.mv?a.x+(b.x-a.x)*k:a.x)*TS,fy2=(G.mv?a.y+(b.y-a.y)*k:a.y)*TS;if(Math.abs(fx2-px)<2&&Math.abs(fy2-py)<2&&!G.mv&&i>0)return;
+    const sx2=Math.round(fx2-camX),sy2=Math.round(fy2-camY);
+    obj.push({y:fy2+14,d:()=>{sh(c,sx2+8,sy2+15,6,2);drawPet(c,{sp:pp.species,tint:pp.tint,stage:1,mood:"happy",equip:pp.equip,x:sx2+8,base:sy2+14,t:ts+i*250,walking,still:false});grassFront(fx2,fy2)}})});
+  obj.push({y:py+15,d:()=>{if(av)drawTrainer(c,psx,psy,av,G.face,walking,ts);else{sh(c,psx+8,psy+15,7,2);drawPet(c,{sp:p.species,stage:1,mood:"happy",equip:p.equip,x:psx+8,base:psy+14,t:ts,walking,still:false})}grassFront(px,py)}});
   obj.sort((a,b)=>a.y-b.y).forEach(o=>o.d());
   if(G.pop&&ts-G.pop.t<700){const k=(ts-G.pop.t)/700;lo(c,()=>{const x=(G.pop.x*TS-camX)/2+2,y=(G.pop.y*TS-camY)/2-4-k*8;spark(c,x,y,"#FFE45C");spark(c,x+6,y+2,"#FFFFFF")})}
   if(isNight()){c.globalAlpha=.22;R(c,0,0,W,H,"#141047");c.globalAlpha=1}
   if(G.enc){const e=G.enc,z=G.zone==="Bosque Susurro";c.globalAlpha=.92;R(c,0,0,W,H,z?"#CDEFD5":"#FFF1C9");c.globalAlpha=1;
     for(let y=0;y<H;y+=6)R(c,0,y,W,1,z?"#B9E4C3":"#FBE3A6");
     const by=Math.round(H*.36);oval(c,92,by+12,26,6,z?"#6CC77B":"#9ED36A","#3E8E4F");drawCritter(c,e.c.id,92,by-2,ts);
-    const py2=Math.round(H*.66);oval(c,36,py2+4,28,7,z?"#6CC77B":"#9ED36A","#3E8E4F");drawPet(c,{sp:p.species,stage:Math.max(2,xi.stage),mood:"happy",equip:p.equip,x:36,base:py2+2,t:ts,action:null,still:false})}
+    const py2=Math.round(H*.66),lead=(G.team||[])[0],lp=lead&&S.pets[lead],av=avOf(kid);oval(c,40,py2+4,34,7,z?"#6CC77B":"#9ED36A","#3E8E4F");
+    if(av)drawHuman(c,{x:lp?24:40,base:py2+3,av,face:1,pose:"idle",t:ts});
+    if(lp)drawPet(c,{sp:lp.species,tint:lp.tint,stage:Math.max(2,xpInfo(lead).stage),mood:"happy",equip:lp.equip,x:av?54:40,base:py2+5,t:ts,action:null,still:false})}
 }
 let gLast=0;
 function gameLoop(ts){if(!G)return;requestAnimationFrame(gameLoop);if(ts-gLast<33)return;gLast=ts;
@@ -1171,7 +1450,7 @@ function gameScreen(){
     <div class="grow"><span>Se guardaron en tu bolsa</span>${mon(e.award)}</div>
     <p class="muted" style="font-size:.85rem">Las monedas sirven para comida, ropa y muebles. Para tus metas reales necesitas fichas de deberes.</p>
     ${e.nf.length?`<div class="grow"><span>Amigos nuevos</span><b>${e.nf.map(id=>CRIT.find(c=>c.id===id).n).join(", ")}</b></div>`:""}
-    <p class="muted" style="font-size:.85rem">${esc(p.name||"Tu mascota")} volvió feliz, pero con un poquito de hambre.</p>
+    <p class="muted" style="font-size:.85rem">${(G.team||[]).length?`${(G.team||[]).map(id=>esc((S.pets[id]||{}).name||"Tu fichamigo")).join(" y ")} ${(G.team||[]).length>1?"volvieron felices":"volvió feliz"}, pero con un poquito de hambre.`:"¡Qué buen paseo! La próxima vez lleva a tus fichamigos bien alimentados."}</p>
     <button class="btn block" data-act="gexit">Volver a casa</button></div></div>`}
   if(MG)over=miniScreen();
   else if(G.enc){const e=G.enc,c=e.c,gm=MINIS[CRIT_GAME[c.id]];
@@ -1201,8 +1480,8 @@ const MINIS={bloques:{n:"Bloques",how:"Mueve y gira las piezas. Completa líneas
   topos:{n:"¡Atrápalos!",how:"Toca a los bichitos cuando se asomen. El dorado vale 3.",goal:12,dur:20},
   simon:{n:"Sigue el ritmo",how:"Mira la secuencia de colores y repítela en el mismo orden.",goal:4,dur:0}};
 const MREW={bloques:s=>Math.min(18,2+s*3),frutas:s=>Math.min(16,Math.floor(s/2)),memoria:s=>Math.min(16,s*2+2),topos:s=>Math.min(16,Math.floor(s*.8)),simon:s=>Math.min(18,s*2)};
-const CRIT_GAME={babosin:"bloques",mariposin:"frutas",mariquin:"topos",orejitas:"memoria",hongui:"simon",estrellin:"bloques"};
-const NPC_GAME={"Abuela Rosa":"memoria","Pescador Tito":"frutas","Exploradora Lu":"simon","Profe Nico":"bloques"};
+const CRIT_GAME={babosin:"bloques",mariposin:"frutas",mariquin:"topos",orejitas:"memoria",hongui:"simon",estrellin:"bloques",pinguin:"memoria",cactin:"topos",cangrejin:"frutas"};
+const NPC_GAME={"Abuela Rosa":"memoria","Pescador Tito":"frutas","Exploradora Lu":"simon","Profe Nico":"bloques","Montañista Sara":"bloques","Arqueólogo Beto":"simon"};
 let MG=null;
 const mgT=(fn,ms)=>{const id=setTimeout(fn,ms);MG&&MG.timers.push(id);return id};
 const mgI=(fn,ms)=>{const id=setInterval(fn,ms);MG&&MG.timers.push(id);return id};
@@ -1317,7 +1596,7 @@ let chatWith=null, chatMsgs=[], chatFor=null, chatAt=0, profSig={};
 const socialOn=()=>remote&&!!family;
 const kidSoc=kid=>((S.kids[kid]||{}).social)||{};
 async function syncProfile(kidId,force){if(!socialOn()||!S.kids[kidId])return;const p=S.pets[kidId]||{},k=S.kids[kidId];
-  const sig=JSON.stringify([p.name,p.species,p.equip,k.nick,k.color,k.social]);if(!force&&profSig[kidId]===sig)return;profSig[kidId]=sig;
+  const sig=JSON.stringify([p.name,p.species,p.equip,p.tint,p.avatar,k.nick,k.color,k.social]);if(!force&&profSig[kidId]===sig)return;profSig[kidId]=sig;
   try{const j=await api("social/profile",{family,kidId});SOC[kidId]={...(SOC[kidId]||{}),code:j.code,nick:j.nick}}catch(e){profSig[kidId]=null}}
 async function loadFriends(kidId){if(!socialOn())return;try{const r=await fetch(`/api/friends?f=${family}&kid=${kidId}`,{cache:"no-store"});const j=await r.json();SOC[kidId]={...(SOC[kidId]||{}),friends:j.friends||[],code:j.code||(SOC[kidId]||{}).code,nick:j.nick,at:Date.now()}}catch(e){}}
 async function loadChat(kidId,w){if(!socialOn())return;try{const r=await fetch(`/api/chat?f=${family}&kid=${kidId}&with=${w}`,{cache:"no-store"});const j=await r.json();if(r.ok){const changed=JSON.stringify(j.msgs)!==JSON.stringify(chatMsgs);chatMsgs=j.msgs||[];chatAt=Date.now();try{localStorage.setItem("fm-seen-"+kidId+"-"+w,String((chatMsgs[chatMsgs.length-1]||{}).ts||0))}catch(e){}return changed}}catch(e){}return false}
@@ -1372,7 +1651,7 @@ function pAmigos(){
 /* ---- globo de mensajes nuevos (encima de todo) y chat rápido ---- */
 let inboxAlert=null, qchat=null, inboxBusy=false;
 function inboxSeenKey(){return "fm-inbox-"+(role&&role.r==="kid"?"k:"+role.id:"p:"+family)}
-async function pollInbox(){if(!socialOn()||!role||inboxBusy)return;if(role.r==="kid"&&!S.kids[role.id])return;inboxBusy=true;
+async function pollInbox(){if(!socialOn()||!role||role.r==="teacher"||inboxBusy)return;if(role.r==="kid"&&!S.kids[role.id])return;inboxBusy=true;
   try{let since=0;try{since=+localStorage.getItem(inboxSeenKey())||0}catch(e){}
     if(!since){since=Date.now()-60000;try{localStorage.setItem(inboxSeenKey(),String(since))}catch(e){}}
     const q=role.r==="kid"?`who=kid&kid=${role.id}`:"who=parent";const r=await fetch(`/api/inbox?f=${family}&${q}&since=${since}`,{cache:"no-store"});const j=await r.json();
@@ -1400,12 +1679,14 @@ setInterval(async()=>{if(qchat&&document.visibilityState==="visible"){const ch=a
 let worldTimer=null;
 function worldOn(){return socialOn()&&G&&role&&role.r==="kid"&&G.kid===role.id&&kidSoc(G.kid).world!==false}
 async function worldTick(emote){if(!worldOn())return;try{const j=await api("world",{family,kidId:G.kid,x:G.x,y:G.y,zone:G.zone,emote});const now=performance.now();const nx={};
-  (j.others||[]).forEach(o=>{const old=G.others&&G.others[o.id];nx[o.id]={...o,px:old?old.px:o.x,py:old?old.py:o.y,seen:now}});G.others=nx}catch(e){}}
+  (j.others||[]).forEach(o=>{const old=G.others&&G.others[o.id],moved=old&&(old.x!==o.x||old.y!==o.y);nx[o.id]={...o,px:old?old.px:o.x,py:old?old.py:o.y,bx:moved?old.x:old?old.bx:o.x,by:moved?old.y:old?old.by:o.y+1,qx:old?old.qx:o.x,qy:old?old.qy:o.y+1,dir:moved?(o.x>old.x?"right":o.x<old.x?"left":o.y<old.y?"up":"down"):old?old.dir:"down",seen:now}});G.others=nx}catch(e){}}
 function startWorld(){clearInterval(worldTimer);if(!worldOn())return;G.others={};syncProfile(G.kid,true).then(()=>worldTick());worldTimer=setInterval(()=>{if(!G){clearInterval(worldTimer);return}worldTick()},1500)}
 function leaveWorld(kid){clearInterval(worldTimer);if(socialOn()&&kid)api("world",{family,kidId:kid,x:0,y:0,zone:"",leave:true}).catch(()=>{})}
 function otherAt(x,y){if(!G||!G.others)return null;return Object.values(G.others).find(o=>o.x===x&&o.y===y)||null}
 function drawOthers(obj,c,camX,camY,ts){if(!G||!G.others)return;Object.values(G.others).forEach(o=>{o.px+=(o.x-o.px)*.25;o.py+=(o.y-o.py)*.25;const sx=Math.round(o.px*TS-camX),sy=Math.round(o.py*TS-camY);
-  obj.push({y:o.py*TS+15,d:()=>{sh(c,sx+8,sy+15,7,2);drawPet(c,{sp:(o.look||{}).sp,stage:1,mood:"happy",equip:(o.look||{}).equip,x:sx+8,base:sy+14,t:ts+o.x*97,walking:Math.abs(o.x-o.px)+Math.abs(o.y-o.py)>.05});
+  const lk=o.look||{},mv=Math.abs(o.x-o.px)+Math.abs(o.y-o.py)>.05;o.qx+=(o.bx-o.qx)*.2;o.qy+=(o.by-o.qy)*.2;
+  if(lk.av){const qx=Math.round(o.qx*TS-camX),qy=Math.round(o.qy*TS-camY);obj.push({y:o.qy*TS+14,d:()=>{sh(c,qx+8,qy+15,6,2);drawPet(c,{sp:lk.sp,tint:lk.tint,stage:1,mood:"happy",equip:lk.equip,x:qx+8,base:qy+14,t:ts+o.x*97,walking:mv})}})}
+  obj.push({y:o.py*TS+15,d:()=>{if(lk.av)drawTrainer(c,sx,sy,lk.av,o.dir||"down",mv,ts+o.x*31);else{sh(c,sx+8,sy+15,7,2);drawPet(c,{sp:lk.sp,stage:1,mood:"happy",equip:lk.equip,x:sx+8,base:sy+14,t:ts+o.x*97,walking:mv})}
     c.font="bold 6px system-ui,sans-serif";c.textAlign="center";const w=Math.min(40,c.measureText(o.nick).width+6);R(c,sx+8-w/2,sy-12,w,8,o.fr==="ok"?"#14866A":"#23253A");c.fillStyle="#FFFFFF";c.fillText(o.nick,sx+8,sy-6);
     if(o.emote){R(c,sx+12,sy-24,11,9,"#FFFFFF");R(c,sx+12,sy-25,11,1,OL);R(c,sx+12,sy-15,11,1,OL);R(c,sx+11,sy-24,1,9,OL);R(c,sx+23,sy-24,1,9,OL);heart(c,sx+15,sy-22)}}})})}
 
@@ -1433,6 +1714,7 @@ function header(){
   const snd=`<button class="link" data-act="mute" aria-label="${muted?"Activar sonido":"Silenciar"}">${muted?"🔇":"🔊"}</button>`;
   if(!role)return snd;
   if(role.r==="kid")return `${snd}<button class="link" data-act="kidparent">Zona de padres</button>`;
+  if(role.r==="teacher")return snd;
   const fk=role.fromKid&&S.kids[role.fromKid];
   return `${pview?`<button class="link" data-act="pback">← Familia</button>`:""}${snd}`;
 }
@@ -1443,6 +1725,7 @@ function screen(){
     <div class="px bigcode">${esc(role.pair)}</div><p class="muted">Esta pantalla cambia sola cuando te agreguen.</p>
     <button class="link" data-act="cancelpair">Cancelar</button></div>`;
   if(role.r==="kid")return wstep==="kidparent"?`<div class="welcome">${parentGate()}</div>`:kidScreen(role.id,false);
+  if(role.r==="teacher")return teacherScreen();
   if(pview&&S.kids[pview])return kidScreen(pview,true);
   return parentScreen();
 }
@@ -1466,6 +1749,16 @@ function welcome(){
       <p class="muted">${has?"Escribe tu PIN de 4 dígitos.":"Con este PIN controlas los perfiles, apruebas deberes y entregas las metas."}</p>
       <input id="pin" data-keep="no" inputmode="numeric" maxlength="4" pattern="[0-9]{4}" autocomplete="off" aria-label="PIN" required>
       <button class="btn block" type="submit">${has?"Entrar":"Guardar PIN"}</button><button class="link" type="button" data-act="wback">Volver</button></form></div>`}
+  if(wstep==="teacher")return `<div class="welcome"><form class="pinbox" data-form="tcreate"><h2>Perfil de docente</h2>
+      <p class="muted">Crea grupos (por ejemplo <b>Literatura 4.º B</b>), agrega a tus estudiantes con el código de su celular y envíales tareas a todos a la vez. Los padres aprueban cada vinculación.</p>
+      <label class="f">Tu nombre como lo conocen los estudiantes<input id="tc-name" maxlength="40" required placeholder="Ej: Profe Marta Ruiz"></label>
+      <label class="f">Crea un PIN de 4 dígitos<input id="tc-pin" data-keep="no" inputmode="numeric" maxlength="4" pattern="[0-9]{4}" autocomplete="off" required></label>
+      <button class="btn block" type="submit">Crear perfil de docente</button>
+      <button class="link" type="button" data-act="wstep" data-v="tjoin">Ya tengo perfil: conectar este dispositivo</button><button class="link" type="button" data-act="wback">Volver</button></form></div>`;
+  if(wstep==="tjoin")return `<div class="welcome"><form class="pinbox" data-form="tjoin"><h2>Conectar perfil de docente</h2>
+      <label class="f">Código de docente<input id="tj-code" data-keep="no" autocomplete="off" autocapitalize="none" required placeholder="12 letras y números"></label>
+      <label class="f">PIN<input id="tj-pin" data-keep="no" inputmode="numeric" maxlength="4" pattern="[0-9]{4}" autocomplete="off" required></label>
+      <button class="btn block" type="submit">Conectar</button><button class="link" type="button" data-act="wback">Volver</button></form></div>`;
   if(wstep==="recover"&&S.kids[wkid])return `<div class="welcome"><form class="pinbox" data-form="recover"><h2>Usar este celular como el de ${esc(S.kids[wkid].name)}</h2>
     <p class="muted">Para cambiar el perfil de un celular hace falta el PIN de padre.</p>
     <input id="rc-pin" data-keep="no" inputmode="numeric" maxlength="4" pattern="[0-9]{4}" autocomplete="off" aria-label="PIN de padre" required>
@@ -1480,13 +1773,13 @@ function welcome(){
     <button class="btn block" type="submit">Crear mi perfil</button><button class="link" type="button" data-act="wback">Volver</button></form>${rec}</div>`;
   return `<div class="welcome">${demo}<h1>Fichamigo</h1><p class="lead">Cada deber cumplido te da fichas. Con ellas alimentas y cuidas a tu mascota, y ahorras para la meta que pactaste en casa.</p>
     ${installEvt?`<button class="btn coinb block" data-act="installapp" style="max-width:360px">📲 Instalar Fichamigo en este celular</button>`:""}
-    <div class="choices"><button class="btn block" data-act="wstep" data-v="kid">${devKid&&S.kids[devKid]?`Entrar como ${esc(S.kids[devKid].name)}`:"Soy un joven"}</button><button class="btn ghost block" data-act="wstep" data-v="parent">Soy papá o mamá</button></div></div>`;
+    <div class="choices"><button class="btn block" data-act="wstep" data-v="kid">${devKid&&S.kids[devKid]?`Entrar como ${esc(S.kids[devKid].name)}`:"Soy un joven"}</button><button class="btn ghost block" data-act="wstep" data-v="parent">Soy papá o mamá</button>${remote?`<button class="btn ghost block" data-act="wstep" data-v="teacher">Soy docente</button>`:""}</div></div>`;
 }
 
 /* ---------- pantalla del joven ---------- */
 function statusMsg(p,st,xi){
   const n=esc(p.name||"Tu mascota");
-  if(st.egg)return "El huevo nace cuando aprueben tu primer deber.";
+  if(st.egg)return `El huevo de ${n} nace cuando aprueben tu próximo deber.`;
   if(st.dead)return `${n} se murió de hambre.`;
   if(st.h<=0)return `¡${n} no ha comido! Le quedan ${Math.ceil(st.left)} h.`;
   const m=moodOf(st);
@@ -1523,21 +1816,34 @@ function petMenuHtml(kidId,p,st){
     <div class="pmgrid">${BASIC.map(([id,l])=>`<button data-act="pact" data-v="${id}">${l}</button>`).join("")}${learned.map(([id,l])=>`<button class="tr" data-act="pact" data-v="${id}">★ ${l}</button>`).join("")}</div>
     <button class="btn sm block" data-act="pmteach">Enseñar trucos (${learned.length}/${TRICKS.length})</button></div>`;
 }
+let avDraft=null, adoptFor=null;
+function moodDot(st){if(!st)return"#9AA4C7";if(st.egg)return"#FFE45C";if(st.dead)return"#6B7280";const m=moodOf(st);return m==="happy"||m==="sleep"?"#22B573":m==="sick"?"#E5484D":"#FF9F1C"}
+function petRow(kidId,sel,asParent){
+  const pl=petsOf(kidId).filter(o=>o.p.species), slots=petSlots(kidId), n=approvedCount(kidId), auto=!((S.kids[kidId]||{}).maxPets)||(S.kids[kidId]||{}).maxPets==="auto";
+  if(pl.length<1)return"";
+  let extra="";
+  if(pl.length<slots&&pl.length<3&&!asParent)extra=`<button class="petchip add" data-act="adopt" data-id="${kidId}">＋ Adoptar otro fichamigo</button>`;
+  else if(pl.length<3&&auto&&pl.length>=slots){const need=PET_UNLOCK[pl.length+1];extra=`<span class="petchip lock" title="Se desbloquea con deberes aprobados">🔒 ${pl.length+1}.º fichamigo: ${Math.min(n,need)}/${need} deberes</span>`}
+  if(pl.length<2&&!extra)return"";
+  return `<div class="petrow" role="tablist" aria-label="Tus fichamigos">${pl.map(o=>`<button class="petchip" role="tab" data-act="selpet" data-id="${o.id}" data-kid="${kidId}" aria-selected="${o.id===sel}"><i style="background:${moodDot(calc(o.p))}"></i>${esc(o.p.name||"Fichamigo")}</button>`).join("")}${extra}</div>`;
+}
 function kidScreen(kidId,asParent){
   if(G&&G.kid===kidId)return gameScreen();
-  const k=S.kids[kidId], p=S.pets[kidId];
-  if(!p)return `<div class="empty">Este perfil no tiene mascota todavía.<br><br><button class="btn" data-act="newpet" data-id="${kidId}">Entregar huevo</button></div>`;
-  if(!p.species)return chooser(kidId);
-  const st=calc(p), xi=xpInfo(kidId), m=money(kidId);
+  const k=S.kids[kidId], main=S.pets[kidId];
+  if(!main)return `<div class="empty">Este perfil no tiene mascota todavía.<br><br><button class="btn" data-act="newpet" data-id="${kidId}">Entregar huevo</button></div>`;
+  if(!main.avatar&&!asParent)return avatarCreator(kidId);
+  if(!main.species)return chooser(kidId,kidId);
+  if(adoptFor&&adoptFor.kid===kidId&&!asParent)return chooser(kidId,adoptFor.id);
+  const pid=selPet(kidId), p=S.pets[pid], st=calc(p), xi=xpInfo(pid), m=money(kidId);
   const dis=st.egg||st.dead?"disabled":"";
   const pend=arr("tasks").filter(t=>t.kidId===kidId&&t.status==="pendiente").length;
   const goalsReady=arr("goals").filter(g=>g.kidId===kidId&&g.status==="activa"&&m.goalPts>=g.cost).length;
-  const tabs=[["deberes","Deberes",pend],["tienda","Tienda"],["metas","Metas",goalsReady],["chat","Chat"],["album","Álbum"],["registro","Registro"]];
+  const tabs=[["deberes","Deberes",pend],["personaje","Mi personaje"],["tienda","Tienda"],["metas","Metas",goalsReady],["chat","Chat"],["album","Álbum"],["registro","Registro"]];
   if(!asParent)tabs.push(["padres","Zona de padres"]);
-  const body=ktab==="padres"?parentGate():({deberes:kDeberes,tienda:kTienda,metas:kMetas,album:kAlbum,chat:kChat,registro:kRegistro}[ktab]||kDeberes)(kidId,m,xi,asParent);
+  const body=ktab==="padres"?parentGate():({deberes:kDeberes,personaje:kPersonaje,tienda:kTienda,metas:kMetas,album:kAlbum,chat:kChat,registro:kRegistro}[ktab]||kDeberes)(kidId,m,xi,asParent);
   const pair=!k.linked?`<div class="paircard"><span>Código para unirte a tu familia</span><b class="px">${esc(k.code)}</b><small>Tu papá o mamá lo escribe en Familia → Agregar dispositivo</small></div>`:"";
   const sheet=menuOpen?`<div class="scrim" data-act="closemenu"></div>
-    <div class="sheet" role="dialog" aria-modal="true" aria-label="Menú de ${esc(p.name)}">
+    <div class="sheet" role="dialog" aria-modal="true" aria-label="Menú">
       <div class="sheethead"><nav class="tabs" aria-label="Secciones">${tabs.map(([key,l,n])=>`<button data-act="ktab" data-v="${key}" aria-pressed="${ktab===key}">${l}${n?`<span class="badge">${n}</span>`:""}</button>`).join("")}</nav>
       <button class="closeb" data-act="closemenu" aria-label="Cerrar menú">✕</button></div>
       <div class="sheetbody">${pair}${body}</div></div>`:"";
@@ -1545,27 +1851,82 @@ function kidScreen(kidId,asParent){
   return `<div class="play" style="--shell:${esc(k.color||COLORS[0])}">
     <div class="ptop">
       ${asParent?`<button class="iconbtn" data-act="pback" aria-label="Volver a Familia">←</button>`:""}
-      <div class="pid"><span class="pname">${esc(p.name||"")}</span><span class="stage">${stageLabel(xi)}${asParent?` · de ${esc(k.name)}`:""}</span></div>
+      <div class="pid"><span class="pname">${esc(p.name||"")}</span><span class="stage">${st.egg?"Huevo":stageLabel(xi)}${asParent?` · de ${esc(k.name)}`:""}</span></div>
       <span class="pchip num" title="Fichas de deberes">${cI("f")}${m.wallet}</span><span class="pchip num m" title="Monedas de explorar">${cI("m")}${m.mon}</span>
       ${!asParent&&remote&&pushStatus()!=="on"&&pushStatus()!=="nofamily"?`<button class="iconbtn bell" data-act="enablepush" aria-label="Activar notificaciones">🔔<i></i></button>`:""}
       <button class="iconbtn" data-act="mute" aria-label="${muted?"Activar sonido":"Silenciar"}">${muted?"🔇":"🔊"}</button>
     </div>
+    ${petRow(kidId,pid,asParent)}
     ${!k.linked&&!menuOpen?pair:""}
-    <div class="lcdwrap"><canvas id="lcd" width="128" height="96" data-mode="kid" data-kid="${kidId}" aria-label="Pantalla de la mascota. Toca a la mascota para ver qué sabe hacer."></canvas>${petMenu&&!dis?petMenuHtml(kidId,p,st):""}</div>
+    <div class="lcdwrap"><canvas id="lcd" width="128" height="96" data-mode="kid" data-kid="${kidId}" aria-label="Tu cuarto con tu personaje y ${esc(p.name||"tu fichamigo")}. Toca a un fichamigo para ver qué sabe hacer."></canvas>${petMenu&&!dis?petMenuHtml(pid,p,st):""}</div>
     ${dis?"":`<div class="hint">Toca a ${esc(p.name)} para jugar · Mantén presionado para acariciar · Arrastra para cargarlo</div>`}
     ${st.egg||st.dead?"":`<div class="stats">${statBar("Comida",st.h)}${statBar("Ánimo",st.hp)}${statBar("Limpieza",st.c)}</div>`}
     <div class="status">${statusMsg(p,st,xi)}</div>
-    ${foodOpen&&!dis?`<div class="drawer">${FOODS.map(f=>`<div class="food"><canvas width="9" height="9" data-paint="food:${f.id}"></canvas>${f.n}<div class="fpay"><button data-act="feed" data-id="${kidId}" data-f="${f.id}" data-cur="f" ${m.wallet<f.p?"disabled":""} aria-label="${f.n} por ${f.p} fichas">${cI("f")}${f.p}</button><button data-act="feed" data-id="${kidId}" data-f="${f.id}" data-cur="m" ${m.mon<f.p*RATE?"disabled":""} aria-label="${f.n} por ${f.p*RATE} monedas">${cI("m")}${f.p*RATE}</button></div></div>`).join("")}</div>`:""}
-    ${st.dead?`<div class="btns">${asParent?`<button class="btn coinb" data-act="revive" data-id="${kidId}">Revivir</button>`:""}<button class="btn" data-act="newegg" data-id="${kidId}">Huevo nuevo</button><button class="rb c4" data-act="openmenu"><span class="k">${IC.menu}</span>Menú</button></div>`
-    :`<div class="btns"><button class="rb c1" data-act="feedmenu" ${dis} aria-expanded="${foodOpen}"><span class="k">${IC.food}</span>Comer</button><button class="rb c2" data-act="play" data-id="${kidId}" ${dis}><span class="k">${IC.play}</span>Jugar</button><button class="rb c3" data-act="clean" data-id="${kidId}" ${dis}><span class="k">${IC.clean}</span>Limpiar</button><button class="rb c5" data-act="explore" data-id="${kidId}" ${dis}><span class="k">${MAPICON}</span>Explorar</button><button class="rb c4" data-act="openmenu" aria-haspopup="dialog"><span class="k">${IC.menu}${badge?`<i class="dot">${badge}</i>`:""}</span>Menú</button></div>`}
+    ${foodOpen&&!dis?`<div class="drawer">${FOODS.map(f=>`<div class="food"><canvas width="9" height="9" data-paint="food:${f.id}"></canvas>${f.n}<div class="fpay"><button data-act="feed" data-id="${pid}" data-f="${f.id}" data-cur="f" ${m.wallet<f.p?"disabled":""} aria-label="${f.n} por ${f.p} fichas">${cI("f")}${f.p}</button><button data-act="feed" data-id="${pid}" data-f="${f.id}" data-cur="m" ${m.mon<f.p*RATE?"disabled":""} aria-label="${f.n} por ${f.p*RATE} monedas">${cI("m")}${f.p*RATE}</button></div></div>`).join("")}</div>`:""}
+    ${st.dead?`<div class="btns">${asParent?`<button class="btn coinb" data-act="revive" data-id="${pid}">Revivir</button>`:""}<button class="btn" data-act="newegg" data-id="${pid}">Huevo nuevo</button><button class="rb c5" data-act="explore" data-id="${kidId}"><span class="k">${MAPICON}</span>Explorar</button><button class="rb c4" data-act="openmenu"><span class="k">${IC.menu}</span>Menú</button></div>`
+    :`<div class="btns"><button class="rb c1" data-act="feedmenu" ${dis} aria-expanded="${foodOpen}"><span class="k">${IC.food}</span>Comer</button><button class="rb c2" data-act="play" data-id="${pid}" ${dis}><span class="k">${IC.play}</span>Jugar</button><button class="rb c3" data-act="clean" data-id="${pid}" ${dis}><span class="k">${IC.clean}</span>Limpiar</button><button class="rb c5" data-act="explore" data-id="${kidId}"><span class="k">${MAPICON}</span>Explorar</button><button class="rb c4" data-act="openmenu" aria-haspopup="dialog"><span class="k">${IC.menu}${badge?`<i class="dot">${badge}</i>`:""}</span>Menú</button></div>`}
   </div>${sheet}`;
 }
-function chooser(kidId){
-  const k=S.kids[kidId];
-  return `<div class="welcome"><h2>${esc(k.name)}, elige tu mascota</h2><p class="muted">Va a nacer de un huevo. Cuídala con tus deberes.</p>
-    <div class="species">${Object.entries(SPECIES).map(([id,s])=>`<button class="spb" data-act="picksp" data-v="${id}" aria-pressed="${pickSp===id}"><canvas width="128" height="120" data-paint="species:${id}"></canvas>${s.n}</button>`).join("")}</div>
-    <form class="pinbox" data-form="species" data-id="${kidId}"><label class="f">Ponle nombre<input id="petname" maxlength="12" required placeholder="Ej: Pixel"></label>
-    <button class="btn block" type="submit" ${pickSp?"":"disabled"}>Recibir mi huevo</button></form></div>`;
+function chooser(kidId,petId){
+  const k=S.kids[kidId], extra=petId!==kidId, n=extra?+petId.split("~")[1]:1;
+  return `<div class="welcome"><h2>${extra?`¡Ganaste tu ${n}.º fichamigo!`:`${esc(k.name)}, elige tu fichamigo`}</h2><p class="muted">${extra?"Tu responsabilidad te lo ganó. Recuerda: cada fichamigo come, juega y se limpia por aparte.":"Va a nacer de un huevo. Cuídalo con tus deberes."}</p>
+    <div class="species">${Object.entries(SPECIES).map(([id,s])=>`<button class="spb" data-act="picksp" data-v="${id}" aria-pressed="${pickSp===id}"><canvas width="128" height="120" data-paint="species:${id}:${kidId}"></canvas>${s.n}</button>`).join("")}</div>
+    <form class="pinbox" data-form="species" data-id="${petId}" data-kid="${kidId}"><label class="f">Ponle nombre<input id="petname" maxlength="12" required placeholder="Ej: Pixel"></label>
+    <button class="btn block" type="submit" ${pickSp?"":"disabled"}>Recibir mi huevo</button>${extra?`<button class="link" type="button" data-act="adoptcancel">Ahora no</button>`:""}</form></div>`;
+}
+function avatarCreator(kidId){
+  const k=S.kids[kidId];if(!avDraft||avDraft.kid!==kidId)avDraft={kid:kidId,...AV_DEF("nino"),g:null};
+  const d=avDraft, sw=(act,v,on,lbl,style)=>`<button class="swatch" data-act="${act}" data-v="${v}" aria-pressed="${on}" aria-label="${esc(lbl)}" ${style?`style="${style}"`:""}>${style?"":esc(lbl)}</button>`;
+  return `<div class="welcome avc"><h2>${esc(k.name)}, crea tu personaje</h2><p class="muted">Este eres tú dentro de Fichamigo. Vive con tus fichamigos y sale a explorar el mundo con ellos.</p>
+    <div class="avstage"><canvas width="72" height="80" data-paint="avdraft"></canvas></div>
+    <div class="avopts">
+      <div class="avgrp"><b>Soy</b><div class="seg2">${sw("avg","nino",d.g==="nino","Niño")}${sw("avg","nina",d.g==="nina","Niña")}</div></div>
+      <div class="avgrp"><b>Piel</b><div class="sws">${SKINS.map((c,i)=>sw("avskin",i,d.skin===i,"Tono "+(i+1),"--c:"+c)).join("")}</div></div>
+      <div class="avgrp"><b>Peinado</b><div class="sws txt">${HAIRS.filter(h=>!h.p).map(h=>sw("avhair",h.id,d.hair===h.id,h.n)).join("")}</div></div>
+      <div class="avgrp"><b>Color de pelo</b><div class="sws">${HAIRC.filter(h=>!h.p).map(h=>sw("avhc",h.id,d.hc===h.id,h.n,"--c:"+h.c)).join("")}</div></div>
+      <div class="avgrp"><b>Camiseta</b><div class="sws">${OUTFIT.filter(o=>o.slot==="top"&&!o.p).map(o=>sw("avtop",o.id,d.top===o.id,o.n,"--c:"+o.c)).join("")}</div></div>
+      <div class="avgrp"><b>Abajo</b><div class="sws txt">${OUTFIT.filter(o=>o.slot==="bottom"&&!o.p).map(o=>sw("avbot",o.id,d.bottom===o.id,o.n)).join("")}</div></div>
+    </div>
+    <p class="muted" style="font-size:.85rem">Más peinados, colores y ropa los consigues en el menú <b>Mi personaje</b> con fichas o monedas.</p>
+    <button class="btn block" data-act="avsave" ${d.g?"":"disabled"} style="max-width:360px">¡Este soy yo!</button></div>`;
+}
+const AVSEC=[["hair","Peinados"],["hc","Color de pelo"],["top","Camisas"],["bottom","Pantalones y faldas"],["shoes","Zapatos"],["head","Cabeza"],["face","Cara"],["back","Espalda"]];
+function avItems(sec){if(sec==="hair")return HAIRS.map(h=>({key:"hair:"+h.id,n:h.n,p:h.p,on:a=>a.hair===h.id,apply:a=>({...a,hair:h.id})}));
+  if(sec==="hc")return HAIRC.map(h=>({key:"hc:"+h.id,n:h.n,p:h.p,on:a=>a.hc===h.id,apply:a=>({...a,hc:h.id})}));
+  return OUTFIT.filter(o=>o.slot===sec).map(o=>({key:"o:"+o.id,n:o.n,p:o.p,on:a=>a[sec]===o.id,apply:a=>({...a,[sec]:o.id}),opt:["head","face","back"].includes(sec),slot:sec}))}
+function kPersonaje(kidId,m,xi,asParent){
+  const main=S.pets[kidId]||{}, a=main.avatar||AV_DEF("nino"), own=new Set(main.aOwned||[]);
+  return `<section><div class="sechead"><h2>Mi personaje</h2><p>${tok(m.wallet)} fichas · ${mon(m.mon)} monedas</p></div>
+    <div class="avtop"><canvas width="72" height="80" data-paint="avme:${kidId}"></canvas><div><p class="muted" style="font-size:.88rem;margin:0 0 8px">Cambia tu estilo cuando quieras. Lo que compras queda guardado para siempre.</p>
+    <div class="avgrp"><b>Piel</b><div class="sws">${SKINS.map((c,i)=>`<button class="swatch" data-act="avskinset" data-id="${kidId}" data-v="${i}" aria-pressed="${(a.skin|0)===i}" aria-label="Tono ${i+1}" style="--c:${c}"></button>`).join("")}</div></div>
+    <div class="avgrp"><b>Soy</b><div class="seg2">${["nino","nina"].map(g=>`<button class="swatch" data-act="avgset" data-id="${kidId}" data-v="${g}" aria-pressed="${a.g===g}">${g==="nino"?"Niño":"Niña"}</button>`).join("")}</div></div></div></div></section>
+  ${AVSEC.map(([sec,title])=>`<section><h2>${title}</h2><div class="shop">${avItems(sec).map(it=>{const free=!it.p,has=free||own.has(it.key),on=it.on(a);
+    return `<div class="prod ${on?"owned":""}"><canvas width="72" height="80" data-paint="avtry:${kidId}:${it.key}"></canvas><div class="t">${esc(it.n)}</div><div class="row2">${has?(on?(it.opt?`<button class="btn sm ghost" data-act="avoff" data-id="${kidId}" data-v="${it.slot}">Quitar</button>`:`<span class="pill ok">Puesto</span>`):`<button class="btn sm" data-act="avuse" data-id="${kidId}" data-v="${it.key}">Usar</button>`)
+      :asParent?`<span class="pill plain">${it.p} fichas</span>`:payBtns("av",kidId,it.key,it.p,m)}</div></div>`}).join("")}</div></section>`).join("")}`;
+}
+function kTienda(kidId,m){
+  const pid=selPet(kidId), p=S.pets[pid]||{}, main=S.pets[kidId], own=new Set(main.owned||[]), eq=p.equip||{}, lvl=main.house||1, cap=HOUSES[lvl-1].cap, nf=FURN.filter(f=>own.has(f.id)).length, pn=esc(p.name||"tu fichamigo");
+  const tints=[{id:"",n:"Color original",p:0}].concat(TINTS).map(t=>{const has=!t.p||own.has("tint-"+t.id),on=(p.tint||"")===t.id;
+    return `<div class="prod ${on?"owned":""}"><canvas width="128" height="96" data-paint="tint:${t.id}:${pid}"></canvas><div class="t">${t.n}</div><div class="row2">${has?(on?`<span class="pill ok">Puesto</span>`:`<button class="btn sm" data-act="settint" data-id="${pid}" data-w="${t.id}">Usar</button>`)
+      :payBtns("tint",pid,t.id,t.p,m)}</div></div>`}).join("");
+  const wear=WEAR.map(w=>{const has=own.has(w.id),on=eq[w.slot]===w.id;
+    return `<div class="prod ${has?"owned":""}"><canvas width="128" height="96" data-paint="wear:${w.id}:${pid}"></canvas><div class="t">${w.n}</div><div class="row2">${has?`<span class="pill ok">Es tuyo</span><button class="btn sm ${on?"ghost":""}" data-act="equip" data-id="${pid}" data-w="${w.id}">${on?"Quitar":"Ponérselo"}</button>`
+      :payBtns("wear",pid,w.id,w.p,m)}</div></div>`}).join("");
+  const furn=FURN.map(f=>{const has=own.has(f.id);
+    return `<div class="prod ${has?"owned":""}"><canvas width="128" height="120" data-paint="furn:${f.id}"></canvas><div class="t">${f.n}</div><div class="row2">${has?`<span class="pill ok">En tu casa</span>`
+      :payBtns("furn",kidId,f.id,f.p,m,nf>=cap,"Sin espacio: amplía tu casa")}</div></div>`}).join("");
+  const next=HOUSES[lvl];
+  const walls=WALLS.map(w=>{const has=w.p===0||own.has("wall-"+w.id),on=(main.wall||"celeste")===w.id;
+    return `<div class="prod ${has?"owned":""}"><canvas width="128" height="120" data-paint="wall:${w.id}"></canvas><div class="t">${w.n}</div><div class="row2">${has?(on?`<span class="pill ok">Puesta</span>`:`<button class="btn sm" data-act="setwall" data-id="${kidId}" data-w="${w.id}">Usar</button>`)
+      :payBtns("wall",kidId,w.id,w.p,m)}</div></div>`}).join("");
+  return `<div class="curnote">Paga con <b>fichas</b> (de tus deberes) o con <b>monedas</b> (de explorar). Una ficha vale ${RATE} monedas.</div>
+  <section><div class="sechead"><h2>Colores para ${pn}</h2><p>${tok(m.wallet)} · ${mon(m.mon)}</p></div><div class="shop">${tints}</div></section>
+  <section><div class="sechead"><h2>Ropa para ${pn}</h2><p>Lo que compras sirve para todos tus fichamigos</p></div><div class="shop">${wear}</div></section>
+  <section><div class="sechead"><h2>Casa</h2><p>${HOUSES[lvl-1].n} · ${nf} de ${cap} muebles</p></div>
+    ${next?`<div class="prod"><canvas width="128" height="120" data-paint="house:${next.l}:${kidId}"></canvas><div class="t">Mudarse a: ${next.n}</div><p class="muted" style="font-size:.85rem">Espacio para ${next.cap} muebles y piso nuevo.</p><div class="row2">${payBtns("house",kidId,next.l,next.p,m)}</div></div>`
+    :`<div class="empty">Ya tienes la casa más grande.</div>`}</section>
+  <section><h2>Muebles</h2><div class="shop">${furn}</div></section>
+  <section><h2>Paredes</h2><div class="shop">${walls}</div></section>`;
 }
 function dueTag(t){if(!t.due)return"";const late=t.status==="pendiente"&&t.due<today();return late?`<span class="pill bad">Vencida · ${fmtDate(t.due)}</span>`:`<span>${t.due===today()?"Hoy":fmtDate(t.due)}</span>`}
 const repTag=t=>t.repeat==="daily"?"<span>↻ diaria</span>":t.repeat==="weekly"?"<span>↻ semanal</span>":"";
@@ -1587,7 +1948,7 @@ async function enablePush(){const st=pushStatus();
   try{const p=await Notification.requestPermission();if(p!=="granted"){toast("Sin permiso no podemos avisarte.");return}await subscribePush(true);toast("¡Listo! Te llegará una notificación de prueba.");render()}
   catch(e){toast("No se pudieron activar las notificaciones. Intenta de nuevo.")}}
 /* si ya hay permiso y cambia el perfil del celular, se reactiva solo */
-setTimeout(()=>{try{if(remote&&family&&role&&"Notification" in window&&Notification.permission==="granted"&&localStorage.getItem("fm-push")!==pushKey())subscribePush(false).then(render).catch(()=>{})}catch(e){}},4000);
+setTimeout(()=>{try{if(remote&&family&&role&&role.r!=="teacher"&&"Notification" in window&&Notification.permission==="granted"&&localStorage.getItem("fm-push")!==pushKey())subscribePush(false).then(render).catch(()=>{})}catch(e){}},4000);
 addEventListener("beforeinstallprompt",e=>{e.preventDefault();installEvt=e;render()});
 addEventListener("appinstalled",()=>{installEvt=null;toast("¡Fichamigo quedó instalada!");render()});
 function proofSrc(t){const p=t.proof;if(!p)return null;if(p.id)return `/api/photo?f=${encodeURIComponent(family||"")}&id=${encodeURIComponent(p.id)}`;return p.data||null}
@@ -1604,33 +1965,13 @@ function kDeberes(kidId,m,xi){
   const rev=tasks.filter(t=>t.status==="revision");
   return `<section><div class="sechead"><h2>Por hacer</h2><p>Total ganado: ${tok(m.earned)}</p></div>
     <div class="list">${pend.length?pend.map(t=>`<div class="item"><span class="cat ${t.cat}"></span><div class="body"><div class="t">${esc(t.title)}</div>
-      <div class="meta"><span>${CATS[t.cat]||""}</span>${dueTag(t)}${repTag(t)}${t.note?`<span class="pill warn">${esc(t.note)}</span>`:""}</div></div>
-      <div class="actions">${tok(t.tokens)}<button class="btn okb sm" data-act="done" data-id="${t.id}">${t.needPhoto?"📷 ¡Lo hice!":"¡Lo hice!"}</button></div></div>`).join("")
+      <div class="meta">${t.school?`<span class="pill plain">🏫 ${esc(t.school.tname)} · ${esc(t.school.gname)}</span>`:`<span>${CATS[t.cat]||""}</span>`}${dueTag(t)}${repTag(t)}${t.note?`<span class="pill warn">${esc(t.note)}</span>`:""}</div>${t.desc?`<div class="tdesc">${esc(t.desc)}</div>`:""}</div>
+      <div class="actions">${t.school?`<span class="tok num">${cI("e")}${t.tokens}</span>`:tok(t.tokens)}<button class="btn okb sm" data-act="done" data-id="${t.id}">${t.needPhoto?"📷 ¡Lo hice!":"¡Lo hice!"}</button></div></div>`).join("")
       :`<div class="empty">No tienes deberes pendientes. Tu mascota está orgullosa.</div>`}</div></section>
-  ${rev.length?`<section><div class="sechead"><h2>En revisión</h2><p>Cuando los aprueben, recibes las fichas</p></div><div class="list">${rev.map(t=>`<div class="item"><span class="cat ${t.cat}"></span><div class="body"><div class="t">${esc(t.title)}</div><div class="meta"><span class="pill warn">Esperando aprobación</span></div></div><div class="actions">${proofThumb(t)}${tok(t.tokens)}</div></div>`).join("")}</div></section>`:""}`;
+  ${rev.length?`<section><div class="sechead"><h2>En revisión</h2><p>Cuando los aprueben, recibes las fichas</p></div><div class="list">${rev.map(t=>`<div class="item"><span class="cat ${t.cat}"></span><div class="body"><div class="t">${esc(t.title)}</div><div class="meta"><span class="pill warn">${t.school?"Esperando a tu docente":"Esperando aprobación"}</span></div></div><div class="actions">${proofThumb(t)}${t.school?`<span class="tok num">${cI("e")}${t.tokens}</span>`:tok(t.tokens)}</div></div>`).join("")}</div></section>`:""}`;
 }
 function payBtns(k,kidId,w,price,m,block,blockLbl){if(block)return `<span class="pill plain">${blockLbl}</span>`;
   return `<div class="pay"><button class="btn coinb sm" data-act="buy" data-k="${k}" data-id="${kidId}" data-w="${w}" data-cur="f" ${m.wallet<price?"disabled":""} aria-label="Comprar con ${price} fichas">${cI("f")}${price}</button><button class="btn monb sm" data-act="buy" data-k="${k}" data-id="${kidId}" data-w="${w}" data-cur="m" ${m.mon<price*RATE?"disabled":""} aria-label="Comprar con ${price*RATE} monedas">${cI("m")}${price*RATE}</button></div>`}
-function kTienda(kidId,m){
-  const p=S.pets[kidId], own=new Set(p.owned||[]), eq=p.equip||{}, lvl=p.house||1, cap=HOUSES[lvl-1].cap, nf=FURN.filter(f=>own.has(f.id)).length;
-  const wear=WEAR.map(w=>{const has=own.has(w.id),on=eq[w.slot]===w.id;
-    return `<div class="prod ${has?"owned":""}"><canvas width="128" height="96" data-paint="wear:${w.id}:${kidId}"></canvas><div class="t">${w.n}</div><div class="row2">${has?`<span class="pill ok">Es tuyo</span><button class="btn sm ${on?"ghost":""}" data-act="equip" data-id="${kidId}" data-w="${w.id}">${on?"Quitar":"Ponérselo"}</button>`
-      :payBtns("wear",kidId,w.id,w.p,m)}</div></div>`}).join("");
-  const furn=FURN.map(f=>{const has=own.has(f.id);
-    return `<div class="prod ${has?"owned":""}"><canvas width="128" height="120" data-paint="furn:${f.id}"></canvas><div class="t">${f.n}</div><div class="row2">${has?`<span class="pill ok">En tu casa</span>`
-      :payBtns("furn",kidId,f.id,f.p,m,nf>=cap,"Sin espacio: amplía tu casa")}</div></div>`}).join("");
-  const next=HOUSES[lvl];
-  const walls=WALLS.map(w=>{const has=w.p===0||own.has("wall-"+w.id),on=(p.wall||"celeste")===w.id;
-    return `<div class="prod ${has?"owned":""}"><canvas width="128" height="120" data-paint="wall:${w.id}"></canvas><div class="t">${w.n}</div><div class="row2">${has?(on?`<span class="pill ok">Puesta</span>`:`<button class="btn sm" data-act="setwall" data-id="${kidId}" data-w="${w.id}">Usar</button>`)
-      :payBtns("wall",kidId,w.id,w.p,m)}</div></div>`}).join("");
-  return `<section><div class="sechead"><h2>Ropa y accesorios</h2><p>${tok(m.wallet)} fichas · ${mon(m.mon)} monedas</p></div>
-  <div class="curnote">Paga con <b>fichas</b> (de tus deberes) o con <b>monedas</b> (de explorar). Una ficha vale ${RATE} monedas.</div><div class="shop">${wear}</div></section>
-  <section><div class="sechead"><h2>Casa</h2><p>${HOUSES[lvl-1].n} · ${nf} de ${cap} muebles</p></div>
-    ${next?`<div class="prod"><canvas width="128" height="120" data-paint="house:${next.l}:${kidId}"></canvas><div class="t">Mudarse a: ${next.n}</div><p class="muted" style="font-size:.85rem">Espacio para ${next.cap} muebles y piso nuevo.</p><div class="row2">${payBtns("house",kidId,next.l,next.p,m)}</div></div>`
-    :`<div class="empty">Ya tienes la casa más grande.</div>`}</section>
-  <section><h2>Muebles</h2><div class="shop">${furn}</div></section>
-  <section><h2>Paredes</h2><div class="shop">${walls}</div></section>`;
-}
 function kMetas(kidId,m,xi,asParent){
   const goals=arr("goals").filter(g=>g.kidId===kidId&&g.status!=="entregada").sort((a,b)=>a.cost-b.cost);
   const doneG=arr("goals").filter(g=>g.kidId===kidId&&g.status==="entregada");
@@ -1658,33 +1999,104 @@ function kRegistro(kidId,m){
   const list=arr("ledger").filter(l=>l.kidId===kidId).sort((a,b)=>b.createdAt-a.createdAt).slice(0,80);
   return `<section><div class="sechead"><h2>Registro de fichas</h2></div>
     <div class="goal"><div class="top"><span>Ganadas (deberes y bonos)</span><b class="num">${m.earned}</b></div><div class="top"><span>Gastadas en la mascota</span><b class="num">−${m.pet}</b></div>
-    <div class="top"><span>Metas entregadas</span><b class="num">−${m.metas}</b></div><div class="top"><span>Saldo de fichas</span>${tok(m.wallet)}</div></div>
+    <div class="top"><span>Metas entregadas</span><b class="num">−${m.metas}</b></div><div class="top"><span>Saldo de fichas</span>${tok(m.wallet)}</div>
+    ${m.school?`<div class="top"><span>Fichas de colegio (ya incluidas: valen ${m.conv} en casa)</span><span class="tok num">${cI("e")}${m.school}</span></div>`:""}</div>
     <div class="goal"><div class="top"><span>Monedas ganadas explorando</span><b class="num">${m.game}</b></div><div class="top"><span>Monedas gastadas</span><b class="num">−${m.monSpent}</b></div><div class="top"><span>Saldo de monedas</span>${mon(m.mon)}</div></div>${ledgerRows(list,false)}</section>`;
 }
 
+/* ================= Perfil docente ================= */
+let TS_=null, tTab="grupos", tBusy=false;
+async function tLoad(){if(!role||role.r!=="teacher"||tBusy)return;tBusy=true;try{const j=await api("teacher/state?t="+role.id);const ch=JSON.stringify(j)!==JSON.stringify(TS_);TS_=j;offline(false);if(ch&&!/INPUT|SELECT|TEXTAREA/.test((document.activeElement||{}).tagName||""))render()}
+  catch(e){if(e.status===404){role=null;saveRole();TS_=null;render();toast("Este perfil de docente ya no existe.")}else offline(true)}finally{tBusy=false}}
+setInterval(()=>{if(document.visibilityState==="visible"&&role&&role.r==="teacher")tLoad()},6000);
+async function tApi(path,payload,okMsg){try{const j=await api(path,{teacher:role.id,...payload});if(okMsg)toast(okMsg);await tLoad();render();return j}catch(e){toast(e.code==="nocode"?"No encontramos ese código. Pídele al papá o mamá el código del celular de su hijo (Zona de padres → Colegio).":"No se pudo. Revisa tu internet.");throw e}}
+const ST_PILL={pendiente:'<span class="pill warn">Esperando permiso del padre</span>',ok:'<span class="pill ok">Vinculado</span>',rechazado:'<span class="pill bad">El padre no lo aprobó</span>',retirado:'<span class="pill plain">Retirado por el padre</span>'};
+const TK_PILL={pendiente:'<span class="pill plain">Por hacer</span>',revision:'<span class="pill warn">Entregada · por revisar</span>',aprobada:'<span class="pill ok">Aprobada</span>',borrada:'<span class="pill plain">Retirada</span>'};
+function teacherScreen(){
+  const T=TS_;if(!T)return '<p class="muted">Cargando…</p>';
+  const groups=Object.entries(T.groups||{}).sort((a,b)=>a[1].created-b[1].created), assigns=Object.entries(T.assigns||{}).sort((a,b)=>b[1].created-a[1].created);
+  const toRev=assigns.flatMap(([aid,a])=>a.rows.filter(r=>r.status==="revision").map(r=>({aid,a,r})));
+  const tabs=[["grupos","Grupos"],["tareas","Tareas"],["revisar","Revisar",toRev.length],["ajustes","Ajustes"]];
+  let body="";
+  if(tTab==="grupos")body=`<form class="form" data-form="tgroup"><h2>Crear grupo</h2><p class="muted" style="font-size:.88rem">Por ejemplo: <b>Literatura 4.º B</b>. Después agregas a cada estudiante con el código de su celular.</p>
+      <div class="row"><label class="f">Nombre del grupo<input id="tg-name" maxlength="40" required placeholder="Literatura 4.º B"></label></div><div><button class="btn" type="submit">Crear grupo</button></div></form>
+    ${groups.length?groups.map(([gid,g])=>{const ok=g.students.filter(s=>s.status==="ok").length,pe=g.students.filter(s=>s.status==="pendiente").length;
+      return `<section class="form"><div class="sechead"><h2>${esc(g.name)}</h2><p>${ok} vinculado${ok===1?"":"s"}${pe?` · ${pe} esperando permiso`:""}</p></div>
+      <form data-form="tstudent" data-g="${gid}" style="display:flex;gap:6px;flex-wrap:wrap"><input id="ts-code-${gid}" inputmode="numeric" maxlength="6" pattern="[0-9]{6}" required placeholder="Código del estudiante (6 dígitos)" style="flex:1;min-width:180px" aria-label="Código del estudiante"><button class="btn sm" type="submit">Agregar estudiante</button></form>
+      <p class="muted" style="font-size:.82rem">El padre o la madre recibe una solicitud y debe aprobarla. Hasta entonces el estudiante no recibe tus tareas.</p>
+      <div class="list">${g.students.length?g.students.sort((a,b)=>String(a.name).localeCompare(b.name)).map(s=>`<div class="item"><span class="av" style="background:#7C5CFF">${esc((s.name||"?")[0].toUpperCase())}</span><div class="body"><div class="t">${esc(s.name)}</div><div class="meta">${ST_PILL[s.status]||""}</div></div>
+        <div class="actions"><button class="x" data-act="tsrm" data-g="${gid}" data-k="${s.kidId}" aria-label="Quitar del grupo">Quitar</button></div></div>`).join(""):'<div class="empty">Aún no hay estudiantes en este grupo.</div>'}</div>
+      <div><button class="x" data-act="tgdel" data-g="${gid}">Borrar grupo</button></div></section>`}).join(""):'<div class="empty">Crea tu primer grupo para empezar.</div>'}`;
+  if(tTab==="tareas")body=groups.length?`<form class="form" data-form="tassign"><h2>Asignar tarea al grupo</h2>
+      <div class="row"><label class="f">Grupo<select id="ta-g">${groups.map(([gid,g])=>`<option value="${gid}">${esc(g.name)}</option>`).join("")}</select></label>
+        <label class="f">Fichas de colegio<input id="ta-tok" type="number" min="1" max="500" value="10" required></label>
+        <label class="f">Fecha de entrega<input id="ta-due" type="date" value="${addDays(today(),2)}"></label></div>
+      <label class="f">Tarea<input id="ta-title" maxlength="80" required placeholder="Ej: Leer el capítulo 3 de El Principito"></label>
+      <label class="f">Instrucciones (opcional)<textarea id="ta-desc" maxlength="400" rows="3" placeholder="Qué deben hacer y cómo entregarlo"></textarea></label>
+      <label class="toggle"><input id="ta-photo" type="checkbox" checked><span>Pedir foto como prueba (la ven el docente y los padres)</span></label>
+      <div><button class="btn" type="submit">Enviar a todo el grupo</button></div></form>
+    <section><div class="sechead"><h2>Tareas enviadas</h2><p>${assigns.length}</p></div>${assigns.length?assigns.map(([aid,a])=>{const n=a.rows.length,c=k=>a.rows.filter(r=>r.status===k).length,g=T.groups[a.gid];
+      return `<details class="form tdet"><summary><div><b>${esc(a.title)}</b><div class="meta"><span>${esc(g?g.name:"Grupo borrado")}</span>${a.due?`<span>Entrega: ${fmtDate(a.due)}</span>`:""}<span class="tok num">${cI("e")}${a.tokens}</span></div></div>
+        <div class="tprog"><span class="pill ok">${c("aprobada")} aprobadas</span><span class="pill warn">${c("revision")} por revisar</span><span class="pill plain">${c("pendiente")} de ${n} por hacer</span></div></summary>
+        ${a.desc?`<p class="muted" style="font-size:.88rem;white-space:pre-wrap">${esc(a.desc)}</p>`:""}
+        <div class="list">${a.rows.map(r=>`<div class="item"><span class="av" style="background:#2F8FE8">${esc((r.name||"?")[0].toUpperCase())}</span><div class="body"><div class="t">${esc(r.name)}</div><div class="meta">${TK_PILL[r.status]||""}${r.doneAt?`<span>${fmtTs(r.doneAt)}</span>`:""}</div></div>
+          <div class="actions">${r.photo?`<button class="thumb" data-act="viewphoto" data-src="${esc(`/api/teacher/photo?t=${role.id}&a=${aid}&k=${r.kidId}`)}" aria-label="Ver foto"><img src="/api/teacher/photo?t=${role.id}&a=${aid}&k=${r.kidId}" alt="Foto de la tarea"></button>`:""}${r.status==="revision"?`<button class="btn ghost sm" data-act="trev" data-a="${aid}" data-k="${r.kidId}" data-v="0">Devolver</button><button class="btn okb sm" data-act="trev" data-a="${aid}" data-k="${r.kidId}" data-v="1">Aprobar</button>`:""}</div></div>`).join("")||'<div class="empty">Ningún estudiante vinculado la recibió.</div>'}</div>
+        <div><button class="x" data-act="tadel" data-a="${aid}">Retirar tarea</button></div></details>`}).join(""):'<div class="empty">Aún no has enviado tareas.</div>'}</section>`
+    :'<div class="empty">Primero crea un grupo en la pestaña <b>Grupos</b>.</div>';
+  if(tTab==="revisar")body=`<section><div class="sechead"><h2>Entregas por revisar</h2><p>Al aprobar, el estudiante recibe sus fichas de colegio</p></div>
+    <div class="list">${toRev.length?toRev.map(({aid,a,r})=>`<div class="item"><span class="cat escuela"></span><div class="body"><div class="t">${esc(a.title)}</div><div class="meta"><b>${esc(r.name)}</b><span>${esc((T.groups[a.gid]||{}).name||"")}</span>${r.doneAt?`<span>${fmtTs(r.doneAt)}</span>`:""}</div></div>
+      <div class="actions">${r.photo?`<button class="thumb" data-act="viewphoto" data-src="${esc(`/api/teacher/photo?t=${role.id}&a=${aid}&k=${r.kidId}`)}" aria-label="Ver foto"><img src="/api/teacher/photo?t=${role.id}&a=${aid}&k=${r.kidId}" alt="Foto de la tarea"></button>`:a.needPhoto?'<span class="pill plain">Sin foto</span>':""}<span class="tok num">${cI("e")}${a.tokens}</span>
+      <button class="btn ghost sm" data-act="trev" data-a="${aid}" data-k="${r.kidId}" data-v="0">Devolver</button><button class="btn okb sm" data-act="trev" data-a="${aid}" data-k="${r.kidId}" data-v="1">Aprobar</button></div></div>`).join(""):'<div class="empty">Nada por revisar. Cuando un estudiante entregue una tarea, aparece aquí con su foto.</div>'}</div></section>`;
+  if(tTab==="ajustes")body=`<div class="form"><h2>Tu código de docente</h2><p class="muted">Para usar este perfil en otro celular o computador: elige <b>Soy docente → Ya tengo perfil</b> y escribe este código con tu PIN.</p><div class="px bigcode sm">${esc(role.id)}</div><button class="btn ghost sm" type="button" data-act="copyteacher">Copiar código</button></div>
+    <div class="form"><h2>Privacidad de los estudiantes</h2><p class="muted">Solo ves el nombre de cada estudiante, las tareas que tú asignas y las fotos de esas tareas. No ves su mascota, sus chats, sus metas ni nada más de su perfil. Cada padre o madre decide si su hijo entra a tu grupo y puede retirarlo cuando quiera.</p></div>
+    <div class="form"><h2>Fichas de colegio</h2><p class="muted">Las fichas que das son <b>fichas de colegio</b>. Cada familia decide cuánto valen en su casa para las metas y premios.</p></div>`;
+  return `<div class="pnav"><button class="btn ghost sm" data-act="logout">← Menú principal</button><span class="muted" style="font-size:.85rem;margin-left:auto">Docente · ${esc(T.name)}</span></div>
+  <nav class="tabs" aria-label="Secciones">${tabs.map(([k,l,n])=>`<button data-act="ttab" data-v="${k}" aria-pressed="${tTab===k}">${l}${n?`<span class="badge">${n}</span>`:""}</button>`).join("")}</nav>${body}`;
+}
+/* ---- padres: colegio ---- */
+const schoolLinks=()=>Object.entries(S.school||{}).map(([id,v])=>({id,...v})).filter(l=>S.kids[l.kidId]);
+function pColegio(){
+  const kids=famKids();if(!kids.length)return needKids();
+  if(!remote)return `<div class="empty">El perfil de docente funciona en la app de Netlify, donde los celulares están conectados.</div>`;
+  const links=schoolLinks(), er=S.config.eRate??1;
+  return `${kids.map(k=>{const ls=links.filter(l=>l.kidId===k.id),m=money(k.id);
+    return `<section class="form"><div class="sechead"><h2>${esc(k.name)}</h2><p>Fichas de colegio: <span class="tok num">${cI("e")}${m.school}</span></p></div>
+      <p class="muted" style="font-size:.88rem">Para que un docente agregue a ${esc(k.name)} a su grupo, compártele este código en persona: <span class="code">${esc(k.code)}</span></p>
+      <div class="list">${ls.length?ls.map(l=>`<div class="item"><span class="cat escuela"></span><div class="body"><div class="t">${esc(l.gname)}</div><div class="meta"><span>${esc(l.tname)}</span>${l.status==="ok"?'<span class="pill ok">Aprobado</span>':'<span class="pill warn">Falta tu permiso</span>'}</div></div>
+        <div class="actions">${l.status==="ok"?`<button class="btn ghost sm" data-act="sdecide" data-id="${l.id}" data-v="remove">Retirar del grupo</button>`:`<button class="btn ghost sm" data-act="sdecide" data-id="${l.id}" data-v="reject">Rechazar</button><button class="btn okb sm" data-act="sdecide" data-id="${l.id}" data-v="approve">Aprobar</button>`}</div></div>`).join(""):'<div class="empty">No está en ningún grupo de colegio.</div>'}</div></section>`}).join("")}
+  <form class="form" data-form="erate"><h2>¿Cuánto valen las fichas de colegio en casa?</h2>
+    <p class="muted" style="font-size:.88rem">Los docentes dan <b>fichas de colegio</b> al aprobar tareas. Tú decides a cuántas fichas de premio equivale cada una para las metas y la mascota.</p>
+    <label class="f" style="max-width:320px">1 ficha de colegio =<select id="s-erate">${[[0,"0 (no cuentan en casa)"],[0.5,"½ ficha de premio"],[1,"1 ficha de premio"],[2,"2 fichas de premio"],[3,"3 fichas de premio"]].map(([v,l])=>`<option value="${v}" ${+er===v?"selected":""}>${l}</option>`).join("")}</select></label>
+    <div><button class="btn" type="submit">Guardar</button></div></form>
+  <p class="muted" style="font-size:.85rem">El docente solo ve el nombre de tu hijo, las tareas que asigna y sus fotos. No ve la mascota, los chats, las metas ni nada más del perfil.</p>`;
+}
 /* ---------- pantalla del padre ---------- */
 function parentScreen(){
-  const revCount=arr("tasks").filter(t=>t.status==="revision").length+arr("goals").filter(g=>g.status==="solicitada").length;
-  const tabs=[["familia","Familia"],["revisar","Revisar",revCount],["deberes","Deberes"],["metas","Metas"],["amigos","Amigos y chat",pendingApprovals()],["registro","Registro"],["ajustes","Ajustes"]];
-  const body={familia:pFamilia,revisar:pRevisar,deberes:pDeberes,metas:pMetas,amigos:pAmigos,registro:pRegistro,ajustes:pAjustes}[ptab]();
+  const sReq=schoolLinks().filter(l=>l.status==="pendiente").length;
+  const revCount=arr("tasks").filter(t=>t.status==="revision"&&!t.school).length+arr("goals").filter(g=>g.status==="solicitada").length+sReq;
+  const tabs=[["familia","Familia"],["revisar","Revisar",revCount],["deberes","Deberes"],["metas","Metas"],["colegio","Colegio",sReq],["amigos","Amigos y chat",pendingApprovals()],["registro","Registro"],["ajustes","Ajustes"]];
+  const body={familia:pFamilia,revisar:pRevisar,deberes:pDeberes,metas:pMetas,colegio:pColegio,amigos:pAmigos,registro:pRegistro,ajustes:pAjustes}[ptab]();
   const fk=role.fromKid&&S.kids[role.fromKid];
   return `<div class="pnav"><button class="btn ghost sm" data-act="logout">← Menú principal</button>${fk?`<button class="btn ghost sm" data-act="askkid" data-id="${role.fromKid}">Volver al Fichamigo de ${esc(fk.name)}</button>`:""}<span class="muted" style="font-size:.85rem;margin-left:auto">Zona de padres</span></div>
   <nav class="tabs" aria-label="Secciones">${tabs.map(([k,l,n])=>`<button data-act="ptab" data-v="${k}" aria-pressed="${ptab===k}">${l}${n?`<span class="badge">${n}</span>`:""}</button>`).join("")}</nav>${body}`;
 }
 const needKids=()=>`<div class="empty">Primero agrega los dispositivos de tus hijos en la pestaña <b>Familia</b>.</div>`;
 function miniBar(lbl,v){const cls=v<30?"low":v<60?"mid":"";return `<span>${lbl}</span><div class="bar ${cls}"><i style="width:${Math.round(v)}%"></i></div>`}
+function petPill(p,st){const mood=moodOf(st);return !p||!p.species?'<span class="pill plain">Sin elegir mascota</span>':st.egg?'<span class="pill plain">Huevo</span>':st.dead?'<span class="pill bad">Murió</span>':mood==="sick"?'<span class="pill bad">Enfermo</span>':mood==="hungry"?'<span class="pill warn">Con hambre</span>':mood==="dirty"?'<span class="pill warn">Sucio</span>':mood==="sad"?'<span class="pill warn">Aburrido</span>':'<span class="pill ok">Bien</span>'}
 function pFamilia(){
   const kids=famKids().sort((a,b)=>a.createdAt-b.createdAt);
   const cards=kids.map(k=>{const p=S.pets[k.id],st=calc(p),xi=xpInfo(k.id),m=money(k.id),mood=moodOf(st);
-    const pill=!p||!p.species?'<span class="pill plain">Sin elegir mascota</span>':st.egg?'<span class="pill plain">Huevo</span>':st.dead?'<span class="pill bad">Murió</span>':mood==="sick"?'<span class="pill bad">Enfermo</span>':mood==="hungry"?'<span class="pill warn">Con hambre</span>':mood==="dirty"?'<span class="pill warn">Sucio</span>':mood==="sad"?'<span class="pill warn">Aburrido</span>':'<span class="pill ok">Bien</span>';
+    const pill=petPill(p,st), extras=petsOf(k.id).slice(1).filter(o=>o.p.species), mp=k.maxPets||"auto";
     const goal=arr("goals").filter(g=>g.kidId===k.id&&g.status==="activa").sort((a,b)=>a.cost-b.cost)[0];
     return `<div class="kidcard" style="--kc:${esc(k.color)}"><canvas width="128" height="120" data-paint="mini:${k.id}" aria-label="Mascota de ${esc(k.name)}"></canvas>
     <div class="info"><div style="display:flex;justify-content:space-between;gap:6px;align-items:center;flex-wrap:wrap"><h3>${esc(k.name)}${k.age?` <span class="muted">· ${esc(k.age)} años</span>`:""}</h3>${pill}</div>
       <div class="meta">${p&&p.name?`<span>${esc(p.name)} · ${stageLabel(xi)}</span>`:""}<span>Fichas ${tok(m.wallet)}</span><span>Monedas ${mon(m.mon)}</span><span>Ganado en deberes ${m.earned}</span></div>
       ${st&&!st.egg&&!st.dead?`<div class="mini">${miniBar("Comida",st.h)}${miniBar("Ánimo",st.hp)}${miniBar("Limpieza",st.c)}</div>`:""}
+      ${extras.length?`<div class="meta">${extras.map(o=>`<span>${esc(o.p.name)} ${petPill(o.p,calc(o.p))}</span>`).join("")}</div>`:""}
       ${goal?`<div class="meta"><span>Meta: ${esc(goal.title)}</span><span class="num">${Math.min(m.goalPts,goal.cost)}/${goal.cost}</span></div>`:""}</div>
     <div class="foot"><span class="muted" style="font-size:.85rem">Dispositivo: <span class="code">${esc(k.code)}</span></span>
       <button class="btn sm" data-act="pview" data-id="${k.id}">Abrir su Fichamigo</button>
+      <label class="msel">Fichamigos<select data-maxpets="${k.id}" aria-label="Cuántos fichamigos puede tener ${esc(k.name)}"><option value="auto" ${mp==="auto"?"selected":""}>Por responsabilidad (${petSlots(k.id)})</option>${[1,2,3].map(n=>`<option value="${n}" ${String(mp)===String(n)?"selected":""}>${n}</option>`).join("")}</select></label>
       ${st&&st.dead?`<button class="btn coinb sm" data-act="revive" data-id="${k.id}">Revivir</button>`:""}
       <form data-form="bonus" data-id="${k.id}" style="display:flex;gap:6px"><input id="b-${k.id}" type="number" placeholder="± fichas" style="width:96px" aria-label="Bono o descuento para ${esc(k.name)}" required><button class="btn ghost sm" type="submit">Bono</button></form>
       <button class="x" data-act="delkid" data-id="${k.id}">Quitar</button></div></div>`}).join("");
@@ -1699,11 +2111,14 @@ function pFamilia(){
     <div><button class="btn" type="submit">Agregar a la familia</button></div></form>`;
 }
 function pRevisar(){
-  const rev=arr("tasks").filter(t=>t.status==="revision"), reqs=arr("goals").filter(g=>g.status==="solicitada");
-  return `<section><div class="sechead"><h2>Deberes por aprobar</h2><p>Al aprobar se pagan las fichas</p></div>
+  const rev=arr("tasks").filter(t=>t.status==="revision"&&!t.school), srev=arr("tasks").filter(t=>t.status==="revision"&&t.school), reqs=arr("goals").filter(g=>g.status==="solicitada"), sl=schoolLinks().filter(l=>l.status==="pendiente");
+  return `${sl.length?`<section><div class="sechead"><h2>Solicitudes del colegio</h2><p>Un docente quiere agregar a tu hijo a su grupo</p></div><div class="list">${sl.map(l=>`<div class="item"><span class="cat escuela"></span><div class="body"><div class="t">${esc(l.tname)} · ${esc(l.gname)}</div><div class="meta"><b>${kidName(l.kidId)}</b><span>Solo verá sus tareas de este grupo y las fotos de esas tareas</span></div></div>
+      <div class="actions"><button class="btn ghost sm" data-act="sdecide" data-id="${l.id}" data-v="reject">Rechazar</button><button class="btn okb sm" data-act="sdecide" data-id="${l.id}" data-v="approve">Aprobar</button></div></div>`).join("")}</div></section>`:""}
+  <section><div class="sechead"><h2>Deberes por aprobar</h2><p>Al aprobar se pagan las fichas</p></div>
     <div class="list">${rev.length?rev.map(t=>`<div class="item"><span class="cat ${t.cat}"></span><div class="body"><div class="t">${esc(t.title)}</div><div class="meta"><b>${kidName(t.kidId)}</b><span>${CATS[t.cat]||""}</span>${repTag(t)}</div></div>
       <div class="actions">${proofThumb(t)}${tok(t.tokens)}<button class="btn ghost sm" data-act="reject" data-id="${t.id}">Devolver</button><button class="btn okb sm" data-act="approve" data-id="${t.id}">Aprobar</button></div></div>`).join("")
       :`<div class="empty">Nada por revisar. Cuando un joven marque “¡Lo hice!”, aparece aquí.</div>`}</div></section>
+  ${srev.length?`<section><div class="sechead"><h2>Tareas del colegio entregadas</h2><p>Las revisa y aprueba el docente</p></div><div class="list">${srev.map(t=>`<div class="item"><span class="cat escuela"></span><div class="body"><div class="t">${esc(t.title)}</div><div class="meta"><b>${kidName(t.kidId)}</b><span>${esc(t.school.tname)} · ${esc(t.school.gname)}</span><span class="pill warn">Esperando al docente</span></div></div><div class="actions">${proofThumb(t)}<span class="tok num">${cI("e")}${t.tokens}</span></div></div>`).join("")}</div></section>`:""}
   <section><div class="sechead"><h2>Metas reclamadas</h2><p>Entrega el premio real</p></div>
     <div class="list">${reqs.length?reqs.map(g=>`<div class="item"><span class="coin" aria-hidden="true"></span><div class="body"><div class="t">${esc(g.title)}</div><div class="meta"><b>${kidName(g.kidId)}</b></div></div>
       <div class="actions">${tok(g.cost)}<button class="btn ghost sm" data-act="goalno" data-id="${g.id}">Aún no</button><button class="btn coinb sm" data-act="goalok" data-id="${g.id}">Entregada</button></div></div>`).join("")
@@ -1723,8 +2138,8 @@ function pDeberes(){
     <label class="toggle"><input id="t-photo" type="checkbox" checked><span>Pedir foto como prueba</span></label>
     <div><button class="btn" type="submit">Asignar</button></div></form>
   <section><div class="sechead"><h2>Deberes activos</h2><p>${all.length}</p></div><div class="list">${all.length?all.map(t=>`<div class="item"><span class="cat ${t.cat}"></span><div class="body"><div class="t">${esc(t.title)}</div>
-    <div class="meta"><b>${kidName(t.kidId)}</b>${dueTag(t)}${repTag(t)}${t.status==="revision"?'<span class="pill warn">En revisión</span>':'<span class="pill plain">Pendiente</span>'}</div></div>
-    <div class="actions">${tok(t.tokens)}${t.status==="pendiente"?`<button class="btn ghost sm" data-act="approve" data-id="${t.id}">Aprobar</button>`:""}<button class="x" data-act="deltask" data-id="${t.id}" aria-label="Borrar">✕</button></div></div>`).join(""):`<div class="empty">Sin deberes activos.</div>`}</div></section>`;
+    <div class="meta"><b>${kidName(t.kidId)}</b>${t.school?`<span class="pill plain">🏫 ${esc(t.school.tname)}</span>`:""}${dueTag(t)}${repTag(t)}${t.status==="revision"?'<span class="pill warn">En revisión</span>':'<span class="pill plain">Pendiente</span>'}</div></div>
+    <div class="actions">${t.school?`<span class="tok num">${cI("e")}${t.tokens}</span>`:`${tok(t.tokens)}${t.status==="pendiente"?`<button class="btn ghost sm" data-act="approve" data-id="${t.id}">Aprobar</button>`:""}<button class="x" data-act="deltask" data-id="${t.id}" aria-label="Borrar">✕</button>`}</div></div>`).join(""):`<div class="empty">Sin deberes activos.</div>`}</div></section>`;
 }
 function pMetas(){
   const kids=famKids();if(!kids.length)return needKids();
@@ -1786,6 +2201,20 @@ document.addEventListener("click",async e=>{
   if(a==="pview"){pview=id;ktab="deberes";foodOpen=false;menuOpen=false;window.scrollTo(0,0);render();return}
   if(a==="pback"){pview=null;menuOpen=false;foodOpen=false;render();return}
   if(a==="picksp"){pickSp=b.dataset.v;beep(990);render();return}
+  if(a==="ttab"){tTab=b.dataset.v;window.scrollTo(0,0);render();tLoad();return}
+  if(a==="copyteacher"){try{await navigator.clipboard.writeText(role.id);toast("Código copiado")}catch(e){toast("Código: "+role.id)}return}
+  if(a==="tgdel"||a==="tsrm"||a==="tadel"){if(!b.dataset.confirm){b.dataset.confirm="1";const old=b.textContent;b.textContent="¿Seguro? Toca otra vez";setTimeout(()=>{if(b.isConnected){delete b.dataset.confirm;b.textContent=old}},3500);return}
+    if(a==="tgdel")await tApi("teacher/group",{gid:b.dataset.g,del:true},"Grupo borrado");
+    if(a==="tsrm")await tApi("teacher/student/remove",{gid:b.dataset.g,kidId:b.dataset.k},"Estudiante retirado del grupo");
+    if(a==="tadel")await tApi("teacher/assign/delete",{aid:b.dataset.a},"Tarea retirada");return}
+  if(a==="trev"){const ok=b.dataset.v==="1";b.disabled=true;await tApi("teacher/review",{aid:b.dataset.a,kidId:b.dataset.k,ok},ok?"Aprobada: fichas de colegio enviadas":"Devuelta al estudiante");if(ok)tune([[523,.06],[784,.1]]);return}
+  if(a==="sdecide"){const v=b.dataset.v;if((v==="remove"||v==="reject")&&!b.dataset.confirm){b.dataset.confirm="1";b.textContent="¿Seguro?";setTimeout(()=>{if(b.isConnected)delete b.dataset.confirm},3000);return}
+    try{await api("school/decide",{family,pin:S.config.pin,linkId:id,action:v});toast(v==="approve"?"Aprobado: ya recibe las tareas de ese grupo":v==="reject"?"Solicitud rechazada":"Retirado del grupo");await poll(true)}catch(e){toast(e.code==="pin"?"El PIN no coincide.":"No se pudo. Revisa tu internet.")}return}
+  if(a==="selpet"){setSel(b.dataset.kid,id);walker=wk(id);petMenu=null;foodOpen=false;beep(990,.05);render();return}
+  if(a==="adopt"){const have=petsOf(id).map(o=>o.id);let n=2;while(have.includes(id+"~"+n))n++;if(n>3||n>petSlots(id))return;adoptFor={kid:id,id:id+"~"+n};pickSp=null;menuOpen=false;tune([[523,.06],[659,.06],[784,.1]]);render();return}
+  if(a==="adoptcancel"){adoptFor=null;pickSp=null;render();return}
+  if(["avg","avskin","avhair","avhc","avtop","avbot"].includes(a)&&avDraft){const v=b.dataset.v;if(a==="avg"){const keep=avDraft.g;avDraft={...avDraft,...(keep?{}:{...AV_DEF(v),skin:avDraft.skin,hc:avDraft.hc}),g:v}}else avDraft[{avskin:"skin",avhair:"hair",avhc:"hc",avtop:"top",avbot:"bottom"}[a]]=a==="avskin"?+v:v;beep(880,.04);render();return}
+  if(a==="avsave"&&avDraft&&avDraft.g){const {kid,...av}=avDraft;await petWrite(kid,()=>({avatar:{...av,shoes:av.shoes||"tenis"}}));avDraft=null;tune([[523,.07],[659,.07],[784,.07],[1046,.15]]);toast("¡Bienvenido a tu casa!");return}
   if(a==="explore"){startGame(id);return}
   if(a==="pwave"){worldTick("hola");G.dialog=null;G.waveT=performance.now();tune([[784,.06],[988,.08]]);toast("¡Saludaste!");render();return}
   if(a==="pfriend"){const op=G.dialog.op;G.dialog=null;render();try{const j=await api("friend/request",{family,kidId:G.kid,target:op.id});op.fr=j.st;tune([[523,.06],[659,.06],[784,.1]]);toast("Solicitud enviada. Tus papás y los de "+op.nick+" deben aprobarla.")}catch(e){toast("No se pudo enviar la solicitud.")}return}
@@ -1831,31 +2260,37 @@ document.addEventListener("click",async e=>{
   if(a==="newpet"){await put("pets",id,newPet());return}
 
   if(a==="feed"||a==="play"||a==="clean"||a==="feedmenu")wake();
-  if(a==="feed"){const f=FOODS.find(x=>x.id===b.dataset.f),m=money(id),cur=b.dataset.cur==="m"?"m":"f",cost=cur==="m"?f.p*RATE:f.p;
+  if(a==="feed"){const kid=kidOfPet(id),f=FOODS.find(x=>x.id===b.dataset.f),m=money(kid),cur=b.dataset.cur==="m"?"m":"f",cost=cur==="m"?f.p*RATE:f.p;
     if((cur==="m"?m.mon:m.wallet)<cost){toast(cur==="m"?"No te alcanzan las monedas.":"No te alcanzan las fichas.");return}
-    act={type:"eat",food:f.id,until:performance.now()+1800};tune([[523,.07],[659,.07],[784,.1]]);foodOpen=false;
-    await ledger(id,"compra",-cost,"Comida: "+f.n,null,cur);await petWrite(id,p=>({hunger:clamp(p.hunger+f.h),happy:clamp(p.happy+f.hp)}));addFx("heart",2);return}
-  if(a==="play"){act={type:"play",until:performance.now()+1600};tune([[784,.06],[988,.06],[1175,.08]]);addFx("heart",3);await petWrite(id,p=>({happy:clamp(p.happy+15)}));return}
-  if(a==="clean"){tune([[1046,.05],[1318,.05],[1568,.07]]);addFx("spark",5);await petWrite(id,()=>({clean:100}));toast("¡Todo limpio!");return}
-  if(a==="buy"){const k=b.dataset.k,w=b.dataset.w,m=money(id),p=S.pets[id];let item,price,label,patch;
-    if(k==="wear"){item=WEAR.find(x=>x.id===w);price=item.p;label="Ropa: "+item.n;patch=pp=>({owned:[...(pp.owned||[]),w],equip:{...(pp.equip||{}),[item.slot]:w}})}
+    foodOpen=false;petMenu=null;if(avOf(kid))humanDo("eat",id,f.id);else{act={type:"eat",food:f.id,pet:id,start:performance.now(),until:performance.now()+1800};taskFx("eat")}
+    await ledger(kid,"compra",-cost,"Comida: "+f.n,null,cur);await petWrite(id,p=>({hunger:clamp(p.hunger+f.h),happy:clamp(p.happy+f.hp)}));return}
+  if(a==="play"){const kid=kidOfPet(id);petMenu=null;if(avOf(kid))humanDo("play",id);else{act={type:"play",pet:id,start:performance.now(),until:performance.now()+1600};taskFx("play")}await petWrite(id,p=>({happy:clamp(p.happy+15)}));return}
+  if(a==="clean"){const kid=kidOfPet(id);petMenu=null;if(avOf(kid))humanDo("clean",id);else taskFx("clean");await petWrite(id,()=>({clean:100}));toast("¡Todo limpio!");return}
+  if(a==="buy"){const k=b.dataset.k,w=b.dataset.w,kid=kidOfPet(id),m=money(kid);let item,price,label,patch,petPatch=null;
+    if(k==="wear"){item=WEAR.find(x=>x.id===w);price=item.p;label="Ropa: "+item.n;patch=pp=>({owned:[...(pp.owned||[]),w]});petPatch=pp=>({equip:{...(pp.equip||{}),[item.slot]:w}})}
+    if(k==="tint"){item=TINTS.find(x=>x.id===w);price=item.p;label="Color: "+item.n;patch=pp=>({owned:[...(pp.owned||[]),"tint-"+w]});petPatch=()=>({tint:w})}
+    if(k==="av"){item=AVSEC.flatMap(([x])=>avItems(x)).find(i=>i.key===w);price=item.p;label="Estilo: "+item.n;patch=pp=>({aOwned:[...new Set([...(pp.aOwned||[]),w])],avatar:item.apply(pp.avatar||AV_DEF("nino"))})}
     if(k==="furn"){item=FURN.find(x=>x.id===w);price=item.p;label="Mueble: "+item.n;patch=pp=>({owned:[...(pp.owned||[]),w]})}
     if(k==="wall"){item=WALLS.find(x=>x.id===w);price=item.p;label="Pared: "+item.n;patch=pp=>({owned:[...(pp.owned||[]),"wall-"+w],wall:w})}
     if(k==="house"){item=HOUSES[+w-1];price=item.p;label="Casa: "+item.n;patch=()=>({house:+w})}
     const cur=b.dataset.cur==="m"?"m":"f",cost=cur==="m"?price*RATE:price;
     if((cur==="m"?m.mon:m.wallet)<cost){toast(cur==="m"?"No te alcanzan las monedas.":"No te alcanzan las fichas.");return}
-    tune([[660,.06],[880,.06],[1320,.1]]);await ledger(id,"compra",-cost,label,null,cur);await petWrite(id,patch);toast("¡Comprado!");return}
+    tune([[660,.06],[880,.06],[1320,.1]]);await ledger(kid,"compra",-cost,label,null,cur);await petWrite(kid,patch);if(petPatch)await petWrite(id,petPatch);toast("¡Comprado!");return}
+  if(a==="settint"){const w=b.dataset.w,own=new Set((S.pets[kidOfPet(id)]||{}).owned||[]);if(w&&!own.has("tint-"+w))return;beep(880);await petWrite(id,()=>({tint:w||null}));return}
+  if(a==="avuse"){const it=AVSEC.flatMap(([x])=>avItems(x)).find(i=>i.key===b.dataset.v),mp=S.pets[id];if(!it||!mp)return;if(it.p&&!(mp.aOwned||[]).includes(it.key))return;beep(880);await petWrite(id,pp=>({avatar:it.apply(pp.avatar||AV_DEF("nino"))}));return}
+  if(a==="avoff"){beep(700);await petWrite(id,pp=>{const av={...(pp.avatar||AV_DEF("nino"))};delete av[b.dataset.v];return {avatar:av}});return}
+  if(a==="avskinset"){beep(880);await petWrite(id,pp=>({avatar:{...(pp.avatar||AV_DEF("nino")),skin:+b.dataset.v}}));return}
+  if(a==="avgset"){beep(880);await petWrite(id,pp=>({avatar:{...(pp.avatar||AV_DEF("nino")),g:b.dataset.v}}));return}
   if(a==="equip"){const w=WEAR.find(x=>x.id===b.dataset.w);beep(880);await petWrite(id,p=>{const eq={...(p.equip||{})};if(eq[w.slot]===w.id)delete eq[w.slot];else eq[w.slot]=w.id;return {equip:eq}});return}
   if(a==="setwall"){beep(880);await petWrite(id,()=>({wall:b.dataset.w}));return}
-  if(a==="newegg"){const p=S.pets[id];await put("pets",id,{...p,bornAt:Date.now(),hatchedAt:null,hunger:80,happy:80,clean:100,at:Date.now(),gen:(p.gen||1)+1});toast("Un huevo nuevo te espera.");return}
+  if(a==="newegg"){const p=S.pets[id];await put("pets",id,{...p,tint:p.tint||null,bornAt:Date.now(),hatchedAt:null,hunger:80,happy:80,clean:100,at:Date.now(),gen:(p.gen||1)+1});toast("Un huevo nuevo te espera.");return}
   if(a==="revive"){await petWrite(id,()=>({hunger:60,happy:50,clean:80,at:Date.now()}));toast("¡Revivió!");return}
 
   if(a==="done"&&S.tasks[id]&&S.tasks[id].needPhoto){photoTask=id;const inp=document.getElementById("photoin");inp.value="";inp.click();return}
   if(a==="done"){tune([[523,.06],[784,.1]]);await put("tasks",id,{...S.tasks[id],status:"revision",doneAt:Date.now(),note:""});toast("¡Bien! Enviado para aprobación.");return}
   if(a==="approve"){const t=S.tasks[id];await put("tasks",id,{...t,status:"aprobada",approvedAt:Date.now(),note:""});
     await ledger(t.kidId,"tarea",+t.tokens,t.title,t.cat);
-    const p=S.pets[t.kidId];
-    if(p){if(!p.hatchedAt)await put("pets",t.kidId,{...p,hatchedAt:Date.now(),hunger:85,happy:90,clean:100,at:Date.now()});else await petWrite(t.kidId,pp=>({happy:clamp(pp.happy+15)}))}
+    for(const o of petsOf(t.kidId)){const p=o.p;if(!p.species)continue;if(!p.hatchedAt)await put("pets",o.id,{...p,hatchedAt:Date.now(),hunger:85,happy:90,clean:100,at:Date.now()});else await petWrite(o.id,pp=>({happy:clamp(pp.happy+15)}))}
     if(t.repeat&&t.repeat!=="none"){const base=t.due&&t.due>=today()?t.due:today();await put("tasks",uid(),{...t,status:"pendiente",note:"",doneAt:null,approvedAt:null,createdAt:Date.now(),due:addDays(base,t.repeat==="daily"?1:7)})}
     toast(`+${t.tokens} fichas para ${S.kids[t.kidId]?.name||"el joven"}`);return}
   if(a==="reject"){await put("tasks",id,{...S.tasks[id],status:"pendiente",proof:null,note:"Devuelto: revísalo"});return}
@@ -1864,13 +2299,14 @@ document.addEventListener("click",async e=>{
   if(a==="goalok"){const g=S.goals[id];await put("goals",id,{...g,status:"entregada",deliveredAt:Date.now()});await ledger(g.kidId,"meta",-g.cost,"Meta: "+g.title);toast("Meta entregada");return}
   if(a==="goalno"){await put("goals",id,{...S.goals[id],status:"activa"});return}
   if(a==="delgoal"){await del("goals",id);return}
-  if(a==="delkid"){if(b.dataset.confirm){if(devKid===id)setDevKid(null);await del("kids",id);await del("pets",id);return}b.dataset.confirm="1";b.textContent="¿Seguro? Toca otra vez";b.style.color="var(--bad)";
+  if(a==="delkid"){if(b.dataset.confirm){if(devKid===id)setDevKid(null);for(const o of petsOf(id).reverse())await del("pets",o.id);await del("kids",id);return}b.dataset.confirm="1";b.textContent="¿Seguro? Toca otra vez";b.style.color="var(--bad)";
     setTimeout(()=>{if(b.isConnected){delete b.dataset.confirm;b.textContent="Quitar";b.style.color=""}},3500);return}
   }catch(err){}
 });
 document.addEventListener("change",e=>{if(e.target.id==="photoin"&&e.target.files&&e.target.files[0])sendProof(e.target.files[0])});
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&(menuOpen||foodOpen||petMenu)){menuOpen=false;foodOpen=false;petMenu=null;render()}});
 document.addEventListener("change",e=>{if(e.target.id==="regkid"){regKid=e.target.value;render()}});
+document.addEventListener("change",async e=>{const id=e.target.dataset&&e.target.dataset.maxpets;if(!id||!S.kids[id])return;await put("kids",id,{...S.kids[id],maxPets:e.target.value});toast("Guardado")});
 document.addEventListener("submit",async e=>{
   const f=e.target.closest("[data-form]");if(!f)return;e.preventDefault();
   const k=f.dataset.form,v=id=>document.getElementById(id).value.trim();
@@ -1888,6 +2324,15 @@ document.addEventListener("submit",async e=>{
     catch(e){toast(e.code==="nocode"?"No encontramos ese código.":e.code==="samefamily"?"Ese código es de alguien de tu misma familia.":"No se pudo enviar.")}return}
   if(k==="ksocial"){const kid=f.dataset.kid;await put("kids",kid,{...S.kids[kid],nick:v("ks-nick-"+kid).slice(0,16),social:{world:document.getElementById("ks-world-"+kid).checked,chat:document.getElementById("ks-chat-"+kid).checked}});
     await syncProfile(kid,true);toast("Guardado");return}
+  if(k==="tcreate"){const pin=v("tc-pin");if(!/^\d{4}$/.test(pin)){toast("El PIN debe tener 4 dígitos.");return}
+    try{const j=await api("teacher",{name:v("tc-name"),pin});role={r:"teacher",id:j.teacher,name:j.name};saveRole();wstep=null;tTab="grupos";TS_=null;tune([[660,.06],[990,.1]]);toast("¡Perfil de docente creado!");render();tLoad()}catch(e){toast("No se pudo crear. Revisa tu internet.")}return}
+  if(k==="tjoin"){try{const j=await api("teacher/join",{teacher:v("tj-code").toLowerCase().replace(/\s/g,""),pin:v("tj-pin")});role={r:"teacher",id:j.teacher,name:j.name};saveRole();wstep=null;tTab="grupos";TS_=null;render();tLoad();toast("Conectado")}
+    catch(e){toast(e.code==="pin"?"PIN incorrecto.":e.code==="notfound"?"No encontramos ese código de docente.":"No se pudo conectar.")}return}
+  if(k==="tgroup"){await tApi("teacher/group",{name:v("tg-name")},"Grupo creado");return}
+  if(k==="tstudent"){const g=f.dataset.g,inp=document.getElementById("ts-code-"+g);try{const j=await tApi("teacher/student",{gid:g,code:inp.value.trim()});inp.value="";toast(j.status==="ok"?`${j.name} ya está en el grupo`:`Solicitud enviada a los padres de ${j.name}`)}catch(e){}return}
+  if(k==="tassign"){try{const j=await tApi("teacher/assign",{gid:v("ta-g"),title:v("ta-title"),desc:document.getElementById("ta-desc").value,tokens:v("ta-tok"),due:v("ta-due"),needPhoto:document.getElementById("ta-photo").checked});
+    document.getElementById("ta-title").value="";document.getElementById("ta-desc").value="";toast(j.sent?`Tarea enviada a ${j.sent} estudiante${j.sent===1?"":"s"}`:"Tarea creada. Llegará a cada estudiante cuando sus padres aprueben la vinculación.")}catch(e){}return}
+  if(k==="erate"){await setConfig({eRate:+v("s-erate")});toast("Guardado");return}
   if(k==="fcreate"){const p=v("pin");if(!/^\d{4}$/.test(p)){toast("El PIN debe tener 4 dígitos.");return}
     try{const j=await api("family",{pin:p});setFamily(j.family);applyState(j.state);role={r:"parent"};saveRole();wstep=null;ptab="familia";tune([[660,.06],[990,.1]]);toast("¡Familia creada!");render()}catch(e){toast("No se pudo crear. Revisa tu internet.")}return}
   if(k==="fjoin"){try{const j=await api("join",{family:v("fj-code").toLowerCase().replace(/\s/g,""),pin:v("fj-pin")});setFamily(j.family);applyState(j.state);role={r:"parent"};saveRole();wstep=null;ptab="familia";tune([[660,.06],[990,.1]]);toast("Celular conectado a tu familia");render()}
@@ -1899,7 +2344,10 @@ document.addEventListener("submit",async e=>{
     role={r:"kid",id};setDevKid(id);saveRole();wstep=null;ktab="deberes";tune([[523,.06],[784,.06],[1046,.1]]);render();return}
   if(k==="recover"){if(v("rc-pin")!==S.config.pin){toast("PIN incorrecto");document.getElementById("rc-pin").value="";beep(180,.2);return}
     role={r:"kid",id:wkid};setDevKid(wkid);saveRole();wstep=null;menuOpen=false;ktab="deberes";tune([[523,.06],[784,.1]]);render();return}
-  if(k==="species"){const id=f.dataset.id;if(!pickSp)return;await petWrite(id,()=>({species:pickSp,name:v("petname")}));pickSp=null;tune([[392,.08],[523,.08],[659,.08],[784,.14]]);return}
+  if(k==="species"){const id=f.dataset.id,kid=f.dataset.kid||id;if(!pickSp)return;
+    if(S.pets[id])await petWrite(id,()=>({species:pickSp,name:v("petname")}));
+    else{const now=Date.now();await put("pets",id,{kidId:kid,slot:+id.split("~")[1]||1,bornAt:now,hatchedAt:null,species:pickSp,name:v("petname"),hunger:80,happy:80,clean:100,at:now,equip:{},gen:1});setSel(kid,id);toast("¡Tu nuevo huevo llegó! Nace con tu próximo deber aprobado.")}
+    adoptFor=null;pickSp=null;tune([[392,.08],[523,.08],[659,.08],[784,.14]]);return}
   if(k==="link"&&remote){const c=v("l-code");try{const j=await api("link",{family,pin:S.config.pin,code:c});document.getElementById("l-code").value="";tune([[523,.06],[784,.1]]);toast(`${j.name} se unió a la familia`);await poll(true)}
     catch(e){beep(180,.2);toast(e.code==="nocode"?"No encontramos ese código. Revísalo en el celular del joven.":e.code==="taken"?"Ese código ya está en otra familia.":e.code==="pin"?"El PIN no coincide.":"No se pudo agregar. Revisa tu internet.")}return}
   if(k==="link"){const c=v("l-code"),kid=arr("kids").find(x=>String(x.code)===c);

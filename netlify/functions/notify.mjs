@@ -24,11 +24,13 @@ export default async () => {
       if (!subs.length) continue;
       const tz = subs[0].tz, hour = localHour(tz, now);
       if (hour >= 21 || hour < 7) continue; // de noche no molestamos
-      const pet = st.pets?.[kidId], s = petNow(pet, now), name = pet?.name || "Tu mascota";
       const mem = rec.sent[kidId] = rec.sent[kidId] || {};
+      const pets = Object.entries(st.pets || {}).filter(([id, p]) => id === kidId || p.kidId === kidId);
+      for (const [petId, pet] of pets) {
+      const s = petNow(pet, now), name = pet?.name || "Tu fichamigo", pm = petId === kidId ? mem : (mem[petId] = mem[petId] || {});
       const send = async (kind, coolH, title, body, tag) => {
-        if (mem[kind] && now - mem[kind] < coolH * H) return;
-        if (await pushTo(push, family, toKid(kidId), { title, body, tag, url: "/" })) { mem[kind] = now; changed = true; }
+        if (pm[kind] && now - pm[kind] < coolH * H) return;
+        if (await pushTo(push, family, toKid(kidId), { title, body, tag: tag + "-" + petId, url: "/" })) { pm[kind] = now; changed = true; }
       };
       if (s) {
         if (s.h <= 20) await send("starving", 3, `¡${name} se muere de hambre!`, "Dale de comer ya. Si pasa mucho tiempo sin comer se puede enfermar.", "hambre");
@@ -36,6 +38,7 @@ export default async () => {
         if (s.hp < 25) await send("sad", 5, `${name} está triste`, "Hace rato nadie juega con él. Tócalo, juega o sal a explorar.", "animo");
         else if (s.hp < 50) await send("bored", 6, `${name} está aburrido`, "¿Le enseñas un truco o salen a explorar?", "animo");
         if (s.c < 30) await send("dirty", 6, `La casa de ${name} está sucia`, "Toca Limpiar para dejarla brillante.", "limpieza");
+      }
       }
       // Recordatorio de deberes: una vez al día, a partir de las 3 p. m.
       const pend = Object.values(st.tasks || {}).filter(t => t.kidId === kidId && t.status === "pendiente");

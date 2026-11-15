@@ -1,5 +1,5 @@
 import { getStore } from "@netlify/blobs";
-import { vapid, pushTo, toKid, toParents } from "../lib/push.mjs";
+import { vapid, pushTo, toKid, toParents, petNow } from "../lib/push.mjs";
 
 const J = (o, s = 200) => new Response(JSON.stringify(o), { status: s, headers: { "content-type": "application/json", "cache-control": "no-store" } });
 const ALPHA = "abcdefghjkmnpqrstuvwxyz23456789";
@@ -9,6 +9,8 @@ const COLORS = ["#7C5CFF", "#FF6B4A", "#16A37F", "#E8459B", "#2F8FE8", "#E2A11B"
 const COLS = ["kids", "pets", "tasks", "ledger", "goals", "config"];
 const newPet = now => ({ bornAt: now, hatchedAt: null, species: null, name: "", hunger: 80, happy: 80, clean: 100, at: now, owned: [], equip: {}, house: 1, wall: "celeste", gen: 1 });
 const okFam = f => typeof f === "string" && /^[a-z0-9]{12}$/.test(f);
+const okT = t => typeof t === "string" && /^[a-z0-9]{12}$/.test(t);
+const taskKey = (aid, kidId) => "sc_" + aid + "_" + kidId;
 
 const BAD = ["hijueputa","hp","gonorrea","malparido","malparida","puta","puto","mierda","marica","pendejo","pendeja","idiota","estupido","estúpido","imbecil","imbécil","perra","verga","culo","huevon","huevón","guevon","boba","bobo","sapo","zorra"];
 function clean(raw) {
@@ -51,6 +53,27 @@ export default async req => {
   const myKid = async (f, kidId) => { const st = await famState(f); return st && st.kids && st.kids[kidId] ? st : null; };
   const profile = id => social.get("k/" + id, { type: "json" });
   const upd = (key, fn, init) => update(social, key, fn, init);
+  const doc = getStore({ name: "docentes", consistency: "strong" });
+  const tGet = async t => okT(t) ? await doc.get("t/" + t, { type: "json" }) : null;
+  const tUpd = (t, fn) => update(doc, "t/" + t, fn);
+  // Quita el vínculo del colegio y las tareas de ese grupo que aún no se aprobaron
+  const dropLink = (f, gid, kidId) => okFam(f) ? update(fam, f, s2 => {
+    if (s2.school) delete s2.school[gid + "_" + kidId];
+    for (const [k, t] of Object.entries(s2.tasks || {})) if (t.school && t.school.gid === gid && t.kidId === kidId && t.status !== "aprobada") delete s2.tasks[k];
+  }).catch(() => null) : null;
+  // Entrega una tarea del docente a un estudiante (en el estado de su familia)
+  const deliver = async (tid, tname, aid, a, kidId, f) => {
+    let added = false;
+    await update(fam, f, s2 => {
+      if (!s2.kids?.[kidId] || s2.school?.[a.gid + "_" + kidId]?.status !== "ok") return false;
+      s2.tasks = s2.tasks || {}; const k = taskKey(aid, kidId); if (s2.tasks[k]) return false;
+      added = true;
+      s2.tasks[k] = { kidId, title: a.title, desc: a.desc || "", cat: "escuela", tokens: a.tokens, cur: "e", due: a.due || null, repeat: "none", status: "pendiente", note: "", needPhoto: a.needPhoto, createdAt: Date.now(), school: { tid, tname, gid: a.gid, gname: s2.school[a.gid + "_" + kidId].gname, aid } };
+    }).catch(() => null);
+    if (!added) return;
+    await tUpd(tid, s2 => { if (s2.assigns?.[aid]) s2.assigns[aid].targets[kidId] = f; });
+    await notify(f, toKid(kidId), { title: `Nueva tarea de ${tname} 📚`, body: `${a.title} · ${a.tokens} fichas de colegio`, tag: "sc-" + aid });
+  };
   const body = req.method === "POST" ? await req.json().catch(() => ({})) : {};
   try {
     if (p === "ping") return J({ ok: true });
@@ -180,7 +203,7 @@ export default async req => {
         for (let i = 0; i < 20; i++) { code = base + "-" + String(100 + Math.floor(Math.random() * 900)); if (!(await social.get("code/" + code))) break; }
         await social.setJSON("code/" + code, { kidId });
       }
-      const look = { sp: pet.species || "blob", equip: pet.equip || {}, color: kid.color || "#7C5CFF" };
+      const look = { sp: pet.species || "blob", equip: pet.equip || {}, tint: pet.tint || null, av: pet.avatar || null, color: kid.color || "#7C5CFF" };
       await upd("k/" + kidId, s2 => { s2.family = f; s2.nick = nick; s2.look = look; s2.code = code; s2.world = kid.social?.world !== false; s2.chat = kid.social?.chat !== false; }, { friends: {} });
       return J({ code, nick });
     }
@@ -314,6 +337,152 @@ export default async req => {
         if (them2) await notify(them2.family, toKid(w), { title: `${me2?.nick || "Un amigo"} te escribió 💬`, body: preview, tag: "chat-" + kidId });
       }
       return J({ ok: true, msg, flagged });
+    }
+
+    /* ---------- docentes: grupos y tareas del colegio ---------- */
+    if (p === "teacher" && req.method === "POST") {
+      const name = String(body.name || "").replace(/\s+/g, " ").trim().slice(0, 40);
+      if (!name) return J({ error: "name" }, 400);
+      if (!/^\d{4}$/.test(body.pin || "")) return J({ error: "pin" }, 400);
+      const id = rid(12);
+      await doc.setJSON("t/" + id, { v: 1, name, pin: body.pin, created: Date.now(), groups: {}, assigns: {} });
+      return J({ teacher: id, name });
+    }
+    if (p === "teacher/join" && req.method === "POST") {
+      const t = String(body.teacher || "").trim().toLowerCase(), T = await tGet(t);
+      if (!T) return J({ error: "notfound" }, 404);
+      if (T.pin !== body.pin) return J({ error: "pin" }, 403);
+      return J({ teacher: t, name: T.name });
+    }
+    if (p === "teacher/state" && req.method === "GET") {
+      const t = url.searchParams.get("t"), T = await tGet(t);
+      if (!T) return J({ error: "notfound" }, 404);
+      const cache = {}, fs = async f => (f in cache ? cache[f] : (cache[f] = await famState(f)));
+      const groups = {};
+      for (const [gid, g] of Object.entries(T.groups || {})) {
+        const students = [];
+        for (const [kidId, e] of Object.entries(g.students || {})) {
+          const st = e.status === "ok" || e.status === "pendiente" ? await fs(e.family) : null;
+          students.push({ kidId, name: st?.kids?.[kidId]?.name || e.name || "Estudiante", status: e.status, ts: e.ts });
+        }
+        groups[gid] = { name: g.name, created: g.created, students };
+      }
+      const assigns = {};
+      for (const [aid, a] of Object.entries(T.assigns || {})) {
+        const rows = [];
+        for (const [kidId, f] of Object.entries(a.targets || {})) {
+          const st = await fs(f), task = st?.tasks?.[taskKey(aid, kidId)];
+          rows.push({ kidId, name: st?.kids?.[kidId]?.name || "Estudiante", status: task ? task.status : "borrada", doneAt: task?.doneAt || null, photo: !!task?.proof?.id, note: task?.note || "" });
+        }
+        assigns[aid] = { gid: a.gid, title: a.title, desc: a.desc, tokens: a.tokens, due: a.due, needPhoto: a.needPhoto, created: a.created, rows };
+      }
+      return J({ name: T.name, groups, assigns });
+    }
+    if (p === "teacher/group" && req.method === "POST") {
+      const t = body.teacher, T = await tGet(t); if (!T) return J({ error: "notfound" }, 404);
+      if (body.del) {
+        const g = T.groups?.[body.gid]; if (!g) return J({ ok: true });
+        for (const [kidId, e] of Object.entries(g.students || {})) await dropLink(e.family, body.gid, kidId);
+        await tUpd(t, s2 => { delete s2.groups[body.gid]; for (const [aid, a] of Object.entries(s2.assigns || {})) if (a.gid === body.gid) delete s2.assigns[aid]; });
+        return J({ ok: true });
+      }
+      const name = String(body.name || "").replace(/\s+/g, " ").trim().slice(0, 40); if (!name) return J({ error: "name" }, 400);
+      const gid = rid(8);
+      await tUpd(t, s2 => { s2.groups = s2.groups || {}; s2.groups[gid] = { name, created: Date.now(), students: {} }; });
+      return J({ gid });
+    }
+    if (p === "teacher/student" && req.method === "POST") {
+      const t = body.teacher, T = await tGet(t); if (!T) return J({ error: "notfound" }, 404);
+      const g = T.groups?.[body.gid]; if (!g) return J({ error: "nogroup" }, 404);
+      const pr = await pairs.get(String(body.code || "").trim(), { type: "json" });
+      if (!pr || !pr.family) return J({ error: "nocode" }, 404);
+      const st = await famState(pr.family), kid = st?.kids?.[pr.kidId];
+      if (!kid) return J({ error: "nocode" }, 404);
+      const cur = g.students?.[pr.kidId];
+      if (cur && (cur.status === "ok" || cur.status === "pendiente")) return J({ ok: true, name: kid.name, status: cur.status });
+      const now = Date.now(), linkId = body.gid + "_" + pr.kidId;
+      await tUpd(t, s2 => { s2.groups[body.gid].students = s2.groups[body.gid].students || {}; s2.groups[body.gid].students[pr.kidId] = { family: pr.family, name: kid.name, status: "pendiente", ts: now }; });
+      await update(fam, pr.family, s2 => { s2.school = s2.school || {}; s2.school[linkId] = { tid: t, tname: T.name, gid: body.gid, gname: g.name, kidId: pr.kidId, status: "pendiente", ts: now }; });
+      await notify(pr.family, toParents, { title: "Solicitud del colegio 🏫", body: `${T.name} quiere agregar a ${kid.name} al grupo ${g.name}. Necesita tu permiso.`, tag: "school-" + linkId });
+      return J({ ok: true, name: kid.name, status: "pendiente" });
+    }
+    if (p === "teacher/student/remove" && req.method === "POST") {
+      const t = body.teacher, T = await tGet(t); if (!T) return J({ error: "notfound" }, 404);
+      const e = T.groups?.[body.gid]?.students?.[body.kidId]; if (!e) return J({ ok: true });
+      await dropLink(e.family, body.gid, body.kidId);
+      await tUpd(t, s2 => { delete s2.groups[body.gid].students[body.kidId]; });
+      return J({ ok: true });
+    }
+    if (p === "school/decide" && req.method === "POST") {
+      const f = body.family, st = await famState(f); if (!st) return J({ error: "notfound" }, 404);
+      if ((st.config?.main?.pin) !== body.pin) return J({ error: "pin" }, 403);
+      const link = st.school?.[body.linkId]; if (!link) return J({ error: "notfound" }, 404);
+      const T = await tGet(link.tid);
+      if (body.action === "approve") {
+        await update(fam, f, s2 => { if (s2.school?.[body.linkId]) s2.school[body.linkId].status = "ok"; });
+        if (T) {
+          await tUpd(link.tid, s2 => { const e = s2.groups?.[link.gid]?.students?.[link.kidId]; if (e) e.status = "ok"; });
+          const day = new Date(Date.now() - 5 * 3.6e6).toISOString().slice(0, 10);
+          for (const [aid, a] of Object.entries(T.assigns || {})) if (a.gid === link.gid && (!a.due || a.due >= day)) await deliver(link.tid, T.name, aid, a, link.kidId, f);
+        }
+        return J({ ok: true });
+      }
+      if (body.action === "reject" || body.action === "remove") {
+        await dropLink(f, link.gid, link.kidId);
+        if (T) await tUpd(link.tid, s2 => { const e = s2.groups?.[link.gid]?.students?.[link.kidId]; if (e) e.status = body.action === "reject" ? "rechazado" : "retirado"; });
+        return J({ ok: true });
+      }
+      return J({ error: "bad" }, 400);
+    }
+    if (p === "teacher/assign" && req.method === "POST") {
+      const t = body.teacher, T = await tGet(t); if (!T) return J({ error: "notfound" }, 404);
+      const g = T.groups?.[body.gid]; if (!g) return J({ error: "nogroup" }, 404);
+      const title = String(body.title || "").trim().slice(0, 80); if (!title) return J({ error: "title" }, 400);
+      const a = { gid: body.gid, title, desc: String(body.desc || "").trim().slice(0, 400), tokens: Math.max(1, Math.min(500, parseInt(body.tokens) || 5)), due: /^\d{4}-\d{2}-\d{2}$/.test(body.due || "") ? body.due : null, needPhoto: body.needPhoto !== false, created: Date.now(), targets: {} };
+      const aid = rid(10);
+      await tUpd(t, s2 => { s2.assigns = s2.assigns || {}; s2.assigns[aid] = a; });
+      let n = 0;
+      for (const [kidId, e] of Object.entries(g.students || {})) if (e.status === "ok") { await deliver(t, T.name, aid, a, kidId, e.family); n++; }
+      return J({ aid, sent: n });
+    }
+    if (p === "teacher/assign/delete" && req.method === "POST") {
+      const t = body.teacher, T = await tGet(t); if (!T) return J({ error: "notfound" }, 404);
+      const a = T.assigns?.[body.aid]; if (!a) return J({ ok: true });
+      for (const [kidId, f] of Object.entries(a.targets || {})) await update(fam, f, s2 => { const k = taskKey(body.aid, kidId); if (s2.tasks?.[k] && s2.tasks[k].status !== "aprobada") delete s2.tasks[k]; else return false; });
+      await tUpd(t, s2 => { delete s2.assigns[body.aid]; });
+      return J({ ok: true });
+    }
+    if (p === "teacher/review" && req.method === "POST") {
+      const t = body.teacher, T = await tGet(t); if (!T) return J({ error: "notfound" }, 404);
+      const a = T.assigns?.[body.aid], f = a?.targets?.[body.kidId]; if (!f) return J({ error: "notfound" }, 404);
+      const k = taskKey(body.aid, body.kidId), now = Date.now(); let title = a.title, ok = false;
+      await update(fam, f, s2 => {
+        const task = s2.tasks?.[k]; if (!task || task.school?.tid !== t) return false;
+        if (body.ok) {
+          if (task.status === "aprobada") return false;
+          task.status = "aprobada"; task.approvedAt = now; task.note = ""; ok = true;
+          s2.ledger = s2.ledger || {}; s2.ledger[rid(12)] = { kidId: body.kidId, type: "tarea", amount: task.tokens, label: task.title + " (" + T.name + ")", cat: "escuela", cur: "e", createdAt: now };
+          for (const [pid, pet] of Object.entries(s2.pets || {})) {
+            if (!(pid === body.kidId || pet.kidId === body.kidId) || !pet.species) continue;
+            if (!pet.hatchedAt) Object.assign(pet, { hatchedAt: now, hunger: 85, happy: 90, clean: 100, at: now });
+            else { const c = petNow(pet, now); if (c) Object.assign(pet, { hunger: c.h, happy: Math.min(100, c.hp + 15), clean: c.c, at: now }); }
+          }
+        } else {
+          if (task.status !== "revision") return false;
+          task.status = "pendiente"; task.proof = null; task.note = "Devuelto por " + T.name + (body.note ? ": " + String(body.note).slice(0, 120) : ": revísalo");
+        }
+      });
+      await notify(f, toKid(body.kidId), ok ? { title: "¡Tarea del colegio aprobada! ⭐", body: `${title} · +${a.tokens} fichas de colegio`, tag: "sok-" + k } : { title: "Te devolvieron una tarea del colegio", body: `${title}: revísala y vuelve a enviarla`, tag: "sdev-" + k });
+      return J({ ok: true });
+    }
+    if (p === "teacher/photo" && req.method === "GET") {
+      const t = url.searchParams.get("t"), aid = url.searchParams.get("a"), kidId = url.searchParams.get("k"), T = await tGet(t);
+      const f = T?.assigns?.[aid]?.targets?.[kidId]; if (!f) return J({ error: "notfound" }, 404);
+      const st = await famState(f), pr = st?.tasks?.[taskKey(aid, kidId)]?.proof;
+      if (!pr || !/^[a-z0-9]{14}$/.test(pr.id || "")) return J({ error: "notfound" }, 404);
+      const r = await fotos.getWithMetadata(f + "/" + pr.id, { type: "arrayBuffer" });
+      if (!r) return J({ error: "notfound" }, 404);
+      return new Response(r.data, { headers: { "content-type": r.metadata?.type || "image/jpeg", "cache-control": "private, max-age=86400" } });
     }
 
     if (p === "photo" && req.method === "POST") {
