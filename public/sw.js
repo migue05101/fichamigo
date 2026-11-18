@@ -1,5 +1,5 @@
 // Service worker mínimo: permite instalar la app (Android/Chrome) y abrirla sin conexión si ya se cargó antes.
-const CACHE="fichamigo-v6";
+const CACHE="fichamigo-v7";
 self.addEventListener("install",e=>{self.skipWaiting();e.waitUntil(caches.open(CACHE).then(c=>c.addAll(["/","/manifest.webmanifest","/icon-192.png","/icon-512.png"])).catch(()=>{}))});
 self.addEventListener("activate",e=>e.waitUntil(self.clients.claim()));
 self.addEventListener("fetch",e=>{const u=new URL(e.request.url);
