@@ -81,9 +81,56 @@ export default async req => {
     if (p === "family" && req.method === "POST") {
       if (!/^\d{4}$/.test(body.pin || "")) return J({ error: "pin" }, 400);
       const id = rid(12);
-      const st = { v: 1, kids: {}, pets: {}, tasks: {}, ledger: {}, goals: {}, config: { main: { pin: body.pin } }, created: Date.now() };
+      if (body.consent !== true) return J({ error: "consent" }, 400);
+      const st = { v: 1, kids: {}, pets: {}, tasks: {}, ledger: {}, goals: {}, config: { main: { pin: body.pin, consent: { at: Date.now(), v: 1 } } }, created: Date.now() };
       await fam.setJSON(id, st);
       return J({ family: id, state: st });
+    }
+
+    /* Borrar la familia y todos sus datos (derecho de supresión, Ley 1581) */
+    if (p === "family/delete" && req.method === "POST") {
+      const f = body.family, st = await famState(f);
+      if (!st) return J({ error: "notfound" }, 404);
+      if (st.config?.main?.pin !== body.pin) return J({ error: "pin" }, 403);
+      const kids = Object.keys(st.kids || {});
+      const safe = async fn => { try { await fn(); } catch (e) {} };
+      // fotos de pruebas
+      await safe(async () => { const { blobs } = await fotos.list({ prefix: f + "/" }); for (const b of blobs) await fotos.delete(b.key); });
+      for (const kidId of kids) {
+        const prof = await profile(kidId).catch(() => null);
+        if (prof) {
+          for (const other of Object.keys(prof.friends || {})) {
+            await safe(() => upd("k/" + other, s2 => { if (!s2.friends?.[kidId]) return false; delete s2.friends[kidId]; }));
+            await safe(() => social.delete("chat/" + pairKey(kidId, other)));
+          }
+          if (prof.code) await safe(() => social.delete("code/" + prof.code));
+          await safe(() => social.delete("k/" + kidId));
+        }
+        await safe(() => social.delete("fchat/" + kidId));
+        await safe(() => social.delete("inbox/k:" + kidId));
+        await safe(() => upd("world", s2 => { if (!s2.p?.[kidId]) return false; delete s2.p[kidId]; }));
+        const code = st.kids[kidId]?.code; if (code) await safe(() => pairs.delete(String(code)));
+      }
+      // vínculos con docentes
+      for (const l of Object.values(st.school || {})) await safe(() => tUpd(l.tid, s2 => { const g = s2.groups?.[l.gid]; if (!g?.students?.[l.kidId]) return false; delete g.students[l.kidId]; for (const a of Object.values(s2.assigns || {})) if (a.targets) delete a.targets[l.kidId]; }));
+      await safe(() => social.delete("inbox/p:" + f));
+      await safe(() => push.delete("f/" + f));
+      await fam.delete(f);
+      return J({ ok: true });
+    }
+
+    /* Reportar un chat: avisa a los padres del que reporta y guarda copia para revisión */
+    if (p === "report" && req.method === "POST") {
+      const { family: f, kidId, with: w } = body;
+      const st = await myKid(f, kidId); if (!st) return J({ error: "notfound" }, 404);
+      const me = await profile(kidId); if (!me || !me.friends?.[w]) return J({ error: "notfriends" }, 403);
+      const c = await social.get("chat/" + pairKey(kidId, w), { type: "json" });
+      const them = await profile(w), nick = them?.nick || "otro jugador", name = st.kids[kidId].name;
+      const now = Date.now();
+      await social.setJSON("report/" + now + "_" + kidId, { at: now, by: kidId, fam: f, with: w, withFam: them?.family || null, reason: String(body.reason || "").slice(0, 200), msgs: (c?.msgs || []).slice(-30) });
+      await upd("inbox/p:" + f, s2 => { s2.msgs.push({ name, with: w, kid: kidId, text: `⚠️ ${name} reportó el chat con ${nick}. Revísalo en Amigos y chat; puedes bloquearlo.`, ts: now }); if (s2.msgs.length > 40) s2.msgs = s2.msgs.slice(-40); }, { msgs: [] });
+      await notify(f, toParents, { title: "Reporte de tu hijo ⚠️", body: `${name} reportó el chat con ${nick}. Revísalo en Amigos y chat.`, tag: "report-" + kidId });
+      return J({ ok: true });
     }
 
     if (p === "join" && req.method === "POST") {

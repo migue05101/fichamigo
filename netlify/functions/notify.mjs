@@ -10,6 +10,20 @@ export default async () => {
   const fam = getStore({ name: "familias", consistency: "strong" });
   const push = getStore({ name: "push", consistency: "strong" });
   const now = Date.now();
+  // Una vez al día: borrar fotos de pruebas con más de 30 días (privacidad de los menores)
+  try {
+    const day = localDay("America/Bogota", now), last = await push.get("cleanup", { type: "json" });
+    if (!last || last.day !== day) {
+      await push.setJSON("cleanup", { day });
+      const fotos = getStore({ name: "fotos" });
+      const { blobs: fs } = await fotos.list();
+      for (const b of fs) { const m = await fotos.getMetadata(b.key).catch(() => null); if (m && m.metadata?.at && now - m.metadata.at > 30 * 24 * H) await fotos.delete(b.key); }
+      // reportes de chat: se guardan 180 días para revisión de seguridad
+      const social = getStore({ name: "social", consistency: "strong" });
+      const { blobs: rs } = await social.list({ prefix: "report/" });
+      for (const b of rs) { const ts = +b.key.slice(7).split("_")[0]; if (ts && now - ts > 180 * 24 * H) await social.delete(b.key); }
+    }
+  } catch (e) {}
   const { blobs } = await push.list({ prefix: "f/" });
   for (const b of blobs) {
     const family = b.key.slice(2);

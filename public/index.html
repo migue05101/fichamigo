@@ -408,6 +408,13 @@ details.tdet>summary::-webkit-details-marker{display:none}
 details.tdet .meta{display:flex;flex-wrap:wrap;gap:8px;font-size:.82rem;color:var(--muted);margin-top:2px}
 .tprog{display:flex;flex-wrap:wrap;gap:6px}
 textarea{width:100%;font:inherit;padding:10px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.toggle.consent{font-size:.84rem;text-align:left;align-items:flex-start}
+.toggle.consent a,.legal a{color:var(--accent);font-weight:800}
+.legal{font-size:.8rem;text-align:center;margin-top:14px;color:var(--muted)}
+.consentcard{border:2px solid var(--accent)}
+.form.danger{border:1px solid color-mix(in srgb,#E5484D 40%,transparent)}
+.btn.badb{background:#E5484D;color:#fff}
+.chathead .report{margin-left:auto;font-size:.8rem}
 .petchip.lock{background:rgb(0 0 0 / .14);font-weight:700;opacity:.9}
 .avc{max-width:520px}
 .avstage{background:linear-gradient(#DDF0F8,#CFE8F2);border-radius:18px;padding:8px;width:min(220px,60vw);margin:0 auto}
@@ -1637,7 +1644,7 @@ function chatThread(kidId,w,asParent){
   const fr=w==="family"?null:((SOC[kidId]||{}).friends||[]).find(f=>f.id===w);const title=w==="family"?(asParent?`Chat con ${kidName(kidId)}`:"Mi familia"):(fr?esc(fr.nick):"Amigo");
   const canWrite=w==="family"||(!asParent&&fr&&fr.st==="ok"&&kidSoc(kidId).chat!==false);
   const me=asParent?"parent":kidId;
-  return `<div class="chat"><div class="chathead"><button class="btn ghost sm" data-act="chatback">←</button><b>${title}</b>${asParent&&w!=="family"?'<span class="pill plain">Solo lectura</span>':""}</div>
+  return `<div class="chat"><div class="chathead"><button class="btn ghost sm" data-act="chatback">←</button><b>${title}</b>${asParent&&w!=="family"?'<span class="pill plain">Solo lectura</span>':""}${!asParent&&w!=="family"&&fr?`<button class="x report" data-act="report" data-kid="${kidId}" data-w="${w}">⚠️ Reportar</button>`:""}</div>
     <div class="chatlog" id="chatlog">${chatMsgs.length?chatMsgs.map(m=>{const mine=m.from===me;const who=m.from==="parent"?"Papá/Mamá":m.from===kidId?(asParent?kidName(kidId):"Tú"):(fr?fr.nick:"Amigo");
       return `<div class="msg ${mine?"me":""} ${m.flag?"flag":""}"><span class="who">${esc(who)}</span><p>${esc(m.text)}</p>${m.flag?'<span class="fl">Se ocultaron datos personales</span>':""}<time>${fmtTs(m.ts)}</time></div>`}).join(""):`<p class="muted" style="text-align:center">Todavía no hay mensajes.</p>`}</div>
     ${canWrite?`<form class="chatform" data-form="chatsend" data-kid="${kidId}" data-with="${w}" data-as="${asParent?"parent":"kid"}"><input id="chat-in" maxlength="300" autocomplete="off" placeholder="Escribe un mensaje…" required><button class="btn" type="submit">Enviar</button></form>`:""}
@@ -1763,6 +1770,7 @@ function welcome(){
   if(wstep==="parent"&&remote&&!family)return `<div class="welcome">${demo}<form class="pinbox" data-form="fcreate"><h2>Crea tu familia</h2>
       <p class="muted">Elige un PIN de padre de 4 dígitos. Con él controlas los perfiles, apruebas deberes y entregas las metas.</p>
       <input id="pin" data-keep="no" inputmode="numeric" maxlength="4" pattern="[0-9]{4}" autocomplete="off" aria-label="PIN nuevo" required>
+      <label class="toggle consent"><input id="consent" type="checkbox" required><span>Soy el padre, la madre o el representante legal de los menores que usarán Fichamigo y <b>autorizo el tratamiento de sus datos</b> según la <a href="/privacidad.html" target="_blank" rel="noopener">Política de privacidad</a> y los <a href="/terminos.html" target="_blank" rel="noopener">Términos de uso</a>.</span></label>
       <button class="btn block" type="submit">Crear mi familia</button>
       <button class="link" type="button" data-act="wstep" data-v="pjoin">Ya tengo una familia: conectar este celular</button><button class="link" type="button" data-act="wback">Volver</button></form></div>`;
   if(wstep==="pjoin")return `<div class="welcome"><form class="pinbox" data-form="fjoin"><h2>Conectar este celular</h2>
@@ -1779,6 +1787,7 @@ function welcome(){
       <p class="muted">Crea grupos (por ejemplo <b>Literatura 4.º B</b>), agrega a tus estudiantes con el código de su celular y envíales tareas a todos a la vez. Los padres aprueban cada vinculación.</p>
       <label class="f">Tu nombre como lo conocen los estudiantes<input id="tc-name" maxlength="40" required placeholder="Ej: Profe Marta Ruiz"></label>
       <label class="f">Crea un PIN de 4 dígitos<input id="tc-pin" data-keep="no" inputmode="numeric" maxlength="4" pattern="[0-9]{4}" autocomplete="off" required></label>
+      <label class="toggle consent"><input id="tc-ok" type="checkbox" required><span>Usaré Fichamigo solo con fines educativos y acepto la <a href="/privacidad.html" target="_blank" rel="noopener">Política de privacidad</a> y los <a href="/terminos.html" target="_blank" rel="noopener">Términos de uso</a>.</span></label>
       <button class="btn block" type="submit">Crear perfil de docente</button>
       <button class="link" type="button" data-act="wstep" data-v="tjoin">Ya tengo perfil: conectar este dispositivo</button><button class="link" type="button" data-act="wback">Volver</button></form></div>`;
   if(wstep==="tjoin")return `<div class="welcome"><form class="pinbox" data-form="tjoin"><h2>Conectar perfil de docente</h2>
@@ -1799,7 +1808,8 @@ function welcome(){
     <button class="btn block" type="submit">Crear mi perfil</button><button class="link" type="button" data-act="wback">Volver</button></form>${rec}</div>`;
   return `<div class="welcome">${demo}<h1>Fichamigo</h1><p class="lead">Cada deber cumplido te da fichas. Con ellas alimentas y cuidas a tu mascota, y ahorras para la meta que pactaste en casa.</p>
     ${installEvt?`<button class="btn coinb block" data-act="installapp" style="max-width:360px">📲 Instalar Fichamigo en este celular</button>`:""}
-    <div class="choices"><button class="btn block" data-act="wstep" data-v="kid">${devKid&&S.kids[devKid]?`Entrar como ${esc(S.kids[devKid].name)}`:"Soy un joven"}</button><button class="btn ghost block" data-act="wstep" data-v="parent">Soy papá o mamá</button>${remote?`<button class="btn ghost block" data-act="wstep" data-v="teacher">Soy docente</button>`:""}</div></div>`;
+    <div class="choices"><button class="btn block" data-act="wstep" data-v="kid">${devKid&&S.kids[devKid]?`Entrar como ${esc(S.kids[devKid].name)}`:"Soy un joven"}</button><button class="btn ghost block" data-act="wstep" data-v="parent">Soy papá o mamá</button>${remote?`<button class="btn ghost block" data-act="wstep" data-v="teacher">Soy docente</button>`:""}</div>
+    <p class="legal"><a href="/privacidad.html" target="_blank" rel="noopener">Privacidad</a> · <a href="/terminos.html" target="_blank" rel="noopener">Términos</a></p></div>`;
 }
 
 /* ---------- pantalla del joven ---------- */
@@ -1978,7 +1988,7 @@ setTimeout(()=>{try{if(remote&&family&&role&&role.r!=="teacher"&&"Notification" 
 addEventListener("beforeinstallprompt",e=>{e.preventDefault();installEvt=e;render()});
 addEventListener("appinstalled",()=>{installEvt=null;toast("¡Fichamigo quedó instalada!");render()});
 function proofSrc(t){const p=t.proof;if(!p)return null;if(p.id)return `/api/photo?f=${encodeURIComponent(family||"")}&id=${encodeURIComponent(p.id)}`;return p.data||null}
-function proofThumb(t){const src=proofSrc(t);if(src)return `<button class="thumb" data-act="viewphoto" data-src="${esc(src)}" aria-label="Ver foto de prueba"><img src="${esc(src)}" alt="Foto de prueba"></button>`;return t.needPhoto?'<span class="pill plain">Sin foto</span>':""}
+function proofThumb(t){const src=proofSrc(t);if(src)return `<button class="thumb" data-act="viewphoto" data-src="${esc(src)}" aria-label="Ver foto de prueba"><img src="${esc(src)}" alt="Foto de prueba" onerror="this.parentNode.outerHTML='<span class=&quot;pill plain&quot;>Foto vencida</span>'"></button>`;return t.needPhoto?'<span class="pill plain">Sin foto</span>':""}
 function compressImg(file,max,q){return new Promise((res,rej)=>{const u=URL.createObjectURL(file),img=new Image();img.onload=()=>{const k=Math.min(1,max/Math.max(img.width,img.height)),cv=document.createElement("canvas");
   cv.width=Math.round(img.width*k);cv.height=Math.round(img.height*k);cv.getContext("2d").drawImage(img,0,0,cv.width,cv.height);URL.revokeObjectURL(u);res(cv.toDataURL("image/jpeg",q))};img.onerror=()=>{URL.revokeObjectURL(u);rej(new Error("img"))};img.src=u})}
 async function sendProof(file){const id=photoTask;photoTask=null;const t=S.tasks[id];if(!t||!file)return;toast("Subiendo la foto…");
@@ -2103,7 +2113,9 @@ function parentScreen(){
   const tabs=[["familia","Familia"],["revisar","Revisar",revCount],["deberes","Deberes"],["metas","Metas"],["colegio","Colegio",sReq],["amigos","Amigos y chat",pendingApprovals()],["registro","Registro"],["ajustes","Ajustes"]];
   const body={familia:pFamilia,revisar:pRevisar,deberes:pDeberes,metas:pMetas,colegio:pColegio,amigos:pAmigos,registro:pRegistro,ajustes:pAjustes}[ptab]();
   const fk=role.fromKid&&S.kids[role.fromKid];
-  return `<div class="pnav"><button class="btn ghost sm" data-act="logout">← Menú principal</button>${fk?`<button class="btn ghost sm" data-act="askkid" data-id="${role.fromKid}">Volver al Fichamigo de ${esc(fk.name)}</button>`:""}<span class="muted" style="font-size:.85rem;margin-left:auto">Zona de padres</span></div>
+  const consent=remote&&family&&!S.config.consent?`<form class="form consentcard" data-form="consent"><h2>Autorización de datos</h2><p class="muted">Para seguir usando Fichamigo con tus hijos necesitamos tu autorización como padre, madre o representante legal (Ley 1581 de 2012).</p>
+    <label class="toggle consent"><input id="consent2" type="checkbox" required><span>Autorizo el tratamiento de los datos de mis hijos según la <a href="/privacidad.html" target="_blank" rel="noopener">Política de privacidad</a> y los <a href="/terminos.html" target="_blank" rel="noopener">Términos de uso</a>.</span></label><div><button class="btn" type="submit">Aceptar</button></div></form>`:"";
+  return `${consent}<div class="pnav"><button class="btn ghost sm" data-act="logout">← Menú principal</button>${fk?`<button class="btn ghost sm" data-act="askkid" data-id="${role.fromKid}">Volver al Fichamigo de ${esc(fk.name)}</button>`:""}<span class="muted" style="font-size:.85rem;margin-left:auto">Zona de padres</span></div>
   <nav class="tabs" aria-label="Secciones">${tabs.map(([k,l,n])=>`<button data-act="ptab" data-v="${k}" aria-pressed="${ptab===k}">${l}${n?`<span class="badge">${n}</span>`:""}</button>`).join("")}</nav>${body}`;
 }
 const needKids=()=>`<div class="empty">Primero agrega los dispositivos de tus hijos en la pestaña <b>Familia</b>.</div>`;
@@ -2198,6 +2210,10 @@ function pAjustes(){
       :pushStatus()==="denied"?`<p class="muted">Están bloqueadas. Actívalas en los Ajustes del celular → Notificaciones → Fichamigo (o Chrome).</p>`
       :`<div><button class="btn" type="button" data-act="enablepush">🔔 Activar notificaciones</button></div>`}</div>`:""}
   ${remote&&family?`<div class="form"><h2>Código de familia</h2><p class="muted">Para conectar el celular de otro papá o mamá: en ese celular elige <b>Soy papá o mamá → Ya tengo una familia</b> y escribe este código con tu PIN.</p><div class="px bigcode sm">${esc(family)}</div><button class="btn ghost sm" type="button" data-act="copyfam">Copiar código</button></div>`:""}
+  <div class="form"><h2>Privacidad y datos</h2><p class="muted">Fichamigo no muestra publicidad ni vende datos. Las fotos de prueba se borran solas a los 30 días. Lee la <a href="/privacidad.html" target="_blank" rel="noopener">Política de privacidad</a> y los <a href="/terminos.html" target="_blank" rel="noopener">Términos de uso</a>.</p></div>
+  ${remote&&family?`<form class="form danger" data-form="delfamily"><h2>Borrar mi familia</h2><p class="muted">Borra para siempre los perfiles, las mascotas, los deberes, las fichas, las fotos, los chats y las amistades de toda tu familia, y la retira de los grupos de colegio. No se puede deshacer.</p>
+    <div class="row"><label class="f">PIN de padre<input id="del-pin" data-keep="no" inputmode="numeric" maxlength="4" pattern="[0-9]{4}" autocomplete="off" required></label><label class="f">Escribe BORRAR<input id="del-word" data-keep="no" autocomplete="off" required></label></div>
+    <div><button class="btn badb" type="submit">Borrar todo</button></div></form>`:""}
   <form class="form" data-form="newpin"><h2>Cambiar PIN de padre</h2><label class="f">Nuevo PIN (4 dígitos)<input id="s-pin" data-keep="no" inputmode="numeric" maxlength="4" pattern="[0-9]{4}" required></label>
     <div><button class="btn" type="submit">Cambiar PIN</button></div></form>
   <div class="form"><h2>Reglas de la mascota</h2><p class="muted">La comida baja a cero en unas ${HUNGER_H} horas. Si pasa ${DEATH_H} horas sin comer, muere y el joven empieza con un huevo nuevo; conserva su casa, ropa y muebles. Tú puedes revivirla desde la tarjeta de cada hijo. Cada deber aprobado le sube el ánimo y la hace crecer: Bebé, Niño, Joven y Adulto. El tipo de adulto depende de qué deberes cumple más: colegio (Sabio), casa (Constructor), responsabilidades (Guardián) o equilibrado (Legendario).</p></div>`;
@@ -2227,6 +2243,8 @@ document.addEventListener("click",async e=>{
   if(a==="pview"){pview=id;ktab="deberes";foodOpen=false;menuOpen=false;window.scrollTo(0,0);render();return}
   if(a==="pback"){pview=null;menuOpen=false;foodOpen=false;render();return}
   if(a==="picksp"){pickSp=b.dataset.v;beep(990);render();return}
+  if(a==="report"){if(!b.dataset.confirm){b.dataset.confirm="1";b.textContent="¿Avisar a tus papás?";setTimeout(()=>{if(b.isConnected){delete b.dataset.confirm;b.textContent="⚠️ Reportar"}},4000);return}
+    try{await api("report",{family,kidId:b.dataset.kid,with:b.dataset.w});b.textContent="Reportado";b.disabled=true;toast("Les avisamos a tus papás. Si alguien te incomoda, no le respondas.")}catch(e){toast("No se pudo enviar. Revisa tu internet.")}return}
   if(a==="ttab"){tTab=b.dataset.v;window.scrollTo(0,0);render();tLoad();return}
   if(a==="copyteacher"){try{await navigator.clipboard.writeText(role.id);toast("Código copiado")}catch(e){toast("Código: "+role.id)}return}
   if(a==="tgdel"||a==="tsrm"||a==="tadel"){if(!b.dataset.confirm){b.dataset.confirm="1";const old=b.textContent;b.textContent="¿Seguro? Toca otra vez";setTimeout(()=>{if(b.isConnected){delete b.dataset.confirm;b.textContent=old}},3500);return}
@@ -2350,7 +2368,11 @@ document.addEventListener("submit",async e=>{
     catch(e){toast(e.code==="nocode"?"No encontramos ese código.":e.code==="samefamily"?"Ese código es de alguien de tu misma familia.":"No se pudo enviar.")}return}
   if(k==="ksocial"){const kid=f.dataset.kid;await put("kids",kid,{...S.kids[kid],nick:v("ks-nick-"+kid).slice(0,16),social:{world:document.getElementById("ks-world-"+kid).checked,chat:document.getElementById("ks-chat-"+kid).checked}});
     await syncProfile(kid,true);toast("Guardado");return}
-  if(k==="tcreate"){const pin=v("tc-pin");if(!/^\d{4}$/.test(pin)){toast("El PIN debe tener 4 dígitos.");return}
+  if(k==="consent"){if(!document.getElementById("consent2").checked)return;await setConfig({consent:{at:Date.now(),v:1}});toast("¡Gracias!");return}
+  if(k==="delfamily"){if(v("del-word").trim().toUpperCase()!=="BORRAR"){toast("Escribe BORRAR para confirmar.");return}
+    try{await api("family/delete",{family,pin:v("del-pin")});try{localStorage.clear()}catch(e){}toast("Tu familia y todos sus datos fueron borrados.");setTimeout(()=>location.reload(),1500)}
+    catch(e){toast(e.code==="pin"?"El PIN no coincide.":"No se pudo borrar. Revisa tu internet.")}return}
+  if(k==="tcreate"){if(!document.getElementById("tc-ok").checked){toast("Debes aceptar los términos.");return}const pin=v("tc-pin");if(!/^\d{4}$/.test(pin)){toast("El PIN debe tener 4 dígitos.");return}
     try{const j=await api("teacher",{name:v("tc-name"),pin});role={r:"teacher",id:j.teacher,name:j.name};saveRole();wstep=null;tTab="grupos";TS_=null;tune([[660,.06],[990,.1]]);toast("¡Perfil de docente creado!");render();tLoad()}catch(e){toast("No se pudo crear. Revisa tu internet.")}return}
   if(k==="tjoin"){try{const j=await api("teacher/join",{teacher:v("tj-code").toLowerCase().replace(/\s/g,""),pin:v("tj-pin")});role={r:"teacher",id:j.teacher,name:j.name};saveRole();wstep=null;tTab="grupos";TS_=null;render();tLoad();toast("Conectado")}
     catch(e){toast(e.code==="pin"?"PIN incorrecto.":e.code==="notfound"?"No encontramos ese código de docente.":"No se pudo conectar.")}return}
@@ -2360,7 +2382,8 @@ document.addEventListener("submit",async e=>{
     document.getElementById("ta-title").value="";document.getElementById("ta-desc").value="";toast(j.sent?`Tarea enviada a ${j.sent} estudiante${j.sent===1?"":"s"}`:"Tarea creada. Llegará a cada estudiante cuando sus padres aprueben la vinculación.")}catch(e){}return}
   if(k==="erate"){await setConfig({eRate:+v("s-erate")});toast("Guardado");return}
   if(k==="fcreate"){const p=v("pin");if(!/^\d{4}$/.test(p)){toast("El PIN debe tener 4 dígitos.");return}
-    try{const j=await api("family",{pin:p});setFamily(j.family);applyState(j.state);role={r:"parent"};saveRole();wstep=null;ptab="familia";tune([[660,.06],[990,.1]]);toast("¡Familia creada!");render()}catch(e){toast("No se pudo crear. Revisa tu internet.")}return}
+    if(!document.getElementById("consent").checked){toast("Para crear la familia necesitamos tu autorización.");return}
+    try{const j=await api("family",{pin:p,consent:true});setFamily(j.family);applyState(j.state);role={r:"parent"};saveRole();wstep=null;ptab="familia";tune([[660,.06],[990,.1]]);toast("¡Familia creada!");render()}catch(e){toast("No se pudo crear. Revisa tu internet.")}return}
   if(k==="fjoin"){try{const j=await api("join",{family:v("fj-code").toLowerCase().replace(/\s/g,""),pin:v("fj-pin")});setFamily(j.family);applyState(j.state);role={r:"parent"};saveRole();wstep=null;ptab="familia";tune([[660,.06],[990,.1]]);toast("Celular conectado a tu familia");render()}
     catch(e){toast(e.code==="pin"?"PIN incorrecto.":e.code==="notfound"?"No encontramos ese código de familia.":"No se pudo conectar. Revisa tu internet.")}return}
   if(k==="kreg"&&remote){try{const j=await api("pair",{name:v("r-name"),age:v("r-age")});role={r:"kid",id:j.kidId,pair:j.code,name:v("r-name")};setDevKid(j.kidId);saveRole();wstep=null;ktab="deberes";tune([[523,.06],[784,.06],[1046,.1]]);render();pairPoll()}
