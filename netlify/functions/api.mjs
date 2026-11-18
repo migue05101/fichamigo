@@ -133,6 +133,25 @@ export default async req => {
       return J({ ok: true });
     }
 
+    /* Abrir un perfil de joven ya existente en un celular nuevo (robo o daño): código del fichamigo + PIN de padre */
+    if (p === "recover" && req.method === "POST") {
+      const code = String(body.code || "").replace(/\D/g, "");
+      if (!/^\d{6}$/.test(code)) return J({ error: "nocode" }, 400);
+      const lockKey = "fail/" + code, lock = await pairs.get(lockKey, { type: "json" });
+      const now = Date.now();
+      if (lock && lock.n >= 5 && now - lock.at < 15 * 60 * 1000) return J({ error: "locked" }, 429);
+      const pr = await pairs.get(code, { type: "json" });
+      const st = pr && pr.family ? await famState(pr.family) : null;
+      const ok = st && st.kids?.[pr.kidId] && st.config?.main?.pin === body.pin;
+      if (!ok) {
+        const n = lock && now - lock.at < 15 * 60 * 1000 ? lock.n + 1 : 1;
+        await pairs.setJSON(lockKey, { n, at: now });
+        return J({ error: st && st.kids?.[pr.kidId] ? "pin" : "nocode" }, st ? 403 : 404);
+      }
+      if (lock) await pairs.delete(lockKey).catch(() => {});
+      return J({ family: pr.family, kidId: pr.kidId, state: st });
+    }
+
     if (p === "join" && req.method === "POST") {
       const f = String(body.family || "").trim().toLowerCase();
       if (!okFam(f)) return J({ error: "notfound" }, 404);
