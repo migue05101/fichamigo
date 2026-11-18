@@ -422,7 +422,7 @@ textarea{width:100%;font:inherit;padding:10px;border-radius:12px;border:1px soli
 .chathead .report{margin-left:auto;font-size:.8rem}
 .petchip.lock{background:rgb(0 0 0 / .14);font-weight:700;opacity:.9}
 .avc{max-width:520px}
-.avstage{background:linear-gradient(#DDF0F8,#CFE8F2);border-radius:18px;padding:8px;width:min(220px,60vw);margin:0 auto}
+.avstage{background:linear-gradient(#DDF0F8,#CFE8F2);border-radius:18px;padding:6px;width:min(190px,46vw);margin:0 auto;box-shadow:0 6px 18px rgb(20 20 60 / .28),0 0 0 3px #fff}
 .avstage canvas,.avtop canvas,.prod canvas[width="288"]{width:100%;height:auto;image-rendering:pixelated;display:block;border-radius:12px}
 .avopts{display:grid;gap:12px;width:100%}
 .avgrp{display:grid;gap:6px;text-align:left}
@@ -432,10 +432,11 @@ textarea{width:100%;font:inherit;padding:10px;border-radius:12px;border:1px soli
 .swatch{min-width:40px;height:40px;border-radius:12px;border:3px solid var(--line);background:var(--c,var(--surface));font-weight:800;padding:0 12px;color:var(--ink)}
 .sws:not(.txt) .swatch[style]{width:40px;padding:0}
 .swatch[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 30%,transparent)}
+.avbar{position:sticky;top:0;z-index:6;width:calc(100% + 32px);margin:0 -16px;padding:calc(env(safe-area-inset-top,0px) + 6px) 0 10px;background:rgb(236 239 247 / .9);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-bottom:1px solid rgb(30 30 70 / .08)}
 .avtop{display:grid;grid-template-columns:minmax(110px,170px) 1fr;gap:14px;align-items:start}
-.avtop canvas{background:#CFE8F2}
+.avtop canvas{background:#CFE8F2;position:sticky;top:0;z-index:6;box-shadow:0 6px 16px rgb(20 20 60 / .22),0 0 0 3px #fff}
 .shop .prod canvas[width="288"]{max-width:150px;margin:0 auto}
-@media (max-width:420px){.avtop{grid-template-columns:1fr}.avtop canvas{max-width:180px;margin:0 auto}}
+@media (max-width:420px){.avtop{grid-template-columns:1fr}.avtop canvas{max-width:160px;margin:0 auto}}
 </style>
 
 <div class="wrap">
@@ -2472,7 +2473,7 @@ function avatarCreator(kidId){
   const d=avDraft, sw=(act,v,on,lbl,style)=>`<button class="swatch" data-act="${act}" data-v="${v}" aria-pressed="${on}" aria-label="${esc(lbl)}" ${style?`style="${style}"`:""}>${style?"":esc(lbl)}</button>`;
   const free=sl=>OUTFIT.filter(o=>o.slot===sl&&!o.p);
   return `<div class="welcome avc"><h2>${esc(k.name)}, crea tu personaje</h2><p class="muted">Este eres tú dentro de Fichamigo. Vive con tus fichamigos y sale a explorar el mundo con ellos.</p>
-    <div class="avstage"><canvas width="288" height="320" data-paint="avdraft"></canvas></div>
+    <div class="avbar"><div class="avstage"><canvas width="288" height="320" data-paint="avdraft"></canvas></div></div>
     <div class="avopts">
       <div class="avgrp"><b>Soy</b><div class="seg2">${sw("avg","nino",d.g==="nino","Niño")}${sw("avg","nina",d.g==="nina","Niña")}</div></div>
       <div class="avgrp"><b>Piel</b><div class="sws">${SKINS.map((c,i)=>sw("avset:skin",i,(d.skin|0)===i,"Tono "+(i+1),"--c:"+c)).join("")}</div></div>
