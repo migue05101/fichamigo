@@ -415,6 +415,28 @@ details.tdet .meta{display:flex;flex-wrap:wrap;gap:8px;font-size:.82rem;color:va
 textarea{width:100%;font:inherit;padding:10px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
 .toggle.consent{font-size:.84rem;text-align:left;align-items:flex-start}
 .toggle.consent a,.legal a{color:var(--accent);font-weight:800}
+.guide{gap:14px}
+.gscene{position:relative;width:100%;max-width:400px;display:grid;justify-items:center;padding-top:4px}
+.gbub{position:relative;background:#fff;color:#1B1F3B;border-radius:20px;padding:14px 16px;box-shadow:0 6px 0 rgb(0 0 0 / .12),0 0 0 3px #23253A;text-align:left;font-size:1.02rem;line-height:1.4;animation:gpop .35s cubic-bezier(.3,1.6,.5,1);transform-origin:50% 100%;width:100%;box-sizing:border-box}
+.gbub p{margin:0}.gbub b{color:#5B3BE8}
+.gbub::after{content:"";position:absolute;left:50%;bottom:-13px;width:22px;height:22px;background:#fff;transform:translateX(-50%) rotate(45deg);box-shadow:3px 3px 0 0 #23253A}
+.gchar{width:min(150px,38vw);height:auto;margin-top:14px;filter:drop-shadow(0 6px 6px rgb(0 0 0 / .25));animation:gbob 1.8s ease-in-out infinite}
+.gchar.wave{animation:gbob 1.8s ease-in-out infinite,gwig 1.2s ease-in-out 1}
+@keyframes gpop{0%{transform:scale(.6);opacity:0}100%{transform:scale(1);opacity:1}}
+@keyframes gbob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes gwig{0%,100%{rotate:0deg}25%{rotate:-6deg}75%{rotate:6deg}}
+.gmock{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;background:rgb(91 59 232 / .07);border:2px dashed #B9B2EE;color:#1B1F3B;border-radius:16px;padding:10px 12px;max-width:400px;width:100%;box-sizing:border-box;font-weight:800;animation:gpop .4s .1s both}
+.gmock small{flex-basis:100%;opacity:.85;font-weight:600}
+.gfake{background:#5B3BE8;color:#fff;border-radius:12px;padding:8px 14px;box-shadow:0 3px 0 #23253A}.gfake.ghost{background:#fff;color:#1B1F3B}.gfake.ok{background:#22B573}
+.gpin{letter-spacing:.2em;background:#fff;color:#1B1F3B;border-radius:10px;padding:6px 10px}
+.gcode{background:#fff;color:#1B1F3B;border-radius:12px;padding:8px 14px;font-size:1.6rem;letter-spacing:.18em}
+.gchipp{background:#fff;box-shadow:0 0 0 1px #D7DBEA;color:#1B1F3B;border-radius:999px;padding:5px 11px;font-size:.88rem}.gchipp.on{background:#FFD60A}
+.gcoin{background:#FFD60A;color:#1B1F3B;border-radius:999px;padding:5px 11px}
+.gmock.two{flex-wrap:nowrap}.gph{display:grid;justify-items:center;background:#fff;color:#1B1F3B;border-radius:14px;padding:8px 10px;font-size:1.5rem;min-width:110px}.gph b{font-size:.9rem}.gph small{font-size:.75rem;opacity:.7}.garr{font-size:1.6rem}
+.gdots{display:flex;gap:6px}.gdots i{width:9px;height:9px;border-radius:50%;background:#D5D3EA}.gdots i.ok{background:#A99CF2}.gdots i.on{background:#5B3BE8;width:22px;border-radius:5px}
+.gnav{display:flex;gap:10px;width:100%;max-width:360px}.gnav .btn{flex:1}
+.gstart{display:flex;align-items:center;gap:10px;background:#fff;color:#1B1F3B;border:0;border-radius:16px;padding:8px 14px 8px 8px;font-weight:900;box-shadow:0 4px 0 #23253A;max-width:360px;width:100%;text-align:left}
+@media (prefers-reduced-motion:reduce){.gchar,.gbub,.gmock{animation:none}}
 .legal{font-size:.8rem;text-align:center;margin-top:14px;color:var(--muted)}
 .consentcard{border:2px solid var(--accent)}
 .form.danger{border:1px solid color-mix(in srgb,#E5484D 40%,transparent)}
@@ -2311,7 +2333,51 @@ function screen(){
 }
 
 /* ---------- bienvenida / acceso ---------- */
+/* ---------- guía de primeros pasos con Maestro Fichas ---------- */
+let gdPath=null, gdI=0;
+const guideSeen=()=>{try{return localStorage.getItem("fm-guide")==="1"}catch(e){return true}};
+const guideDone=()=>{try{localStorage.setItem("fm-guide","1")}catch(e){}};
+const gMock={
+  two:`<div class="gmock two"><span class="gph">📱<b>Papá o mamá</b><small>pone los deberes</small></span><span class="garr">⇄</span><span class="gph">📱<b>Joven</b><small>los cumple</small></span></div>`,
+  pbtn:`<div class="gmock"><span class="gfake ghost">Soy papá o mamá</span><span class="gpin">● ● ● ●</span></div>`,
+  kbtn:`<div class="gmock"><span class="gfake">Soy un joven</span></div>`,
+  code:`<div class="gmock"><span class="gcode px">482913</span><small>Código de 6 dígitos (este es de ejemplo)</small></div>`,
+  link:`<div class="gmock"><span class="gchipp">Zona de padres</span>›<span class="gchipp">Familia</span>›<span class="gchipp on">Agregar dispositivo</span></div>`,
+  tabs:`<div class="gmock"><span class="gchipp on">Deberes</span><span class="gchipp on">Metas</span></div>`,
+  rev:`<div class="gmock"><span class="gchipp">Revisar</span>›<span class="gfake ok">Aprobar</span>›<span class="gcoin">+10 fichas</span></div>`,
+  safe:`<div class="gmock"><span class="gchipp">Familia</span>›<span class="gchipp on">Código del Fichamigo</span><span class="gchipp">Ajustes</span>›<span class="gchipp on">Código de familia</span></div>`,
+  pet:`<div class="gmock"><img src="fm/p05.webp" alt="" width="54"><img src="fm/p29.webp" alt="" width="54"><img src="fm/p01.webp" alt="" width="54"></div>`,
+  done:`<div class="gmock"><span class="gfake ok">¡Lo hice!</span>›<span class="gcoin">+ fichas</span>›🍉 👕 🛋️ 🎯</div>`};
+const GUIDE={
+  padre:[
+    ["Fichamigo funciona con dos celulares: el tuyo y el de tu hijo. Tú pones los deberes; él los cumple y gana fichas.","two"],
+    ["Primero, en TU celular toca <b>«Soy papá o mamá»</b>. Crea un PIN de 4 dígitos que solo tú sepas y acepta la autorización. Así nace tu familia.","pbtn"],
+    ["Ahora, en el celular de tu hijo, abre Fichamigo y toca <b>«Soy un joven»</b>. Él escribe su nombre y su edad, y le aparece un código de 6 dígitos.","code"],
+    ["Para unirlos, en tu celular entra a <b>Zona de padres → Familia → Agregar dispositivo</b> y escribe ese código. ¡Listo, ya están conectados!","link"],
+    ["En <b>Deberes</b> creas las tareas y cuántas fichas vale cada una. En <b>Metas</b> pactan el premio de verdad: una salida, un juguete, lo que acuerden.","tabs"],
+    ["Cuando tu hijo marque un deber como hecho, te llega a <b>Revisar</b>. Si lo apruebas, recibe sus fichas para cuidar a su fichamigo o ahorrar para la meta.","rev"],
+    ["Un último consejo: en <b>Familia</b>, en la tarjeta de tu hijo, está el <b>código del Fichamigo</b>. Guárdalo: si cambia de celular, con ese código y tu PIN recupera todo. Si otro papá o mamá quiere entrar, en <b>Ajustes</b> está el código de familia.","safe"]],
+  joven:[
+    ["¡Qué bien! Aquí cuidas a tu propio fichamigo y ganas premios de verdad haciendo tus deberes.","pet"],
+    ["Toca <b>«Soy un joven»</b> y escribe tu nombre. Te va a aparecer un código de 6 dígitos.","code"],
+    ["Muéstrale ese código a tu papá o mamá. Ellos lo escriben en su celular, en <b>Agregar dispositivo</b>, para unirte a la familia.","link"],
+    ["Después creas tu personaje y eliges tu fichamigo. ¡Nace de un huevo!","pet"],
+    ["Cada deber que hagas, márcalo con <b>«¡Lo hice!»</b>. Cuando tus papás lo aprueben, ganas fichas para comida, ropa, muebles… o para tu meta.","done"],
+    ["Y cuando quieras, toca <b>Explorar</b>: hay fichamigos salvajes, cofres y amigos nuevos. ¡A jugar!",""]]};
+function guideScreen(){
+  const intro=!gdPath, L=intro?null:GUIDE[gdPath], st=intro?null:L[gdI], last=!intro&&gdI===L.length-1;
+  const text=intro?"¡Hola! Soy <b>Maestro Fichas</b>. En un minuto te explico cómo funciona Fichamigo. Primero cuéntame: ¿quién eres?":st[0];
+  return `<div class="welcome guide">
+    <div class="gscene"><div class="gbub" role="status" aria-live="polite"><p>${text}</p></div><img class="gchar ${intro||gdI%2?"wave":""}" src="fm/p00.webp" alt="Maestro Fichas, un gatito constructor"></div>
+    ${!intro&&st[1]?gMock[st[1]]:""}
+    ${intro?`<div class="choices"><button class="btn block" data-act="gdpath" data-v="padre">Soy papá o mamá</button><button class="btn ghost block" data-act="gdpath" data-v="joven">Soy un joven</button></div>`
+      :`<div class="gdots">${L.map((_,i)=>`<i class="${i===gdI?"on":i<gdI?"ok":""}"></i>`).join("")}</div>
+      <div class="gnav"><button class="btn ghost" data-act="gdprev">Atrás</button>${last?`<button class="btn" data-act="gdend">${gdPath==="padre"?"¡Crear mi familia!":"¡Crear mi perfil!"}</button>`:`<button class="btn" data-act="gdnext">Siguiente</button>`}</div>`}
+    <button class="link" data-act="gdskip">${intro?"Saltar la guía":"Salir de la guía"}</button></div>`;
+}
 function welcome(){
+  if(!wstep&&!family&&!guideSeen())wstep="guide";
+  if(wstep==="guide")return guideScreen();
   const demo=`<div class="device" style="--shell:#7C5CFF"><div class="dev-top"><span class="pname">Fichamigo</span><span class="stage">DEMO</span></div>
     <div class="screen"><canvas id="lcd" width="128" height="120" data-mode="demo" aria-label="Mascota de ejemplo caminando"></canvas></div><div class="status">Cumple tus deberes. Cuida a tu mascota.</div></div>`;
   if(wstep==="parent"&&remote&&!family)return `<div class="welcome">${demo}<form class="pinbox" data-form="fcreate"><h2>Crea tu familia</h2>
@@ -2361,6 +2427,7 @@ function welcome(){
     <button class="btn block" type="submit">Abrir mi Fichamigo</button><button class="link" type="button" data-act="wstep" data-v="kid">Volver</button></form></div>`;
   return `<div class="welcome">${demo}<h1>Fichamigo</h1><p class="lead">Cada deber cumplido te da fichas. Con ellas alimentas y cuidas a tu mascota, y ahorras para la meta que pactaste en casa.</p>
     ${installEvt?`<button class="btn coinb block" data-act="installapp" style="max-width:360px">📲 Instalar Fichamigo en este celular</button>`:""}
+    <button class="gstart" data-act="guide"><img src="fm/p00.webp" alt="" width="40">¿Primera vez? Te explico cómo empezar</button>
     <div class="choices"><button class="btn block" data-act="wstep" data-v="kid">${devKid&&S.kids[devKid]?`Entrar como ${esc(S.kids[devKid].name)}`:"Soy un joven"}</button><button class="btn ghost block" data-act="wstep" data-v="parent">Soy papá o mamá</button>${remote?`<button class="btn ghost block" data-act="wstep" data-v="teacher">Soy docente</button>`:""}</div>
     <p class="legal"><a href="/privacidad.html" target="_blank" rel="noopener">Privacidad</a> · <a href="/terminos.html" target="_blank" rel="noopener">Términos</a></p></div>`;
 }
@@ -2700,7 +2767,7 @@ function pFamilia(){
   const pend=waiting.length?`<section><div class="sechead"><h2>Dispositivos esperando</h2><p>Perfiles creados que aún no están en tu familia</p></div><div class="list">${waiting.map(k=>`<div class="item">${av(k)}<div class="body"><div class="t">${esc(k.name)}</div>
     <div class="meta"><span>Código <span class="code">${esc(k.code)}</span></span><span>Creado ${fmtTs(k.createdAt)}</span></div></div>
     <div class="actions"><button class="btn okb sm" data-act="linkkid" data-id="${k.id}">Agregar</button><button class="btn ghost sm" data-act="askkid" data-id="${k.id}">Usar este celular como suyo</button><button class="x" data-act="delkid" data-id="${k.id}">Quitar</button></div></div>`).join("")}</div></section>`:"";
-  return `${pend}<section><div class="sechead"><h2>Tu familia</h2><p>${kids.length} perfil${kids.length===1?"":"es"}</p></div>${cards||'<div class="empty">Aún no hay dispositivos en tu familia. En el celular de cada joven abre Fichamigo, elige “Soy un joven” y escribe aquí el código que aparece.</div>'}</section>
+  return `${pend}<section><div class="sechead"><h2>Tu familia</h2><p>${kids.length} perfil${kids.length===1?"":"es"}</p></div>${cards||'<div class="empty">Aún no hay dispositivos en tu familia. En el celular de cada joven abre Fichamigo, elige “Soy un joven” y escribe aquí abajo el código que aparece.</div>'}</section>
   <form class="form" data-form="link"><h2>Agregar dispositivo</h2>
     <p class="muted" style="font-size:.88rem">En el celular del joven abre Fichamigo y elige “Soy un joven”. Te mostrará un código de 6 dígitos.</p>
     <label class="f">Código del dispositivo<input id="l-code" inputmode="numeric" maxlength="6" pattern="[0-9]{6}" required placeholder="000000"></label>
@@ -2795,6 +2862,12 @@ document.addEventListener("click",async e=>{
     wstep=b.dataset.v;beep(880);render();return}
   if(a==="recover"){wkid=id;wstep="recover";render();return}
   if(a==="wback"){wstep=null;render();return}
+  if(a==="guide"){wstep="guide";gdPath=null;gdI=0;beep(880);render();return}
+  if(a==="gdpath"){gdPath=b.dataset.v;gdI=0;tune([[523,.06],[784,.08]]);render();return}
+  if(a==="gdnext"){gdI++;beep(880,.05);render();return}
+  if(a==="gdprev"){if(gdI>0)gdI--;else gdPath=null;beep(660,.05);render();return}
+  if(a==="gdskip"){guideDone();wstep=null;render();return}
+  if(a==="gdend"){guideDone();wstep=gdPath==="padre"?"parent":"kid";tune([[523,.06],[659,.06],[784,.1]]);render();return}
   if(a==="logout"){role=null;wstep=null;pview=null;foodOpen=false;saveRole();render();return}
   if(a==="ptab"){chatWith=null;chatFor=null;if(b.dataset.v==="amigos")famKids().forEach(k=>{syncProfile(k.id);loadFriends(k.id).then(render)});ptab=b.dataset.v;render();return}
   if(a==="ktab"){if(b.dataset.v==="chat"&&role&&role.r==="kid"){loadFriends(role.id).then(render);syncProfile(role.id)}chatWith=null;ktab=b.dataset.v;render();return}
