@@ -276,6 +276,24 @@ body.playing{overflow:hidden}
 .gbar{position:relative;height:26px;background:#E6E9F2;border:2px solid #23253A;border-radius:8px;overflow:hidden}
 .gzone{position:absolute;top:0;bottom:0;background:#7CFFB2;border-left:2px solid #14866A;border-right:2px solid #14866A}
 .gmark{position:absolute;top:50%;transform:translate(-50%,-50%);font-size:1.2rem;color:#E2A11B;text-shadow:0 0 2px #23253A}
+.gmapw{padding:10px;align-items:start;overflow:auto}
+.gmapc{width:min(560px,100%);gap:8px;padding:12px}
+.gmaph{display:flex;align-items:center;justify-content:space-between}
+.gmapbox{position:relative;border:3px solid #23253A;border-radius:12px;overflow:hidden;box-shadow:0 3px 0 #23253A}
+.gmapbox canvas{display:block;width:100%;height:auto;touch-action:none;cursor:crosshair}
+.gmz{position:absolute;transform:translate(-50%,-50%);font-size:.62rem;font-weight:900;color:#1B1F3B;background:rgb(255 255 255 / .75);padding:1px 6px;border-radius:999px;pointer-events:none;white-space:nowrap}
+.gmpin{position:absolute;transform:translate(-50%,-90%);width:30px;height:30px;border-radius:50%;background:#FF4D8D;border:2px solid #23253A;display:grid;place-items:center;padding:0;font-size:.95rem;box-shadow:0 2px 0 #23253A;cursor:pointer}
+.gmpin.ok{background:#22B573}.gmpin.on{background:#FFD60A;animation:gpulse 1s ease-in-out infinite}
+.gmpin{line-height:1;color:#fff}.gmpin::after{content:"";position:absolute;left:50%;bottom:-7px;translate:-50% 0;border:5px solid transparent;border-top:6px solid #23253A}
+@keyframes gpulse{50%{scale:1.15}}
+.gmme{position:absolute;transform:translate(-50%,-50%);width:16px;height:16px;border-radius:50%;background:#4D96FF;border:3px solid #fff;box-shadow:0 0 0 2px #23253A;pointer-events:none}
+.gmme i{position:absolute;inset:-8px;border-radius:50%;border:2px solid #4D96FF;animation:gring 1.4s ease-out infinite}
+@keyframes gring{from{scale:.5;opacity:1}to{scale:1.6;opacity:0}}
+.gmlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(135px,1fr));gap:6px}
+.gml{display:flex;align-items:center;gap:6px;background:#fff;color:#1B1F3B;border:2px solid #23253A;border-radius:10px;padding:6px 8px;font-weight:800;font-size:.82rem;text-align:left;box-shadow:0 2px 0 #23253A;cursor:pointer}
+.gml span{font-size:1.1rem}.gml.ok{background:#E3F6E7}
+.gres{background:#FFD60A;cursor:pointer}
+.gchip svg{width:15px;height:15px}
 .gover{position:absolute;inset:0;display:grid;place-items:center;background:rgb(10 12 25 / .45);padding:16px;border-radius:22px}
 .gcard{background:var(--bg);color:var(--ink);border:3px solid #23253A;border-radius:16px;padding:18px;display:grid;gap:10px;width:min(340px,100%);box-shadow:0 5px 0 #23253A}
 .gcard h2{font-size:1.2rem}
@@ -1767,7 +1785,8 @@ function drawDemo(c,ts,Hl){
 function paintAll(){
   document.querySelectorAll("canvas[data-paint]").forEach(cv=>{
     const c=cv.getContext("2d"), [k,a,b]=cv.dataset.paint.split(":");c.clearRect(0,0,cv.width,cv.height);
-    if(k==="mini"){c.setTransform(cv.width/128,0,0,cv.width/128,0,0);c.imageSmoothingEnabled=false;drawKidScene(c,a,1000,false,120);c.setTransform(1,0,0,1,0,0)}
+    if(k==="worldmap"){if(WORLD)paintMap(cv)}
+    else if(k==="mini"){c.setTransform(cv.width/128,0,0,cv.width/128,0,0);c.imageSmoothingEnabled=false;drawKidScene(c,a,1000,false,120);c.setTransform(1,0,0,1,0,0)}
     else if(k==="food"){c.setTransform(cv.width/9,0,0,cv.width/9,0,0);drawFood(c,a,1,1);c.setTransform(1,0,0,1,0,0)}
     else if(k==="crit"){const known=b==="1";c.setTransform(cv.width/64,0,0,cv.width/64,0,0);drawCritter(c,a,32,30,1000,40);if(!known){c.globalCompositeOperation="source-atop";R(c,0,0,64,48,"#7C86A2");}
       c.globalCompositeOperation="destination-over";oval(c,32,40,18,4,known?"#9ED36A":"#C9CFDD");R(c,0,0,64,48,known?"#E3F6E7":"#E6E9F2");c.globalCompositeOperation="source-over";c.setTransform(1,0,0,1,0,0)}
@@ -1873,7 +1892,7 @@ function gInteract(){if(!G||G.end||G.enc)return;
 function askHome(){gSay(["¿Volver a casa? Lo que recogiste se guarda."],{ask:"home"})}
 function gameStep(now){
   if(G&&(G.enc||G.dialog||MG||G.end)){G.path=null;G.after=null}
-  if(!G||G.end||G.enc||G.dialog||MG)return;
+  if(!G||G.end||G.enc||G.dialog||MG||G.map)return;
   if(G.mv){if(now-G.mv.start>=STEP_MS){G.x=G.mv.tx;G.y=G.mv.ty;G.mv=null;afterStep()}return}
   let dir=G.dir;
   if(dir)G.path=null;
@@ -1975,6 +1994,9 @@ function drawGame(c,ts,Hl){
   WORLD.houses.forEach(h=>obj.push({y:(h.y+3)*TS-1,d:()=>gHouse(c,h,h.x*TS-camX,h.y*TS-camY,ts)}));
   WORLD.npcs.forEach(n=>obj.push({y:n.y*TS+14,d:()=>{const sx=n.x*TS-camX,sy=n.y*TS-camY;sh(c,sx+8,sy+15,6,2,.22);const near=Math.abs(n.x-G.x)+Math.abs(n.y-G.y)<=2;
     drawHumanSticker(c,{x:sx+8,base:sy+15,h:28,av:n.av,face:near?(G.x<n.x?-1:G.x>n.x?1:0):0,pose:near&&Math.floor(ts/900)%2?"wave":"idle",t:ts+n.x*311,expr:near?"laugh":"smile"})}}));
+  LANDMARKS.forEach(l=>{if(l.home)return;const sx=l.x*TS-camX,sy=l.y*TS-camY;if(sx<-20||sy<-30||sx>W+20||sy>H+20)return;const on=G.dest&&G.dest.id===l.id,ok=G.visited&&G.visited.has(l.id);
+    obj.push({y:l.y*TS+2,d:()=>{const w=Math.sin(ts/250)*1.5;sh(c,sx+12,sy+15,3,1);c.fillStyle="#5D4037";c.fillRect(sx+11,sy-2,1.6,17);c.fillStyle=ok?"#22B573":on?"#FFD60A":"#FF4D8D";c.beginPath();c.moveTo(sx+12.6,sy-2);c.lineTo(sx+20,sy+1+w*.4);c.lineTo(sx+12.6,sy+4);c.closePath();c.fill();c.strokeStyle="#23253A";c.lineWidth=.6;c.stroke()}})});
+  if(G.dest&&G.path){const sx=G.dest.x*TS-camX+8,sy=G.dest.y*TS-camY+12,k=(ts%1200)/1200;c.save();c.globalAlpha=.8-k*.6;c.strokeStyle="#FFD60A";c.lineWidth=1.4;c.beginPath();c.ellipse(sx,sy,3+k*6,1.5+k*3,0,0,Math.PI*2);c.stroke();c.restore()}
   WORLD.decor.forEach(o=>obj.push({y:o.y*TS+14,d:()=>{const sx=o.x*TS-camX,sy=o.y*TS-camY;sh(c,sx+8,sy+15,8,2);drawStk(c,o.id,sx+8,sy+16,o.h)}}));
   drawOthers(obj,c,camX,camY,ts);
   WORLD.signs.forEach(s=>obj.push({y:s.y*TS+14,d:()=>{const sx=s.x*TS-camX,sy=s.y*TS-camY;sh(c,sx+8,sy+15,5,1);drawStk(c,"letrero",sx+8,sy+16,17)}}));
@@ -2013,29 +2035,61 @@ function gameScreen(){
     <p class="muted" style="font-size:.85rem">${(G.team||[]).length?`${(G.team||[]).map(id=>esc((S.pets[id]||{}).name||"Tu fichamigo")).join(" y ")} ${(G.team||[]).length>1?"volvieron felices":"volvió feliz"}, pero con un poquito de hambre.`:"¡Qué buen paseo! La próxima vez lleva a tus fichamigos bien alimentados."}</p>
     <button class="btn block" data-act="gexit">Volver a casa</button></div></div>`}
   if(MG)over=miniScreen();
+  else if(G.map)over=mapScreen();
   else if(G.enc){const e=G.enc,c=e.c,gm=MINIS[CRIT_GAME[c.id]];
     over=`<div class="gdlg"><p>¡Apareció ${c.a||"un"} <b>${c.n}</b> salvaje!${c.rare?" ✦ Es muy raro":""} Quiere jugar a <b>${gm.n}</b>.</p><div class="gbtns"><button class="btn" data-act="gplay">¡A jugar!</button><button class="btn ghost" data-act="grun">Seguir caminando</button></div></div>`}
   else if(G.dialog){const d=G.dialog;over=`<div class="gdlg" ${d.ask?"":`data-act="gnext"`}><p>${esc(d.lines[d.i])}</p>${d.ask==="player"?`<div class="gbtns"><button class="btn" data-act="pwave">👋 Saludar</button>${!d.op.fr?`<button class="btn coinb" data-act="pfriend">Pedir amistad</button>`:""}<button class="btn ghost" data-act="gstay">Seguir</button></div>`:d.ask==="npc"?`<div class="gbtns"><button class="btn" data-act="npcplay">¡Sí, juguemos!</button><button class="btn ghost" data-act="gstay">Ahora no</button></div>`:d.ask?`<div class="gbtns"><button class="btn" data-act="gfinish">Sí, volver a casa</button><button class="btn ghost" data-act="gstay">Seguir explorando</button></div>`:`<span class="gmore">▼</span>`}</div>`}
   return `<div class="play game" style="--shell:${esc(k.color||COLORS[0])}">
     <div class="lcdwrap"><canvas id="gcv" width="256" height="320" aria-label="Mapa de exploración"></canvas>
       <div class="ghud"><span class="gchip" id="gzone">${G.zone}</span><span class="gchip">${cI("m")}<b id="gcoins" class="num">${G.coins}</b></span>
-        <span class="gen" title="Energía"><i id="genergy" style="width:${G.energy/ENERGY*100}%"></i></span><button class="gchip gx" data-act="ghome">Casa</button></div>
+        <span class="gen" title="Energía"><i id="genergy" style="width:${G.energy/ENERGY*100}%"></i></span><button class="gchip gx" data-act="gmap">${MAPICON}Mapa</button><button class="gchip" data-act="ghome">Casa</button>${G.dest&&!G.path&&!G.enc&&!G.dialog&&!MG&&!G.end?`<button class="gchip gres" data-act="gresume">▶ Seguir a ${esc(G.dest.n)}</button>`:""}</div>
       <div id="gbanner" class="gbanner px" hidden></div>
-      ${!G.end&&!G.enc&&!G.dialog&&!MG?`<div class="dpad" aria-label="Moverse">${["up","left","right","down"].map(d=>`<button data-dir="${d}" aria-label="${{up:"Arriba",down:"Abajo",left:"Izquierda",right:"Derecha"}[d]}">${{up:"▲",down:"▼",left:"◀",right:"▶"}[d]}</button>`).join("")}</div>
-      <button class="abtn" data-act="ga" aria-label="Hablar o abrir">A</button>`:""}
       ${over}
     </div></div>`;
 }
 document.addEventListener("pointerdown",e=>{const b=e.target.closest("[data-dir]");if(!b||!G)return;e.preventDefault();G.dir=b.dataset.dir;wake();try{b.setPointerCapture(e.pointerId)}catch(_){}});
 ["pointerup","pointercancel"].forEach(ev=>window.addEventListener(ev,e=>{if(G&&e.target.closest&&e.target.closest("[data-dir]"))G.dir=null;else if(G&&ev==="pointercancel")G.dir=null}));
 window.addEventListener("pointerup",()=>{if(G)G.dir=null});
+/* ---------- mapa del mundo y puntos de llegada ---------- */
+const LANDMARKS=[{id:"casa",n:"Tu casa",e:"🏠",x:20,y:21,home:1},{id:"fuente",n:"Fuente del pueblo",e:"⛲",x:25,y:28},{id:"cascada",n:"Cascada del bosque",e:"🌲",x:6,y:4},
+  {id:"lago",n:"Muelle del lago",e:"🛶",x:8,y:22},{id:"cima",n:"Cima nevada",e:"🏔️",x:53,y:6},{id:"playa",n:"Playa de Tito",e:"🏖️",x:55,y:31},
+  {id:"jardin",n:"Jardín de flores",e:"🌷",x:20,y:41},{id:"ruinas",n:"Ruinas del desierto",e:"🏜️",x:41,y:41}];
+const MAPC={"~":"#4FB3E8",B:"#B07A44","=":"#EBDCA8",R:"#9AA5B1",F:"#A9773F",":":"#F5E1A4","*":"#F7A8C8"};
+function mapTile(x,y){const t=WORLD.m[y][x],Z=WORLD.z[y][x],P=ZPAL[Z]||ZDEF;
+  if(t==="T")return Z==="Montaña Nevada"?"#2F7A5A":Z==="Playa Coral"?"#3CA35E":Z==="Desierto Dorado"?"#5E9C3A":"#2F8F4E";
+  if(t===",")return P.tg;if(t==="m")return "#E5484D";return MAPC[t]||P.g}
+function paintMap(cv){const c=cv.getContext("2d"),k=cv.width/MW;c.setTransform(1,0,0,1,0,0);
+  for(let y=0;y<MH;y++)for(let x=0;x<MW;x++){c.fillStyle=mapTile(x,y);c.fillRect(x*k,y*k,k+.5,k+.5)}
+  WORLD.houses.forEach(h=>{c.fillStyle="#23253A";c.fillRect(h.x*k-1,(h.y-1)*k-1,4*k+2,4*k+2);c.fillStyle=h.c;c.fillRect(h.x*k,(h.y-1)*k,4*k,4*k)});
+  c.strokeStyle="rgb(35 37 58 / .25)";c.lineWidth=1;c.strokeRect(.5,.5,cv.width-1,cv.height-1)}
+const ZLBL=[["Bosque Susurro",18,6],["Montaña Nevada",52,9],["Lago Espejo",7,27],["Pueblo Fichas",33,23],["Playa Coral",57,22],["Pradera Brillante",14,44],["Desierto Dorado",46,45]];
+function mapScreen(){const pc=(x,y)=>`left:${(x+.5)/MW*100}%;top:${(y+.5)/MH*100}%`;
+  return `<div class="gover gmapw"><div class="gcard gmapc"><div class="gmaph"><h2 class="px">Mapa del mundo</h2><button class="gchip" data-act="gmapx" aria-label="Cerrar mapa">✕</button></div>
+    <div class="gmapbox"><canvas id="gmapcv" width="512" height="384" data-paint="worldmap" aria-label="Mapa de todo el mundo libre. Toca un lugar para ir."></canvas>
+      ${ZLBL.map(([n,x,y])=>`<span class="gmz" style="${pc(x,y)}">${n}</span>`).join("")}
+      ${LANDMARKS.map(l=>`<button class="gmpin ${G.dest&&G.dest.id===l.id?"on":""} ${G.visited&&G.visited.has(l.id)?"ok":""}" style="${pc(l.x,l.y)}" data-act="gto" data-v="${l.id}" aria-label="Ir a ${l.n}">${l.e}</button>`).join("")}
+      <span class="gmme" style="${pc(G.x,G.y)}" aria-label="Estás aquí"><i></i></span></div>
+    <p class="muted" style="font-size:.85rem;margin:0">Toca un punto del mapa o un lugar de la lista y tu personaje camina solito hasta allá.</p>
+    <div class="gmlist">${LANDMARKS.map(l=>`<button class="gml ${G.visited&&G.visited.has(l.id)?"ok":""}" data-act="gto" data-v="${l.id}"><span>${l.e}</span>${l.n}${G.visited&&G.visited.has(l.id)?" ✓":""}</button>`).join("")}</div></div></div>`}
+function nearGoals(x,y){const out=[];for(let r=0;r<=3&&!out.length;r++)for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){if(Math.max(Math.abs(dx),Math.abs(dy))!==r)continue;const gx=x+dx,gy=y+dy;if(!blockedAt(gx,gy)&&!(gx===WORLD.door.x&&gy===WORLD.door.y))out.push({x:gx,y:gy})}return out}
+function gTravel(dest){G.map=false;const goals=nearGoals(dest.x,dest.y),path=goals.length?gPath(goals):null;
+  if(!path){render();toast("No encuentro camino hasta allá");return}
+  G.dest=dest;G.path=path;G.mark={x:dest.x,y:dest.y,t:performance.now()};
+  G.after={fn:()=>{const d=G.dest;G.dest=null;if(!d)return;G.visited=G.visited||new Set();const first=d.id&&!G.visited.has(d.id);if(d.id)G.visited.add(d.id);
+    if(d.home){askHome();return}
+    if(first){G.coins+=3;G.pop={x:G.x,y:G.y,v:3,t:performance.now()};gHud()}
+    G.banner={t:first?`¡Llegaste a ${d.n}! +3`:`¡Llegaste a ${d.n}!`,until:performance.now()+2600};tune([[523,.06],[659,.06],[784,.12]]);render()}};
+  tune([[784,.05],[988,.08]]);render()}
+function mapTap(e){const cv=e.target,r=cv.getBoundingClientRect(),tx=Math.floor((e.clientX-r.left)/r.width*MW),ty=Math.floor((e.clientY-r.top)/r.height*MH);
+  if(tx<0||ty<0||tx>=MW||ty>=MH)return;gTravel({n:WORLD.z[ty][tx]||"ese lugar",x:tx,y:ty})}
+document.addEventListener("pointerdown",e=>{if(e.target.id==="gmapcv"){e.preventDefault();mapTap(e)}});
 /* tocar el mapa: el personaje camina hasta ahí; si tocas a alguien o algo, va y lo usa */
 function gPath(goals){const key=(x,y)=>x+","+y,want=new Set(goals.map(g=>key(g.x,g.y))),prev=new Map([[key(G.x,G.y),null]]),q=[[G.x,G.y]];
   if(want.has(key(G.x,G.y)))return [];
   while(q.length){const [x,y]=q.shift();for(const [dx,dy] of [[0,-1],[1,0],[0,1],[-1,0]]){const nx=x+dx,ny=y+dy,k=key(nx,ny);if(prev.has(k)||blockedAt(nx,ny)||(nx===WORLD.door.x&&ny===WORLD.door.y))continue;
     prev.set(k,key(x,y));if(want.has(k)){const out=[];let c=k;while(c&&c!==key(G.x,G.y)){const [a,b]=c.split(",").map(Number);out.unshift({x:a,y:b});c=prev.get(c)}return out}q.push([nx,ny])}
     if(prev.size>3200)break}return null}
-function gTap(e){if(!G||G.end||G.enc||G.dialog||MG||!G.cam)return;const cv=e.target,k=cv.width/128,r=cv.getBoundingClientRect(),H=cv.height/k,sc=Math.min(r.width/128,r.height/H);
+function gTap(e){if(!G||G.end||G.enc||G.dialog||MG||G.map||!G.cam)return;G.dest=null;const cv=e.target,k=cv.width/128,r=cv.getBoundingClientRect(),H=cv.height/k,sc=Math.min(r.width/128,r.height/H);
   const lx=(e.clientX-r.left-(r.width-128*sc)/2)/sc,ly=(e.clientY-r.top-(r.height-H*sc)/2)/sc,wx=lx+G.cam.x,wy=ly+G.cam.y,tx=Math.floor(wx/TS),ty=Math.floor(wy/TS);
   wake();G.dir=null;
   const at=(x,y)=>otherAt(x,y)||WORLD.npcs.find(o=>o.x===x&&o.y===y)||WORLD.signs.find(o=>o.x===x&&o.y===y)||WORLD.chests.find(o=>o.x===x&&o.y===y);
@@ -2886,6 +2940,10 @@ document.addEventListener("click",async e=>{
   if(a==="ga"||a==="gnext"){gInteract();return}
   if(a==="gfinish"){finishGame();return}
   if(a==="gstay"){G.dialog=null;render();return}
+  if(a==="gmap"){if(!G.end&&!G.enc&&!MG&&!G.dialog){G.map=true;G.path=null;G.after=null;beep(880,.05);render()}return}
+  if(a==="gmapx"){G.map=false;render();return}
+  if(a==="gto"){const l=LANDMARKS.find(x=>x.id===b.dataset.v);if(l)gTravel(l);return}
+  if(a==="gresume"){if(G.dest)gTravel(G.dest);return}
   if(a==="ghome"){if(!G.end&&!G.enc&&!MG)askHome();return}
   if(a==="gplay"){startMini(CRIT_GAME[G.enc.c.id],{crit:G.enc.c});return}
   if(a==="npcplay"){const n=G.dialog.npc;G.dialog=null;startMini(NPC_GAME[n.n],{npc:n});return}
