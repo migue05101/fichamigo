@@ -1947,18 +1947,19 @@ function rigDraw(x,av,o){
   /* brazos */
   const tpT=av.tp&&RIGM["t"+av.tp+"_"+v+"_t"],tpU=av.tp&&(RIGM["t"+av.tp+"_"+v+"_u0"]||RIGM["t"+av.tp+"_"+v+"_u1"]),longS=!!(tpT&&tpU&&tpU[1]/tpT[1]>.7);
   const armP=[P(b+v+"_arm0"),P(b+v+"_arm1")];
-  const armD=i=>{const p=armP[i];if(!p)return;const m=RIGM[b+v+"_arm"+i],sx=i?RSK.shX:-RSK.shX;x.save();x.translate(sx,RSK.shY);
+  const armD=i=>{const p=armP[i];if(!p)return;const m=RIGM[b+v+"_arm"+i],sx=(i?1:-1)*(RSK.shX+(longS?RSLV.sx:0));x.save();x.translate(sx,RSK.shY);
     x.save();x.rotate((arm[i]-m[4])*D);x.drawImage(p.im,-m[2],-m[3],p.w,p.h);x.restore();
-    if(longS){const u=P("t"+av.tp+"_"+v+"_u"+i)||P("t"+av.tp+"_"+v+"_u"+(1-i));if(u){x.rotate(arm[i]*D);const w=RSLV.w,h=m[5]*RSLV.len+RSLV.up;x.drawImage(u.im,-w/2,-RSLV.up,w,h)}}
+    if(longS){const u=P("t"+av.tp+"_"+v+"_u"+i)||P("t"+av.tp+"_"+v+"_u"+(1-i));if(u){const sg=i?1:-1;x.rotate((arm[i]-(i?-1:1)*RSLV.r0)*D);const w=u.w*RSLV.sc,h=u.h*RSLV.sc;x.drawImage(u.im,-w/2+sg*RSLV.ox,-RSLV.up,w,h)}}
     x.restore()};
   legH(0,0);legH(1,1);
   const up=i=>Math.abs(arm[i])>75;
-  if(!up(0))armD(0);if(!up(1))armD(1);
+  if(!longS){if(!up(0))armD(0);if(!up(1))armD(1)}
   /* torso + ropa */
   const tw=torso.w;x.save();x.translate(0,RSK.torsoBot);x.scale(1,sq);if(av.tp){x.save();x.beginPath();x.rect(-tw*.27,-torso.h-2,tw*.54,torso.h*.5);x.rect(-tw*.5,-torso.h*.52,tw,torso.h*.54);x.clip();x.drawImage(torso.im,-tw*.46,-torso.h,tw*.92,torso.h);x.restore()}else x.drawImage(torso.im,-tw/2,-torso.h,tw,torso.h);
   if(av.bt){const p=P("p"+av.bt+"_"+v+"_h");if(p){const w=tw*.98,h=w*p.h/p.w;x.drawImage(p.im,-w/2,-h*.92+6,w,h)}}
   if(av.tp){const p=P("t"+av.tp+"_"+v+"_t");if(p){const w=tw*RSLV.tw,h=w*p.h/p.w;x.drawImage(p.im,-w/2,-torso.h+RSLV.ty,w,h)}}
   x.restore();
+  if(longS){if(!up(0))armD(0);if(!up(1))armD(1)}
   /* cabeza */
   x.save();x.translate(0,RSK.headBot*sq);x.rotate(hr*D);
   const hw=head.w,hh=head.h,top=-hh;
@@ -1983,7 +1984,7 @@ function rigDraw(x,av,o){
   /* accesorios de cabeza */
   const acc=(id,cb)=>{if(!id)return;const a=RIG_ACC.find(q=>q[0]===id);if(!a)return;const p=P("a"+id+"_"+(v==="b"&&a[1]!=="clip"?"b":"f"));if(p)cb(p,a[1])};
   acc(av.ae,(p)=>{const w=hw*1.14,h=w*p.h/p.w;x.drawImage(p.im,-w/2,top+hh*.62-h/2,w,h)});
-  if(v==="f")acc(av.af,(p)=>{const w=hw*.66,h=w*p.h/p.w;x.drawImage(p.im,-w/2,top+hh*.6-h/2,w,h)});
+  if(v==="f")acc(av.af,(p)=>{const w=hw*RSLV.gw,h=w*p.h/p.w;x.drawImage(p.im,-w/2,top+hh*RSLV.gy-h/2,w,h)});
   acc(av.ac,(p)=>{const w=hw*.2,h=w*p.h/p.w;x.drawImage(p.im,hw*.3-w/2,top+hh*.2-h/2,w,h)});
   acc(av.ah,(p,k)=>{const w=hw*(k==="crown"?.62:k==="band"?.98:1.12),h=w*p.h/p.w,by=top+hh*(k==="crown"?.12:k==="band"?.36:.38);x.drawImage(p.im,-w/2,by-h,w,h)});
   x.restore();
@@ -1991,7 +1992,7 @@ function rigDraw(x,av,o){
   x.restore();
   return true;
 }
-const RIG_H=560;const RSLV={w:84,len:.62,up:52,tw:1.13,ty:17},RHAIR={s:1.02,y:.27};
+const RIG_H=560;const RSLV={gw:.6,gy:.58,sc:1.12,up:50,ox:0,r0:20,sx:6,tw:1.13,ty:17},RHAIR={s:1.02,y:.27};
 const ROFF={};
 const RPRE={};
 function rigPreload(av){const k=JSON.stringify(av);if(RPRE[k])return;RPRE[k]=1;const b=av.g==="nina"?"g":"b";
