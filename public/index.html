@@ -730,6 +730,17 @@ body.homescr .wrap{padding-top:calc(env(safe-area-inset-top,0px) + 14px)}
 .gpanel{max-height:calc(100% - 20px);overflow:auto;display:grid;gap:10px;width:min(560px,100%)}
 .gleft{gap:8px}.gleft .sbtn .ic{width:46px;height:42px;font-size:1.4rem}
 .rside{gap:6px}.rside .sbtn .ic{width:46px;height:40px;font-size:1.35rem}
+.homeart{position:relative;width:min(100%,calc((100dvh - 70px) * 0.75),560px);aspect-ratio:1086/1448;border-radius:26px;overflow:hidden;box-shadow:0 14px 34px rgb(59 15 140 / .4);margin-inline:auto}
+.homebg{position:absolute;inset:0;width:100%;height:100%;display:block;user-select:none;-webkit-user-drag:none}
+.homecv{position:absolute;border-radius:9%/10%;overflow:hidden;border:4px solid rgb(255 255 255 / .9);box-shadow:0 0 0 3px rgb(139 92 246 / .6),0 0 28px rgb(255 214 120 / .55),0 10px 24px rgb(59 15 140 / .4);background:#E9DDFF}
+.homecv canvas{display:block;width:100%;height:100%;object-fit:cover}
+.hot{position:absolute;border:0;background:transparent;border-radius:999px;padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .12s,background .12s}
+.hot:active{transform:scale(.97);background:rgb(255 255 255 / .18)}
+.hot:focus-visible{outline:3px solid #FFD43B;outline-offset:2px}
+html:has(body.homescr),body.homescr{background:radial-gradient(120% 70% at 50% 40%,#7A3BD6,#4C1A9A) fixed;background-color:#4C1A9A}
+body.homescr .wrap{padding-top:calc(env(safe-area-inset-top,0px) + 8px)}
+body.homescr .legal,body.homescr .legal a{color:#E9DDFF}
+.welcome.home{gap:10px;min-height:calc(100dvh - env(safe-area-inset-top,0px) - 30px);align-content:center}
 </style>
 
 <div class="wrap">
@@ -2797,13 +2808,14 @@ function welcome(){
     <label class="f">Código del Fichamigo (6 dígitos)<input id="kr-code" data-keep="no" inputmode="numeric" maxlength="6" pattern="[0-9]{6}" autocomplete="off" required></label>
     <label class="f">PIN de papá o mamá<input id="kr-pin" data-keep="no" type="password" inputmode="numeric" maxlength="4" pattern="[0-9]{4}" autocomplete="off" required></label>
     <button class="btn block" type="submit">Abrir mi Fichamigo</button><button class="link" type="button" data-act="wstep" data-v="kid">Volver</button></form></div>`;
-  return `<div class="welcome home"><span class="logo big">Ficha<b>migo</b></span><span class="tagline">✦ Aprende, cumple y crece ✦</span>
-    <div class="homegrid"><div class="feats"><div class="feat"><span class="e">📋</span>Cumple tus deberes</div><div class="feat"><span class="e">🐾</span>Cuida a tu mascota</div><div class="feat"><span class="e">🎯</span>Alcanza tus metas</div></div>
-      <div class="herocv"><canvas id="lcd" width="128" height="120" data-mode="demo" aria-label="Un niño y su fichamigo en su cuarto"></canvas></div></div>
+  return `<div class="welcome home"><div class="homeart"><img class="homebg" src="home.webp" alt="Fichamigo: aprende, cumple y crece. Cumple tus deberes, cuida a tu mascota y alcanza tus metas.">
+    <div class="homecv" style="left:24.68%;top:20.17%;width:67.40%;height:45.58%"><canvas id="lcd" width="128" height="120" data-mode="demo" aria-label="Un niño y su fichamigo en su cuarto"></canvas></div>
+    <button class="hot" style="left:2.76%;top:16.57%;width:20.72%;height:45.23%" data-act="guide" aria-label="Cumple tus deberes, cuida a tu mascota y alcanza tus metas: ver cómo funciona"></button>
+    <button class="hot" style="left:10.87%;top:66.44%;width:77.53%;height:9.67%" data-act="guide" aria-label="¿Primera vez? Te explicamos cómo empezar"></button>
+    <button class="hot" style="left:12.15%;top:78.18%;width:75.51%;height:8.29%" data-act="wstep" data-v="kid" aria-label="${devKid&&S.kids[devKid]?`Entrar como ${esc(S.kids[devKid].name)}`:"Entrar a mi Fichamigo"}"></button>
+    <button class="hot" style="left:10.68%;top:87.57%;width:39.23%;height:6.49%" data-act="wstep" data-v="parent" aria-label="Soy papá o mamá"></button>
+    <button class="hot" style="left:51.20%;top:87.57%;width:38.12%;height:6.49%" data-act="wstep" data-v="teacher" aria-label="Soy docente"></button></div>
     ${installEvt?`<button class="btn coinb block" data-act="installapp" style="max-width:480px">📲 Instalar Fichamigo en este celular</button>`:""}
-    <button class="gstart" data-act="guide"><img src="fm/p00.webp" alt="" width="54"><span style="text-align:left;line-height:1.2"><b style="font-size:1.05rem">¿Primera vez?</b><br><span style="font-weight:500">Te explicamos cómo empezar.</span></span><span class="go">▶</span></button>
-    <button class="btn bigyel" data-act="wstep" data-v="kid">🎮 ${devKid&&S.kids[devKid]?`Entrar como ${esc(S.kids[devKid].name)}`:"Entrar a mi Fichamigo"}</button>
-    <div class="duo"><button class="btn ${remote?"":"one"}" data-act="wstep" data-v="parent">👨‍👧 Soy papá o mamá</button>${remote?`<button class="btn" data-act="wstep" data-v="teacher">🎓 Soy docente</button>`:""}</div>
     <p class="legal"><a href="/privacidad.html" target="_blank" rel="noopener">Privacidad</a> · <a href="/terminos.html" target="_blank" rel="noopener">Términos</a></p></div>`;
 }
 
