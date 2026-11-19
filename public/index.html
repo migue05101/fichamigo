@@ -706,6 +706,30 @@ body.homescr .wrap{padding-top:calc(env(safe-area-inset-top,0px) + 14px)}
 .ghud{display:grid!important;grid-template-columns:auto 1fr auto;align-items:center;gap:6px 8px}.ghud .gexp{justify-self:start}.ghud .gmapbtn{grid-row:1/3;grid-column:3;align-self:start}.ghud .gchip,.ghud .gen,.ghud .gres{grid-row:2}.ghud .gen{grid-column:2;width:auto;max-width:140px}
 .gleft{top:118px}
 .gbanner{top:110px;font-family:var(--font-title);border-radius:999px;background:linear-gradient(#8B5CF6,#6D28D9);border:3px solid #fff;box-shadow:0 4px 0 #3B0F8C}
+
+.achs{display:grid;gap:8px}
+.ach{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;background:linear-gradient(#FFFFFF,#F4EEFF);border:3px solid #fff;border-radius:22px;padding:8px 10px;box-shadow:0 4px 12px rgb(91 33 182 / .12),0 0 0 1.5px #E3D8FF}
+.ach .am{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;font-size:1.7rem;background:radial-gradient(circle at 40% 30%,#F1EDF8,#D4CCE6);border:3px solid #fff;box-shadow:0 3px 0 #BDB2D6;filter:grayscale(.2)}
+.ach.on .am{background:radial-gradient(circle at 40% 30%,#FFF6B0,#FFC928);box-shadow:0 3px 0 #C99400,0 0 0 3px #FFE873;filter:none}
+.ach.on:not(.cl){box-shadow:0 0 0 3px #FFC928,0 6px 16px rgb(255 180 0 / .3);animation:achglow 1.6s ease-in-out infinite}
+@keyframes achglow{50%{box-shadow:0 0 0 3px #FFC928,0 6px 22px rgb(255 180 0 / .55)}}
+.ach .ab{display:grid;gap:2px;min-width:0}.ach .ab b{font-family:var(--font-title);font-weight:600;color:#2A1466;font-size:1rem}.ach .ab small{color:#5B4A99;font-weight:700;font-size:.78rem;line-height:1.2}
+.ach .ap{position:relative;height:14px;border-radius:999px;background:#E2DAF5;overflow:hidden;margin-top:2px}.ach .ap i{position:absolute;inset:0 auto 0 0;background:linear-gradient(#C4A5FF,#8B5CF6);border-radius:999px}.ach .ap em{position:absolute;inset:0;display:grid;place-items:center;font-style:normal;font-size:.66rem;font-weight:900;color:#2A1466}
+.ach .rw{display:inline-flex;gap:3px;align-items:center;font-family:var(--font-title);font-weight:600;color:#6B5FA0}
+.ach .btn .coin{--s:16px}
+@media (max-width:460px){.ach{grid-template-columns:auto 1fr}.ach .ar{grid-column:2;justify-self:start}}
+.gpanel .ach{grid-template-columns:auto 1fr}.gpanel .ach .ar{grid-column:2;justify-self:start}
+.invg{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px}
+.inv{display:grid;justify-items:center;gap:2px;text-align:center;background:linear-gradient(#FFFFFF,#F4EEFF);border:3px solid #fff;border-radius:18px;padding:8px 4px;box-shadow:0 3px 10px rgb(91 33 182 / .12),0 0 0 1.5px #E3D8FF}
+.inv .ii{width:64px;height:64px;display:grid;place-items:center;font-size:2.2rem;overflow:hidden}.inv .ii img{max-width:64px!important;max-height:64px!important;width:auto;height:auto}
+.inv .ii img{max-width:100%;max-height:100%;object-fit:contain;filter:drop-shadow(1.5px 0 0 #fff) drop-shadow(-1.5px 0 0 #fff) drop-shadow(0 1.5px 0 #fff) drop-shadow(0 -1.5px 0 #fff) drop-shadow(0 2px 3px rgb(76 29 149 / .2))}
+.inv b{font-family:var(--font-title);font-weight:600;font-size:.8rem;color:#2A1466;line-height:1.1}.inv small{font-size:.68rem;color:#6B5FA0;font-weight:700}
+.inv .sw{width:44px;height:44px;border-radius:50%;border:3px solid #fff;box-shadow:0 2px 0 rgb(0 0 0 / .15)}
+.inv .md{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 40% 30%,#FFF6B0,#FFC928);border:3px solid #fff;box-shadow:0 3px 0 #C99400;font-size:1.6rem}
+.hero .hart{font-size:3.2rem}
+.gpanel{max-height:calc(100% - 20px);overflow:auto;display:grid;gap:10px;width:min(560px,100%)}
+.gleft{gap:8px}.gleft .sbtn .ic{width:46px;height:42px;font-size:1.4rem}
+.rside{gap:6px}.rside .sbtn .ic{width:46px;height:40px;font-size:1.35rem}
 </style>
 
 <div class="wrap">
@@ -2201,7 +2225,7 @@ function gInteract(){if(!G||G.end||G.enc)return;
 function askHome(){gSay(["¿Volver a casa? Lo que recogiste se guarda."],{ask:"home"})}
 function gameStep(now){
   if(G&&(G.enc||G.dialog||MG||G.end)){G.path=null;G.after=null}
-  if(!G||G.end||G.enc||G.dialog||MG||G.map)return;
+  if(!G||G.end||G.enc||G.dialog||MG||G.map||G.panel)return;
   if(G.mv){if(now-G.mv.start>=STEP_MS){G.x=G.mv.tx;G.y=G.mv.ty;G.mv=null;afterStep()}return}
   let dir=G.dir;
   if(dir)G.path=null;
@@ -2234,7 +2258,7 @@ async function finishGame(){
   const p=S.pets[kid],old=new Set(p.friends||[]),nf=[...G.friends].filter(f=>!old.has(f));
   G.end={coins:G.coins,award,nf};G.dialog=null;G.enc=null;render();
   try{if(award>0)await ledger(kid,"juego",award,"Exploración",null,"m");
-    const fr=G?[...G.friends]:[];await petWrite(kid,pp=>({friends:[...new Set([...(pp.friends||[]),...fr])]}));
+    const fr=G?[...G.friends]:[];const vis=G&&G.visited?[...G.visited]:[];await petWrite(kid,pp=>({friends:[...new Set([...(pp.friends||[]),...fr])],visited:[...new Set([...(pp.visited||[]),...vis])]}));
     for(const id of (G&&G.team)||[])await petWrite(id,pp=>({hunger:clamp(pp.hunger-10),happy:clamp(pp.happy+15)}))}catch(e){}
 }
 function gHud(){if(!G)return;const a=document.getElementById("gcoins");if(a)a.textContent=G.coins;const e=document.getElementById("genergy");if(e)e.style.width=(G.energy/ENERGY*100)+"%";const z=document.getElementById("gzone");if(z)z.textContent=G.zone}
@@ -2345,6 +2369,7 @@ function gameScreen(){
     <button class="btn block" data-act="gexit">Volver a casa</button></div></div>`}
   if(MG)over=miniScreen();
   else if(G.map)over=mapScreen();
+  else if(G.panel){const m=money(G.kid);over=`<div class="gover gmapw"><div class="gcard gmapc gpanel"><div class="gmaph"><span></span><button class="gchip" data-act="gpanelx" aria-label="Cerrar">✕</button></div>${G.panel==="logros"?kLogros(G.kid,m):kInventario(G.kid,m)}</div></div>`}
   else if(G.enc){const e=G.enc,c=e.c,gm=MINIS[CRIT_GAME[c.id]];
     over=`<div class="gdlg"><p>¡Apareció ${c.a||"un"} <b>${c.n}</b> salvaje!${c.rare?" ✦ Es muy raro":""} Quiere jugar a <b>${gm.n}</b>.</p><div class="gbtns"><button class="btn" data-act="gplay">¡A jugar!</button><button class="btn ghost" data-act="grun">Seguir caminando</button></div></div>`}
   else if(G.dialog){const d=G.dialog;over=`<div class="gdlg" ${d.ask?"":`data-act="gnext"`}><p>${esc(d.lines[d.i])}</p>${d.ask==="player"?`<div class="gbtns"><button class="btn" data-act="pwave">👋 Saludar</button>${!d.op.fr?`<button class="btn coinb" data-act="pfriend">Pedir amistad</button>`:""}<button class="btn ghost" data-act="gstay">Seguir</button></div>`:d.ask==="npc"?`<div class="gbtns"><button class="btn" data-act="npcplay">¡Sí, juguemos!</button><button class="btn ghost" data-act="gstay">Ahora no</button></div>`:d.ask?`<div class="gbtns"><button class="btn" data-act="gfinish">Sí, volver a casa</button><button class="btn ghost" data-act="gstay">Seguir explorando</button></div>`:`<span class="gmore">▼</span>`}</div>`}
@@ -2353,7 +2378,7 @@ function gameScreen(){
       <div class="ghud"><span class="gzn"><span class="e">🌎</span><span><b>Mundo Libre</b><small id="gzone">${G.zone}</small></span></span><span class="gexp" title="Lugares descubiertos"><span>Explorador</span><span class="eb"><i style="width:${Math.round(((G.visited&&G.visited.size)||0)/(LANDMARKS.length)*100)}%"></i></span>🧰</span>
         <button class="gmapbtn gx" data-act="gmap" aria-label="Abrir mapa"><span class="ic">🗺️</span><span class="lb">Mapa</span></button>
         <span class="gchip">${cI("m")}<b id="gcoins" class="num">${G.coins}</b></span><span class="gen" title="Energía"><i id="genergy" style="width:${G.energy/ENERGY*100}%"></i></span>${G.dest&&!G.path&&!G.enc&&!G.dialog&&!MG&&!G.end?`<button class="gchip gres" data-act="gresume">▶ Seguir a ${esc(G.dest.n)}</button>`:""}</div>
-      ${!G.end&&!G.enc&&!MG&&!G.map?`<div class="gleft"><button class="sbtn" data-act="ghome"><span class="ic">🏠</span><span class="lb">Casa</span></button><button class="sbtn" data-act="gmap"><span class="ic">🧭</span><span class="lb">Destinos</span></button></div>`:""}
+      ${!G.end&&!G.enc&&!MG&&!G.map&&!G.panel?`<div class="gleft"><button class="sbtn" data-act="ghome"><span class="ic">🏠</span><span class="lb">Casa</span></button><button class="sbtn" data-act="gmap"><span class="ic">🧭</span><span class="lb">Destinos</span></button><button class="sbtn" data-act="gpanel" data-v="logros"><span class="ic">🏆</span><span class="lb">Logros</span>${achReady(G.kid)?`<span class="badge">${achReady(G.kid)}</span>`:""}</button><button class="sbtn" data-act="gpanel" data-v="inventario"><span class="ic">🎒</span><span class="lb">Inventario</span></button></div>`:""}
       <div id="gbanner" class="gbanner px" hidden></div>
       ${over}
     </div></div>`;
@@ -2400,7 +2425,7 @@ function gPath(goals){const key=(x,y)=>x+","+y,want=new Set(goals.map(g=>key(g.x
   while(q.length){const [x,y]=q.shift();for(const [dx,dy] of [[0,-1],[1,0],[0,1],[-1,0]]){const nx=x+dx,ny=y+dy,k=key(nx,ny);if(prev.has(k)||blockedAt(nx,ny)||(nx===WORLD.door.x&&ny===WORLD.door.y))continue;
     prev.set(k,key(x,y));if(want.has(k)){const out=[];let c=k;while(c&&c!==key(G.x,G.y)){const [a,b]=c.split(",").map(Number);out.unshift({x:a,y:b});c=prev.get(c)}return out}q.push([nx,ny])}
     if(prev.size>3200)break}return null}
-function gTap(e){if(!G||G.end||G.enc||G.dialog||MG||G.map||!G.cam)return;G.dest=null;const cv=e.target,k=cv.width/128,r=cv.getBoundingClientRect(),H=cv.height/k,sc=Math.min(r.width/128,r.height/H);
+function gTap(e){if(!G||G.end||G.enc||G.dialog||MG||G.map||G.panel||!G.cam)return;G.dest=null;const cv=e.target,k=cv.width/128,r=cv.getBoundingClientRect(),H=cv.height/k,sc=Math.min(r.width/128,r.height/H);
   const lx=(e.clientX-r.left-(r.width-128*sc)/2)/sc,ly=(e.clientY-r.top-(r.height-H*sc)/2)/sc,wx=lx+G.cam.x,wy=ly+G.cam.y,tx=Math.floor(wx/TS),ty=Math.floor(wy/TS);
   wake();G.dir=null;
   const at=(x,y)=>otherAt(x,y)||WORLD.npcs.find(o=>o.x===x&&o.y===y)||WORLD.signs.find(o=>o.x===x&&o.y===y)||WORLD.chests.find(o=>o.x===x&&o.y===y);
@@ -2848,6 +2873,45 @@ const GLY={eat:'<svg viewBox="0 0 24 24"><path fill="currentColor" d="M7 2a1 1 0
   shirt:'<svg viewBox="0 0 24 24"><path fill="currentColor" d="M8.5 3h1.2a2.4 2.4 0 0 0 4.6 0h1.2l5.5 3.2-2.2 4.2-2.3-1.1V20a1 1 0 0 1-1 1H8.5a1 1 0 0 1-1-1V9.3l-2.3 1.1L3 6.2 8.5 3Z"/></svg>',
   grid:'<svg viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="2.5" fill="currentColor"/><rect x="13" y="3" width="8" height="8" rx="2.5" fill="currentColor"/><rect x="3" y="13" width="8" height="8" rx="2.5" fill="currentColor"/><rect x="13" y="13" width="8" height="8" rx="2.5" fill="currentColor"/></svg>'};
 function sChip(e,lbl,v){const cls=v<30?"low":v<60?"mid":"";return `<div class="schip ${cls}" title="${lbl}: ${Math.round(v)}%"><span class="e">${e}</span><b>${lbl}</b><span class="sb"><i style="width:${Math.max(4,Math.round(v))}%"></i></span></div>`}
+
+/* ================= Logros e inventario ================= */
+const LOGROS=[
+ ["primer_deber","📝","Primer deber","Completa tu primer deber.","tareas",1,20],["deberes10","📚","Responsable","Completa 10 deberes.","tareas",10,50],["deberes50","🏅","Imparable","Completa 50 deberes.","tareas",50,150],["deberes100","👑","Leyenda del deber","Completa 100 deberes.","tareas",100,300],
+ ["fichas500","💰","Ahorrador","Gana 500 fichas con tus deberes.","earned",500,60],["fichas2000","💎","Millonario de fichas","Gana 2.000 fichas con tus deberes.","earned",2000,200],
+ ["nacio","🐣","¡Nació!","Tu primer fichamigo sale del huevo.","stage",1,20],["adulto","🦁","Gran fichamigo","Un fichamigo llega a su última etapa.","stage",4,150],
+ ["dos","🐾","Familia de fichamigos","Ten 2 fichamigos.","pets",2,80],["tres","🎪","Cuidador experto","Ten 3 fichamigos.","pets",3,150],
+ ["truco","🎩","Primer truco","Enséñale un truco a tu fichamigo.","tricks",1,30],["trucos","🤹","Maestro de trucos","Enséñale todos los trucos.","tricks",TRICKS.length,120],
+ ["amigo","🤝","Primer amigo salvaje","Hazte amigo de un fichamigo salvaje.","friends",1,30],["amigos10","📖","Coleccionista","Ten 10 amigos en tu álbum.","friends",10,120],["raro","✨","¡Un unicornio!","Encuentra al fichamigo más raro.","rare",1,200],
+ ["explorador","🧭","Explorador","Llega a 4 lugares del mapa.","visited",4,60],["trotamundos","🗺️","Trotamundos","Llega a todos los lugares del mapa.","visited",LANDMARKS.length,150],["paseos","🥾","Caminante","Sal a explorar 10 veces.","walks",10,60],
+ ["muebles","🛋️","Decorador","Ten 8 muebles en tu casa.","furn",8,60],["casa","🏡","Casa nueva","Múdate a una casa más grande.","house",2,80],["estilo","👕","Con estilo","Compra 3 piezas para tu personaje.","looks",3,50],["meta","🎯","Meta cumplida","Recibe tu primer premio real.","goals",1,100]];
+function achStats(kidId){const main=S.pets[kidId]||{},L=arr("ledger").filter(l=>l.kidId===kidId),pets=petsOf(kidId).filter(o=>o.p.species),m=money(kidId);
+  const own=new Set([...(main.owned||[]),...furnOwned(main)]);
+  return {tareas:L.filter(l=>l.type==="tarea").length,earned:m.earned,stage:Math.max(0,...pets.map(o=>xpInfo(o.id).stage)),pets:pets.length,
+    tricks:Math.max(0,...pets.map(o=>TRICKS.filter(([id])=>((o.p.tricks||{})[id]||0)>=LEARN).length)),friends:(main.friends||[]).length,rare:(main.friends||[]).includes("estrellin")?1:0,
+    visited:(main.visited||[]).length,walks:L.filter(l=>l.type==="juego").length,furn:FURN.filter(f=>own.has(f.id)).length,house:main.house||1,
+    looks:(main.aOwned||[]).filter(k=>/^k[fhtb]:/.test(k)).length,goals:arr("goals").filter(g=>g.kidId===kidId&&g.status==="entregada").length}}
+function achList(kidId){const st=achStats(kidId),cl=(S.pets[kidId]||{}).ach||{};
+  return LOGROS.map(([id,e,n,d,k,goal,r])=>{const v=Math.min(goal,st[k]||0);return {id,e,n,d,goal,v,r,done:v>=goal,claimed:!!cl[id]}})}
+const achReady=kidId=>achList(kidId).filter(a=>a.done&&!a.claimed).length;
+function kLogros(kidId,m,xi,asParent){const L=achList(kidId),got=L.filter(a=>a.done).length;
+  return `<div class="hero"><span class="hart">🏆</span><div><h2>Logros</h2><p>Cumple retos, gana medallas y reclama monedas de premio.</p></div><div class="hstat"><span class="e">🏅</span>Medallas<b>${got}/${L.length}</b></div></div>
+  <div class="achs">${L.sort((a,b)=>(b.done&&!b.claimed)-(a.done&&!a.claimed)||(b.done-a.done)||(b.v/b.goal-a.v/a.goal)).map(a=>`<div class="ach ${a.done?"on":""} ${a.claimed?"cl":""}"><span class="am">${a.done?a.e:"🔒"}</span>
+    <div class="ab"><b>${a.n}</b><small>${a.d}</small>${a.done?"":`<span class="ap"><i style="width:${Math.round(a.v/a.goal*100)}%"></i><em>${a.v}/${a.goal}</em></span>`}</div>
+    <div class="ar">${a.claimed?`<span class="pill ok">✔ Reclamado</span>`:a.done?(asParent?`<span class="pill warn">Por reclamar</span>`:`<button class="btn coinb sm" data-act="achclaim" data-id="${kidId}" data-v="${a.id}">Reclamar ${cI("m")}${a.r}</button>`):`<span class="rw">${cI("m")}${a.r}</span>`}</div></div>`).join("")}</div>`}
+function kInventario(kidId,m){const main=S.pets[kidId]||{},own=new Set([...(main.owned||[]),...furnOwned(main)]),pets=petsOf(kidId).filter(o=>o.p.species);
+  const furn=FURN.filter(f=>own.has(f.id)),tints=TINTS.filter(t=>own.has("tint-"+t.id)),wear=WEAR.filter(w=>own.has(w.id)),walls=WALLS.filter(w=>w.p&&own.has("wall-"+w.id));
+  const looks=(main.aOwned||[]).filter(k=>/^k[fhtb]:/.test(k)),a=avPick(main.avatar),fr=main.friends||[],ach=achList(kidId).filter(x=>x.done);
+  const box=(t,n,body,empty)=>`<section class="invs"><div class="sechead"><h2>${t}</h2><p>${n}</p></div>${body||`<div class="empty">${empty}</div>`}</section>`;
+  const tile=(img,lbl,sub)=>`<div class="inv"><span class="ii">${img}</span><b>${lbl}</b>${sub?`<small>${sub}</small>`:""}</div>`;
+  const pf={kf:"h",kh:"h",kt:"t",kb:"b"},lk={kf:"Completo",kh:"Cabeza",kt:"Camisa",kb:"Pantalón"};
+  return `<div class="hero"><span class="hart">🎒</span><div><h2>Inventario</h2><p>Todo lo que has conseguido con tu esfuerzo.</p></div><div class="hstat"><span class="e">${cI("f")}</span>${m.wallet} fichas<b>${cI("m")}${m.mon}</b></div></div>
+  ${box("Mis fichamigos",`${pets.length} de 3`,pets.length?`<div class="invg">${pets.map(o=>{const sp=SPECIES[o.p.species]||{};return tile(`<img src="fm/${sp.f}.webp" alt="">`,esc(o.p.name||"Fichamigo"),calc(o.p).egg?"Huevo":stageLabel(xpInfo(o.id)))}).join("")}</div>`:"","Aún no tienes fichamigos.")}
+  ${box("Mi personaje",`${looks.length} piezas compradas`,`<div class="invg">${tile(`<img src="av/h${pad2(a.hd)}.webp" alt="">`,"Puesto ahora",esc(AVN[a.tp]))}${looks.map(k=>{const [t,n]=k.split(":");return tile(`<img src="av/${pf[t]}${pad2(+n)}.webp" alt="">`,esc(AVN[+n]),lk[t])}).join("")}</div>`)}
+  ${box("Muebles",`${furn.length} en tu casa · ${HOUSES[(main.house||1)-1].n}`,furn.length?`<div class="invg">${furn.map(f=>tile(`<img src="st/${f.id}.webp" alt="">`,esc(f.n))).join("")}</div>`:"","Compra muebles en la Tienda para decorar tu casa.")}
+  ${box("Colores y accesorios del fichamigo",`${tints.length+wear.length}`,tints.length||wear.length?`<div class="invg">${tints.map(t=>tile(`<span class="sw" style="background:${t.c}"></span>`,esc(t.n),"Color")).join("")}${wear.map(w=>tile("🎀",esc(w.n),"Accesorio")).join("")}</div>`:"","Todavía no has comprado colores ni accesorios.")}
+  ${walls.length?box("Paredes",`${walls.length}`,`<div class="invg">${walls.map(w=>tile("🖼️",esc(w.n))).join("")}</div>`):""}
+  ${box("Amigos salvajes",`${fr.length} de ${CRIT.length}`,fr.length?`<div class="invg">${fr.map(id=>{const c=CRIT.find(x=>x.id===id);if(!c)return"";const sp=SPECIES[c.sp]||{};return tile(`<img src="fm/${sp.f}.webp" alt="">`,esc(c.n))}).join("")}</div>`:"","Sal a explorar y juega con los fichamigos salvajes para hacerte su amigo.")}
+  ${box("Medallas",`${ach.length} de ${LOGROS.length}`,ach.length?`<div class="invg">${ach.map(x=>tile(`<span class="md">${x.e}</span>`,esc(x.n))).join("")}</div>`:"","Cumple retos en Logros para ganar medallas.")}`}
 function kidScreen(kidId,asParent){
   if(G&&G.kid===kidId)return gameScreen();
   const k=S.kids[kidId], main=S.pets[kidId];
@@ -2859,17 +2923,18 @@ function kidScreen(kidId,asParent){
   const dis=st.egg||st.dead?"disabled":"";
   const pend=arr("tasks").filter(t=>t.kidId===kidId&&t.status==="pendiente").length;
   const goalsReady=arr("goals").filter(g=>g.kidId===kidId&&g.status==="activa"&&m.goalPts>=g.cost).length;
-  const tabs=[["deberes","Deberes",pend],["personaje","Mi personaje"],["tienda","Tienda"],["metas","Metas",goalsReady],["chat","Chat"],["album","Álbum"],["registro","Registro"]];
+  const achN=achReady(kidId);
+  const tabs=[["deberes","Deberes",pend],["personaje","Mi personaje"],["tienda","Tienda"],["logros","Logros",achN],["inventario","Inventario"],["metas","Metas",goalsReady],["chat","Chat"],["album","Álbum"],["registro","Registro"]];
   if(!asParent)tabs.push(["padres","Zona de padres"]);
-  const body=ktab==="padres"?parentGate():({deberes:kDeberes,personaje:kPersonaje,tienda:kTienda,metas:kMetas,album:kAlbum,chat:kChat,registro:kRegistro}[ktab]||kDeberes)(kidId,m,xi,asParent);
+  const body=ktab==="padres"?parentGate():({deberes:kDeberes,personaje:kPersonaje,tienda:kTienda,logros:kLogros,inventario:kInventario,metas:kMetas,album:kAlbum,chat:kChat,registro:kRegistro}[ktab]||kDeberes)(kidId,m,xi,asParent);
   const pair=!k.linked?`<div class="paircard"><span>Código para unirte a tu familia</span><b class="px">${esc(k.code)}</b><small>Tu papá o mamá lo escribe en Familia → Agregar dispositivo</small></div>`:"";
   const sheet=menuOpen?`<div class="scrim" data-act="closemenu"></div>
     <div class="sheet" role="dialog" aria-modal="true" aria-label="Menú">
       <div class="sheethead"><nav class="mtabs" aria-label="Secciones">${tabs.slice(0,3).map(([key,l,n])=>`<button class="mtab" data-act="ktab" data-v="${key}" aria-pressed="${ktab===key}">${key==="personaje"?`<img src="${headSrc(kidId)}" alt="">`:`<span class="ti">${key==="deberes"?"📋":"🏪"}</span>`}${l}${n?`<span class="badge">${n}</span>`:""}</button>`).join("")}</nav>
       <button class="closeb" data-act="closemenu" aria-label="Cerrar menú">✕</button>
-      <nav class="mtabs2" aria-label="Más secciones">${tabs.slice(3).map(([key,l,n])=>`<button data-act="ktab" data-v="${key}" aria-pressed="${ktab===key}">${{metas:"🎯",chat:"💬",album:"📖",registro:"🧾",padres:"🔒"}[key]||""} ${l}${n?`<span class="badge">${n}</span>`:""}</button>`).join("")}</nav></div>
+      <nav class="mtabs2" aria-label="Más secciones">${tabs.slice(3).map(([key,l,n])=>`<button data-act="ktab" data-v="${key}" aria-pressed="${ktab===key}">${{logros:"🏆",inventario:"🎒",metas:"🎯",chat:"💬",album:"📖",registro:"🧾",padres:"🔒"}[key]||""} ${l}${n?`<span class="badge">${n}</span>`:""}</button>`).join("")}</nav></div>
       <div class="sheetbody">${pair}${body}</div></div>`:"";
-  const badge=pend+goalsReady;
+  const badge=pend+goalsReady+achN;
   return `<div class="play" style="--shell:${esc(k.color||COLORS[0])}">
     <div class="ktop">
       ${asParent?`<button class="kicon" data-act="pback" aria-label="Volver a Familia" style="color:#fff">←</button>`:""}
@@ -2881,7 +2946,7 @@ function kidScreen(kidId,asParent){
     </div>
     ${petRow(kidId,pid,asParent)}
     ${!k.linked&&!menuOpen?pair:""}
-    <div class="lcdwrap"><canvas id="lcd" width="128" height="96" data-mode="kid" data-kid="${kidId}" aria-label="Tu cuarto con tu personaje y ${esc(p.name||"tu fichamigo")}. Toca a un fichamigo para ver qué sabe hacer."></canvas>${petMenu&&!dis?petMenuHtml(pid,p,st):""}${asParent?"":`<div class="rside"><button class="sbtn" data-act="kgo" data-v="deberes"><span class="ic">📅</span><span class="lb">Misiones</span>${pend?`<span class="badge">${pend}</span>`:""}</button><button class="sbtn" data-act="kgo" data-v="metas"><span class="ic">🎁</span><span class="lb">Recompensas</span>${goalsReady?`<span class="badge">${goalsReady}</span>`:""}</button><button class="sbtn" data-act="kgo" data-v="tienda"><span class="ic">🏪</span><span class="lb">Tienda</span></button></div>`}</div>
+    <div class="lcdwrap"><canvas id="lcd" width="128" height="96" data-mode="kid" data-kid="${kidId}" aria-label="Tu cuarto con tu personaje y ${esc(p.name||"tu fichamigo")}. Toca a un fichamigo para ver qué sabe hacer."></canvas>${petMenu&&!dis?petMenuHtml(pid,p,st):""}${asParent?"":`<div class="rside"><button class="sbtn" data-act="kgo" data-v="deberes"><span class="ic">📅</span><span class="lb">Misiones</span>${pend?`<span class="badge">${pend}</span>`:""}</button><button class="sbtn" data-act="kgo" data-v="metas"><span class="ic">🎁</span><span class="lb">Recompensas</span>${goalsReady?`<span class="badge">${goalsReady}</span>`:""}</button><button class="sbtn" data-act="kgo" data-v="tienda"><span class="ic">🏪</span><span class="lb">Tienda</span></button><button class="sbtn" data-act="kgo" data-v="logros"><span class="ic">🏆</span><span class="lb">Logros</span>${achN?`<span class="badge">${achN}</span>`:""}</button><button class="sbtn" data-act="kgo" data-v="inventario"><span class="ic">🎒</span><span class="lb">Inventario</span></button></div>`}</div>
     ${dis?"":`<div class="hint">Toca a ${esc(p.name)} para jugar · Mantén presionado para acariciar · Arrastra para cargarlo</div>`}
     ${st.egg||st.dead?"":`<div class="stats">${sChip("🍎","Comida",st.h)}${sChip("💗","Ánimo",st.hp)}${sChip("🫧","Limpieza",st.c)}</div>`}
     <div class="status">${statusMsg(p,st,xi)}</div>
@@ -3311,6 +3376,10 @@ document.addEventListener("click",async e=>{
   if(a==="practice"){await practice(id,b.dataset.v);return}
   if(a==="qlink"){const f=document.getElementById("linkform");if(f){f.scrollIntoView({behavior:"smooth",block:"center"});setTimeout(()=>{const i=document.getElementById("l-code");if(i)i.focus()},400)}return}
   if(a==="qbonus"){const d=document.querySelector(".kc2 details");if(d){d.open=true;d.scrollIntoView({behavior:"smooth",block:"center"})}else toast("Primero agrega a tus hijos.");return}
+  if(a==="achclaim"){const L=achList(id).find(x=>x.id===b.dataset.v);if(!L||!L.done||L.claimed)return;b.disabled=true;
+    await petWrite(id,pp=>({ach:{...(pp.ach||{}),[L.id]:Date.now()}}));await ledger(id,"logro",L.r,"Logro: "+L.n,null,"m");tune([[523,.06],[659,.06],[784,.06],[1046,.18]]);toast(`¡Medalla "${L.n}"! +${L.r} monedas`);return}
+  if(a==="gpanel"){if(G&&!G.end&&!G.enc&&!MG&&!G.dialog){G.panel=b.dataset.v;G.path=null;G.after=null;beep(880,.05);render()}return}
+  if(a==="gpanelx"){if(G){G.panel=null;render()}return}
   if(a==="kgo"){petMenu=null;menuOpen=true;foodOpen=false;ktab=b.dataset.v;beep(700);render();return}
   if(a==="openmenu"){petMenu=null;menuOpen=true;foodOpen=false;beep(700);render();return}
   if(a==="closemenu"){menuOpen=false;render();return}
