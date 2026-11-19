@@ -19,7 +19,7 @@
 <body>
 <title>Fichamigo</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Nunito:wght@400;600;700;800;900&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Nunito:wght@400;600;700;800;900&family=Fredoka:wght@500;600;700&display=swap">
 <style>
 /* Layout: app móvil de una columna (máx 520px). Arriba el aparato tipo huevo con pantalla LCD pixelada; debajo pestañas de Deberes / Tienda / Metas / Registro. El modo padre usa el mismo ancho con tarjetas por hijo. */
 :root{
@@ -463,7 +463,7 @@ textarea{width:100%;font:inherit;padding:10px;border-radius:12px;border:1px soli
 .chathead .report{margin-left:auto;font-size:.8rem}
 .petchip.lock{background:rgb(0 0 0 / .14);font-weight:700;opacity:.9}
 .avc{max-width:520px}
-.avstage{background:linear-gradient(#DDF0F8,#CFE8F2);border-radius:18px;padding:6px;width:min(190px,46vw);margin:0 auto;box-shadow:0 6px 18px rgb(20 20 60 / .28),0 0 0 3px #fff}
+.avstage{background:linear-gradient(#F4EEFF,#DCCBFF);border-radius:18px;padding:6px;width:min(190px,46vw);margin:0 auto;box-shadow:0 6px 18px rgb(20 20 60 / .28),0 0 0 3px #fff}
 .avstage canvas,.avtop canvas,.prod canvas[width="288"]{width:100%;height:auto;image-rendering:pixelated;display:block;border-radius:12px}
 .pcrow{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 8px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch}
 .pcs{flex:0 0 auto;width:78px;height:78px;border-radius:14px;border:3px solid var(--line);background:#E8F4FA;display:grid;place-items:center;padding:4px;scroll-snap-align:start}
@@ -480,16 +480,237 @@ textarea{width:100%;font:inherit;padding:10px;border-radius:12px;border:1px soli
 .swatch{min-width:40px;height:40px;border-radius:12px;border:3px solid var(--line);background:var(--c,var(--surface));font-weight:800;padding:0 12px;color:var(--ink)}
 .sws:not(.txt) .swatch[style]{width:40px;padding:0}
 .swatch[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 30%,transparent)}
-.avbar{position:sticky;top:0;z-index:6;width:calc(100% + 32px);margin:0 -16px;padding:calc(env(safe-area-inset-top,0px) + 6px) 0 10px;background:rgb(236 239 247 / .9);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-bottom:1px solid rgb(30 30 70 / .08)}
+.avbar{position:sticky;top:0;z-index:6;width:calc(100% + 32px);margin:0 -16px;padding:calc(env(safe-area-inset-top,0px) + 6px) 0 10px;background:rgb(237 231 255 / .92);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-bottom:1px solid rgb(30 30 70 / .08)}
 .avtop{display:grid;grid-template-columns:minmax(110px,170px) 1fr;gap:14px;align-items:start}
 .avtop canvas{background:#CFE8F2;position:sticky;top:0;z-index:6;box-shadow:0 6px 16px rgb(20 20 60 / .22),0 0 0 3px #fff}
 .shop .prod canvas[width="288"]{max-width:150px;margin:0 auto}
 @media (max-width:420px){.avtop{grid-template-columns:1fr}.avtop canvas{max-width:160px;margin:0 auto}}
+
+/* ================= TEMA "Fichamigo morado" (según los diseños de Miguel) ================= */
+:root,:root[data-theme="dark"]{--bg:#EDE7FF;--surface:#FFFFFF;--surface2:#F1EBFF;--ink:#2A1466;--muted:#6B5FA0;--line:#DCD0FF;
+  --accent:#7C3AED;--accent-ink:#fff;--p1:#8B5CF6;--p2:#6D28D9;--p3:#4C1D95;--y1:#FFE873;--y2:#FFC928;--g1:#5BE07A;--g2:#1FA84A;--g3:#14803A;
+  --ok:#15803D;--ok-bg:#DCFCE7;--warn:#B45309;--warn-bg:#FEF3C7;--bad:#E11D48;--bad-bg:#FFE4E6;
+  --font-title:"Fredoka","Baloo 2","Nunito",system-ui,sans-serif;color-scheme:light}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#EDE7FF;--surface:#FFFFFF;--surface2:#F1EBFF;--ink:#2A1466;--muted:#6B5FA0;--line:#DCD0FF;--accent:#7C3AED;--accent-ink:#fff;
+  --ok:#15803D;--ok-bg:#DCFCE7;--warn:#B45309;--warn-bg:#FEF3C7;--bad:#E11D48;--bad-bg:#FFE4E6;color-scheme:light}}
+html,body{background:#E4DBFF}
+body{background:radial-gradient(120% 60% at 50% 0%,#F5F0FF 0%,#E6DCFF 45%,#CDBBFA 100%) fixed;color:var(--ink)}
+body::before{background:#6D28D9}
+h1,h2,h3,.ftitle{font-family:var(--font-title);font-weight:700;color:#3B1A8F;letter-spacing:.005em}
+h2{font-size:1.35rem}
+/* logo */
+.logo{font-family:var(--font-title);font-weight:700;font-size:1.75rem;line-height:1;color:#F3EDFF;-webkit-text-stroke:7px #5B21B6;paint-order:stroke fill;text-shadow:0 4px 0 #3B0F8C,0 6px 10px rgb(59 15 140 / .35);white-space:nowrap;display:inline-block;transform:rotate(-2deg)}
+.logo b{font-weight:700;color:#FFD43B;-webkit-text-stroke:7px #5B21B6;paint-order:stroke fill}
+.logo.big{font-size:clamp(2.6rem,13vw,3.6rem)}
+.tagline{display:inline-flex;gap:6px;align-items:center;background:linear-gradient(#8B5CF6,#6D28D9);color:#fff;font-family:var(--font-title);font-weight:600;padding:6px 18px;border-radius:999px;border:3px solid #fff;box-shadow:0 4px 0 #4C1D95;font-size:1.05rem;margin-top:-6px}
+header.top{background:linear-gradient(#7C3AED,#6D28D9);margin-inline:calc(-1 * max(16px,env(safe-area-inset-left,0px)));padding-inline:max(16px,env(safe-area-inset-left,0px));border-radius:0 0 22px 22px;box-shadow:0 6px 16px rgb(76 29 149 / .3);margin-bottom:10px}
+header.top .link{color:#fff;background:rgb(255 255 255 / .16);border-radius:12px;font-family:var(--font-title);font-weight:600}
+/* botones */
+.btn{font-family:var(--font-title);font-weight:600;letter-spacing:.01em;border-radius:999px;padding:11px 20px;background:linear-gradient(#9B6BFF,#6D28D9);color:#fff;border:3px solid rgb(255 255 255 / .85);
+  box-shadow:0 4px 0 #4C1D95,inset 0 2px 0 rgb(255 255 255 / .35);text-shadow:0 1px 0 rgb(0 0 0 / .2)}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 #4C1D95}
+.btn.sm{padding:7px 14px;border-radius:999px;font-size:.9rem;border-width:2px}
+.btn.okb{background:linear-gradient(#6BEA86,#1FA84A);box-shadow:0 4px 0 #14803A,inset 0 2px 0 rgb(255 255 255 / .4)}
+.btn.coinb{background:linear-gradient(#FFF07A,#FFC21E);color:#4A1D96;text-shadow:none;box-shadow:0 4px 0 #D59A00,inset 0 2px 0 rgb(255 255 255 / .6)}
+.btn.monb{background:linear-gradient(#7CC4FF,#2F7BEA);box-shadow:0 4px 0 #1D4FA8,inset 0 2px 0 rgb(255 255 255 / .4)}
+.btn.ghost{background:linear-gradient(#FFFFFF,#F1EBFF);color:#5B21B6;border:3px solid #fff;box-shadow:0 4px 0 #B9A5F2,0 0 0 2px #CDBDF8 inset;text-shadow:none}
+.btn.badb{background:linear-gradient(#FF7A93,#E11D48);box-shadow:0 4px 0 #9F1239}
+.btn:disabled{filter:grayscale(.4);opacity:.55}
+.link{font-family:var(--font-title);font-weight:600;color:#6D28D9}
+/* tarjetas */
+.item,.form,.prod,.kidcard,.empty,.pinbox.card,.curnote,.gcard{border-radius:22px}
+.item,.form,.prod,.kidcard{background:linear-gradient(#FFFFFF,#F6F1FF);border:3px solid #fff;box-shadow:0 6px 18px rgb(91 33 182 / .14),0 0 0 1.5px #E3D8FF}
+.empty{border:2.5px dashed #C4B1F7;background:rgb(255 255 255 / .55);color:#5B4A99}
+.prod.owned{box-shadow:0 0 0 3px #22C55E,0 6px 18px rgb(91 33 182 / .14)}
+.sechead h2{font-size:1.3rem}
+.pill{font-family:var(--font-title);font-weight:600}
+.badge{background:linear-gradient(#FF6A6A,#E5243B);box-shadow:0 0 0 2px #fff;font-family:var(--font-title)}
+.coin{background:radial-gradient(circle at 35% 30%,#FFF6B0,#FFD43B 45%,#F2A50C 100%);box-shadow:inset 0 0 0 2px #D48B00,0 1px 0 rgb(0 0 0 / .2);color:#8A4B00}
+/* pestañas */
+.tabs{gap:8px;padding:4px 2px 6px}
+.tabs button{font-family:var(--font-title);font-weight:600;font-size:.98rem;background:linear-gradient(#8B5CF6,#6D28D9);color:#fff;border:3px solid rgb(255 255 255 / .55);padding:8px 16px;box-shadow:0 3px 0 #4C1D95}
+.tabs button[aria-pressed="true"]{background:linear-gradient(#FFF07A,#FFC928);color:#3B1A8F;border-color:#fff;box-shadow:0 3px 0 #C99400}
+.tabs button .ti{font-size:1.15rem;line-height:1}
+/* formularios */
+input,select,textarea{border-radius:14px!important;border:2px solid #DCCFFF!important;background:#fff!important}
+.welcome .pinbox{background:rgb(255 255 255 / .8);border:3px solid #fff;border-radius:24px;padding:18px;box-shadow:0 8px 22px rgb(91 33 182 / .16)}
+
+/* ---------- pantalla del joven ---------- */
+.play{background:radial-gradient(130% 70% at 50% 0%,#F4EEFF 0%,#E2D6FF 50%,#C8B4FA 100%);color:var(--ink);gap:8px;padding-top:0!important}
+.ktop{display:flex;align-items:center;gap:8px;background:linear-gradient(#7C3AED,#6D28D9);margin:0 calc(-1 * max(14px,env(safe-area-inset-left,0px)));width:auto!important;max-width:none!important;padding:calc(env(safe-area-inset-top,0px) + 8px) max(12px,env(safe-area-inset-right,0px)) 10px max(12px,env(safe-area-inset-left,0px));border-radius:0 0 24px 24px;box-shadow:0 6px 16px rgb(76 29 149 / .35);color:#fff}
+.kme{display:flex;align-items:center;gap:8px;min-width:0;flex:1}
+.kav{flex:none;width:52px;height:52px;border-radius:50%;background:radial-gradient(circle at 40% 30%,#FFE9F5,#F9C6E0);border:3px solid #FFD43B;box-shadow:0 3px 0 #4C1D95;overflow:hidden;display:grid;place-items:end center}
+.kav img{width:118%;margin-bottom:-24%}
+.kmi{display:grid;gap:1px;min-width:0}
+.kmi b{font-family:var(--font-title);font-weight:700;font-size:1.12rem;line-height:1.05;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kmi small{font-size:.74rem;opacity:.9;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lvl{display:flex;align-items:center;gap:0;margin-top:2px}
+.lvl .st{flex:none;width:24px;height:24px;margin-right:-8px;z-index:1;display:grid;place-items:center;background:radial-gradient(circle at 35% 30%,#FFF6B0,#FFC928);clip-path:polygon(50% 0,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);font-family:var(--font-title);font-size:.7rem;color:#7A3D00;font-weight:700}
+.lvl .lb{position:relative;width:86px;height:15px;border-radius:999px;background:#3B1A8F;border:2px solid #fff;overflow:hidden}
+.lvl .lb i{position:absolute;inset:0 auto 0 0;background:linear-gradient(#C4A5FF,#8B5CF6);border-radius:999px}
+.lvl .lb em{position:absolute;inset:0;display:grid;place-items:center;font-style:normal;font-size:.62rem;font-family:var(--font-title);font-weight:600;color:#fff;text-shadow:0 1px 0 #3B0F8C}
+.ktop .logo{font-size:1.25rem;-webkit-text-stroke-width:5px}.ktop .logo b{-webkit-text-stroke-width:5px}
+header.top .logo{font-size:1.45rem;-webkit-text-stroke-color:#3B0F8C}header.top .logo b{-webkit-text-stroke-color:#3B0F8C}
+@media (max-width:440px){.ktop .logo{display:none}}
+.cpill{flex:none;display:inline-flex;align-items:center;gap:4px;background:linear-gradient(#FFFFFF,#EEE6FF);color:#3B1A8F;border-radius:999px;padding:2px 2px 2px 2px;font-family:var(--font-title);font-weight:700;font-size:.95rem;box-shadow:0 3px 0 #4C1D95;border:2px solid #fff}
+.cpill .coin{--s:24px}.cpill .num{padding:0 2px}
+.cpill .plus{width:22px;height:22px;border-radius:50%;border:2px solid #fff;background:linear-gradient(#6BEA86,#1FA84A);color:#fff;font-weight:900;display:grid;place-items:center;font-size:.95rem;line-height:1;padding:0;box-shadow:0 2px 0 #14803A}
+.kicon{flex:none;width:38px;height:38px;border:0;background:transparent;font-size:1.55rem;display:grid;place-items:center;position:relative;filter:drop-shadow(0 2px 0 rgb(59 15 140 / .5));padding:0}
+.kicon i{position:absolute;top:2px;right:2px;width:12px;height:12px;border-radius:50%;background:#FF3B5C;border:2px solid #fff}
+@media (max-width:400px){.cpill .plus{display:none}.kav{width:46px;height:46px}.lvl .lb{width:70px}.cpill{font-size:.85rem}.cpill .coin{--s:20px}}
+/* fila de fichamigos */
+.petrow{padding:0 2px}
+.petchip{background:linear-gradient(#FFFFFF,#F1EBFF);color:#3B1A8F;border:2px solid #fff;box-shadow:0 3px 0 #B9A5F2;font-family:var(--font-title);font-weight:600}
+.petchip[aria-selected="true"]{background:linear-gradient(#FFF07A,#FFC928);color:#3B1A8F;box-shadow:0 3px 0 #C99400}
+.petchip.lock{background:rgb(255 255 255 / .75);color:#4C1D95;opacity:1}
+.petchip.add{background:linear-gradient(#6BEA86,#1FA84A);color:#fff;box-shadow:0 3px 0 #14803A}
+/* cuarto */
+.lcdwrap{background:linear-gradient(#FFFFFF,#EDE4FF);border:4px solid #fff;padding:5px;border-radius:28px;box-shadow:0 10px 24px rgb(76 29 149 / .28),0 0 0 2px #CDBBFA}
+.lcdwrap canvas{border-radius:22px}
+.rside{position:absolute;right:12px;top:12px;display:grid;gap:8px;z-index:3}
+.sbtn{display:grid;justify-items:center;gap:0;border:0;background:transparent;padding:0;position:relative;width:62px}
+.sbtn .ic{width:52px;height:46px;border-radius:16px;background:linear-gradient(#FFFFFF,#F1EBFF);border:3px solid #fff;box-shadow:0 3px 0 #B9A5F2;display:grid;place-items:center;font-size:1.6rem;line-height:1}
+.sbtn .lb{margin-top:-8px;background:linear-gradient(#8B5CF6,#6D28D9);color:#fff;font-family:var(--font-title);font-weight:600;font-size:.66rem;padding:2px 7px;border-radius:999px;border:2px solid #fff;white-space:nowrap}
+.sbtn .badge{position:absolute;top:-6px;right:0;min-width:20px;height:20px;font-size:.7rem}
+.hint{color:#5B4A99;text-shadow:none;font-weight:700;opacity:1;font-size:.72rem}
+.status{color:#3B1A8F;text-shadow:none;font-family:var(--font-title);font-weight:600;font-size:1rem}
+.play .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:100%}
+.schip{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:2px 6px;background:linear-gradient(#FFFFFF,#F4EEFF);border:2px solid #fff;border-radius:999px;padding:4px 10px 5px 6px;box-shadow:0 3px 0 #C9B5F7}
+.schip .e{grid-row:1/3;font-size:1.35rem;line-height:1}
+.schip b{font-family:var(--font-title);font-weight:600;font-size:.82rem;color:#3B1A8F;line-height:1}
+.schip .sb{height:9px;border-radius:999px;background:#E2DAF5;overflow:hidden;box-shadow:inset 0 1px 0 rgb(0 0 0 / .1)}
+.schip .sb i{display:block;height:100%;border-radius:999px;background:linear-gradient(#7BEA8F,#22B14C)}
+.schip.mid .sb i{background:linear-gradient(#FFE27A,#FFB21E)}.schip.low .sb i{background:linear-gradient(#FF9AAE,#E11D48)}
+.kbar{display:flex;justify-content:space-around;gap:2px;background:linear-gradient(#8B5CF6,#5B21B6);border:4px solid rgb(255 255 255 / .7);border-radius:30px;padding:8px 6px 6px;box-shadow:0 6px 0 #3B0F8C,0 12px 24px rgb(76 29 149 / .35);margin-bottom:calc(env(safe-area-inset-bottom,0px) + 4px)}
+.kb{display:grid;justify-items:center;gap:3px;border:0;background:transparent;color:#fff;font-family:var(--font-title);font-weight:600;font-size:.8rem;padding:0;position:relative;min-width:0;flex:1;text-shadow:0 1px 0 rgb(0 0 0 / .3)}
+.kb .k{width:clamp(44px,12.5vw,58px);height:clamp(44px,12.5vw,58px);border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 50% 30%,color-mix(in srgb,var(--bc) 60%,#fff),var(--bc) 60%);border:3px solid #fff;box-shadow:0 4px 0 color-mix(in srgb,var(--bc) 50%,#000),inset 0 -4px 0 rgb(0 0 0 / .12)}
+.kb .k svg{width:55%;height:55%;color:#fff;filter:drop-shadow(0 1.5px 0 rgb(0 0 0 / .25))}
+.kb:active .k{transform:translateY(3px);box-shadow:0 1px 0 color-mix(in srgb,var(--bc) 50%,#000)}
+.kb:disabled{opacity:.45}
+.kb .dot{position:absolute;top:-4px;right:calc(50% - 30px);min-width:22px;height:22px;border-radius:11px;background:linear-gradient(#FF6A6A,#E5243B);border:2px solid #fff;font-style:normal;font-size:.72rem;display:grid;place-items:center;padding:0 4px}
+.kb.c1{--bc:#FF8A2B}.kb.c2{--bc:#FF4F9A}.kb.c3{--bc:#2BB3F5}.kb.c4{--bc:#22C55E}.kb.c5{--bc:#B05CF6}.kb.c6{--bc:#8B5CF6}
+.play .drawer{background:rgb(255 255 255 / .85);border:3px solid #fff;border-radius:22px;color:var(--ink);box-shadow:0 6px 16px rgb(76 29 149 / .2)}
+.play .drawer .food{font-family:var(--font-title);font-weight:600;font-size:.8rem}
+/* menú (hoja) */
+.scrim{background:rgb(40 10 90 / .45)}
+.sheet{background:radial-gradient(130% 60% at 50% 0%,#F6F1FF 0%,#E8DEFF 55%,#D5C5FC 100%);border-radius:28px 28px 0 0;max-height:94%}
+.sheethead{border-bottom:0;padding-top:16px;flex-wrap:wrap}
+.mtabs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;flex:1;min-width:0}
+.mtab{display:flex;align-items:center;justify-content:center;gap:6px;border:3px solid rgb(255 255 255 / .6);border-radius:999px;background:linear-gradient(#8B5CF6,#6D28D9);color:#fff;font-family:var(--font-title);font-weight:600;font-size:.95rem;padding:7px 6px;box-shadow:0 3px 0 #4C1D95;position:relative;white-space:nowrap;min-width:0}
+.mtab .ti{font-size:1.3rem;line-height:1}
+.mtab img{width:26px;height:26px;border-radius:50%;object-fit:cover;object-position:top;background:#FCE7F3}
+.mtab[aria-pressed="true"]{background:linear-gradient(#FFF07A,#FFC928);color:#3B1A8F;border-color:#fff;box-shadow:0 3px 0 #C99400}
+.mtab .badge{position:absolute;top:-8px;right:-2px}
+@media (max-width:400px){.mtab{font-size:.8rem;gap:3px}.mtab .ti{font-size:1.05rem}}
+.closeb{width:44px;height:44px;border-radius:50%;border:3px solid #fff;background:linear-gradient(#9B6BFF,#6D28D9);color:#fff;font-size:1.1rem;box-shadow:0 3px 0 #4C1D95}
+.mtabs2{flex-basis:100%;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:2px}
+.mtabs2 button{flex:none;border:2px solid #fff;background:rgb(255 255 255 / .7);color:#4C1D95;border-radius:999px;padding:4px 12px;font-family:var(--font-title);font-weight:600;font-size:.85rem;display:inline-flex;gap:4px;align-items:center}
+.mtabs2 button[aria-pressed="true"]{background:#4C1D95;color:#fff}
+/* encabezado ilustrado de sección */
+.hero{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;background:linear-gradient(105deg,rgb(255 255 255 / .75),rgb(255 255 255 / .35));border:3px solid #fff;border-radius:26px;padding:10px 12px;box-shadow:0 6px 18px rgb(91 33 182 / .14)}
+.hero .hart{width:78px;height:78px;display:grid;place-items:end center;overflow:visible;font-size:3.4rem;line-height:1}
+.hero .hart img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff) drop-shadow(0 2px 0 #fff) drop-shadow(0 -2px 0 #fff) drop-shadow(0 4px 6px rgb(76 29 149 / .25))}
+.hero h2{font-size:1.6rem;-webkit-text-stroke:0}
+.hero p{font-size:.86rem;color:#4B3B8A;font-weight:700;line-height:1.25}
+.hero .hstat{display:grid;justify-items:center;gap:2px;background:linear-gradient(#8B5CF6,#6D28D9);color:#fff;border:3px solid #fff;border-radius:18px;padding:6px 10px;font-family:var(--font-title);font-weight:600;font-size:.72rem;box-shadow:0 4px 0 #4C1D95;text-align:center}
+.hero .hstat b{font-size:1.15rem;display:inline-flex;gap:4px;align-items:center}
+.hero .hstat .e{font-size:1.5rem;line-height:1}
+@media (max-width:400px){.hero{grid-template-columns:auto 1fr}.hero .hstat{grid-column:1/-1;grid-auto-flow:column;align-items:center;justify-content:center;gap:8px}.hero .hart{width:62px;height:62px;font-size:2.6rem}.hero h2{font-size:1.35rem}}
+/* filas de deberes */
+.trow{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;background:linear-gradient(#FFFFFF,#F6F1FF);border:3px solid #fff;border-radius:22px;padding:9px 10px;box-shadow:0 5px 14px rgb(91 33 182 / .13),0 0 0 1.5px #E3D8FF}
+.trow .ticon{width:54px;height:54px;border-radius:16px;display:grid;place-items:center;font-size:2rem;background:linear-gradient(#EDE4FF,#D9C9FF);border:2px solid #fff;box-shadow:0 3px 0 #C3AFF5}
+.trow .tb{min-width:0;display:grid;gap:3px}
+.trow .tt{font-family:var(--font-title);font-weight:600;font-size:1.08rem;color:#2A1466;line-height:1.15;overflow-wrap:anywhere}
+.trow .tm{display:flex;flex-wrap:wrap;gap:4px 8px;font-size:.76rem;color:#5B4A99;font-weight:700}
+.trow .ta{display:grid;justify-items:end;gap:6px}
+.trow .tok{font-family:var(--font-title);font-size:1.1rem;color:#2A1466}
+.trow .btn{padding:7px 12px;font-size:.92rem}
+.trow .tdesc{font-size:.8rem;color:#5B4A99}
+.prog{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:center;background:linear-gradient(#FFFFFF,#F1EBFF);border:3px solid #fff;border-radius:24px;padding:10px 14px;box-shadow:0 6px 16px rgb(91 33 182 / .15)}
+.prog .e{font-size:2.4rem;line-height:1}
+.prog b{font-family:var(--font-title);font-weight:600;color:#3B1A8F}
+.prog .pb{display:flex;gap:3px;margin-top:4px}.prog .pb i{flex:1;height:14px;border-radius:6px;background:#DDD3F7}.prog .pb i.on{background:linear-gradient(#7BEA8F,#22B14C)}
+.prog small{font-weight:800;color:#5B4A99}
+/* ---------- bienvenida ---------- */
+.welcome.home{gap:14px;padding-top:4px}
+.homegrid{display:grid;grid-template-columns:96px 1fr;gap:10px;width:100%;max-width:480px;align-items:center}
+.feats{display:grid;gap:10px;background:linear-gradient(#8B5CF6,#5B21B6);border:3px solid rgb(255 255 255 / .7);border-radius:24px;padding:10px 6px;box-shadow:0 6px 0 #3B0F8C}
+.feat{display:grid;justify-items:center;gap:2px;color:#fff;font-family:var(--font-title);font-weight:600;font-size:.74rem;line-height:1.1;text-align:center}
+.feat .e{font-size:2rem;line-height:1;filter:drop-shadow(0 2px 0 rgb(0 0 0 / .25))}
+.herocv{position:relative;border-radius:26px;overflow:hidden;border:4px solid #fff;box-shadow:0 10px 24px rgb(76 29 149 / .3);background:#CFE8F2}
+.herocv canvas{display:block;width:100%;height:auto}
+.gstart{border-radius:999px!important;background:linear-gradient(#FFFFFF,#EEE6FF)!important;border:3px solid #fff!important;box-shadow:0 5px 0 #B9A5F2,0 8px 18px rgb(76 29 149 / .18)!important;font-family:var(--font-title);font-weight:600!important;color:#3B1A8F!important;max-width:480px!important;padding:6px 8px 6px 6px!important}
+.gstart img{width:54px!important;height:auto}
+.gstart .go{margin-left:auto;width:42px;height:42px;border-radius:50%;background:linear-gradient(#9B6BFF,#6D28D9);color:#fff;display:grid;place-items:center;border:3px solid #fff;box-shadow:0 3px 0 #4C1D95;flex:none;font-size:1rem}
+.bigyel{width:100%;max-width:480px;font-size:1.35rem!important;padding:14px 18px!important;background:linear-gradient(#FFF27A,#FFC21E)!important;color:#3B1A8F!important;text-shadow:none!important;box-shadow:0 6px 0 #C99400,inset 0 2px 0 rgb(255 255 255 / .6)!important;display:flex;align-items:center;justify-content:center;gap:10px}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;max-width:480px}
+.duo .btn{background:linear-gradient(#8B5CF6,#6D28D9);font-size:1rem;padding:11px 8px}
+.duo .btn.one{grid-column:1/-1}
+/* ---------- zona de padres ---------- */
+.phead{display:grid;grid-template-columns:auto 1fr;gap:8px 12px;align-items:center;background:linear-gradient(110deg,rgb(255 255 255 / .7),rgb(255 255 255 / .3));border:3px solid #fff;border-radius:26px;padding:10px 12px;box-shadow:0 6px 18px rgb(91 33 182 / .15)}
+.phead .pill2{display:flex;align-items:end;justify-content:center;width:84px;height:76px}
+.phead .pill2 img{height:100%;width:auto;filter:drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff) drop-shadow(0 2px 0 #fff) drop-shadow(0 -2px 0 #fff)}
+.phead h2{font-size:1.55rem;display:flex;align-items:center;gap:6px}
+.phead p{font-size:.85rem;color:#4B3B8A;font-weight:700}
+.phead .pbtns{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap}
+.fsum{display:grid;grid-template-columns:auto 1fr auto auto;gap:10px;align-items:center;background:linear-gradient(110deg,#FFFFFF,#F1EBFF);border:3px solid #fff;border-radius:24px;padding:10px 12px;box-shadow:0 6px 16px rgb(91 33 182 / .14)}
+.fsum .e{font-size:2.6rem;line-height:1}
+.fsum h2{font-size:1.3rem}.fsum p{font-size:.8rem;color:#5B4A99;font-weight:700}
+.fbox{display:grid;justify-items:center;background:linear-gradient(#8B5CF6,#6D28D9);color:#fff;border:2px solid #fff;border-radius:16px;padding:4px 10px;font-family:var(--font-title);font-weight:600;font-size:.7rem;box-shadow:0 3px 0 #4C1D95}
+.fbox b{font-size:1.2rem}
+@media (max-width:420px){.fsum{grid-template-columns:auto 1fr auto}.fsum .fbox:last-child{display:none}}
+.kc2{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;background:linear-gradient(#FFFFFF,#F6F1FF);border:3px solid #fff;border-radius:24px;padding:12px;box-shadow:0 6px 18px rgb(91 33 182 / .14),0 0 0 1.5px #E3D8FF}
+.kc2 .kph{position:relative;width:84px;height:84px;border-radius:22px;background:radial-gradient(circle at 40% 30%,#FFE9F5,#E9D5FF);border:3px solid #fff;box-shadow:0 3px 0 #C3AFF5;overflow:hidden;display:grid;place-items:end center}
+.kc2 .kph img{width:116%;margin-bottom:-22%}
+.kc2 .klv{position:absolute;left:4px;right:4px;bottom:3px;background:linear-gradient(#8B5CF6,#6D28D9);color:#fff;font-family:var(--font-title);font-weight:600;font-size:.66rem;border-radius:999px;border:2px solid #fff;text-align:center}
+.kc2 .kb2{display:grid;gap:4px;min-width:0}
+.kc2 h3{font-size:1.35rem}
+.kc2 .row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:.78rem;font-weight:800;color:#4B3B8A}
+.kc2 .mon3{display:flex;gap:10px;flex-wrap:wrap;font-family:var(--font-title);font-weight:600;font-size:.82rem;color:#3B1A8F}
+.kc2 .mon3 span{display:inline-flex;align-items:center;gap:3px}
+.kc2 .bars{display:grid;grid-template-columns:auto 1fr auto;gap:2px 6px;align-items:center;font-size:.74rem;font-weight:800;color:#3B1A8F}
+.kc2 .bars .bb{height:9px;border-radius:999px;background:#E2DAF5;overflow:hidden}.kc2 .bars .bb i{display:block;height:100%;background:linear-gradient(#7BEA8F,#22B14C);border-radius:999px}
+.kc2 .go{width:40px;height:40px;border-radius:50%;border:3px solid #fff;background:linear-gradient(#9B6BFF,#6D28D9);color:#fff;font-size:1.2rem;font-weight:900;box-shadow:0 3px 0 #4C1D95;padding:0}
+.kc2 details{grid-column:1/-1;border-top:2px dashed #E0D4FF;padding-top:6px}
+.kc2 summary{font-family:var(--font-title);font-weight:600;color:#6D28D9;cursor:pointer;font-size:.9rem}
+.kc2 .opts{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px}
+.qtiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(92px,1fr));gap:8px}
+.qt{display:grid;justify-items:center;gap:4px;border:3px solid #fff;border-radius:20px;padding:10px 4px;font-family:var(--font-title);font-weight:600;font-size:.82rem;color:#3B1A8F;box-shadow:0 4px 0 rgb(91 33 182 / .2);background:var(--qb,#F1EBFF);line-height:1.1;text-align:center}
+.qt .e{font-size:1.9rem;line-height:1}
+.qt:nth-child(1){--qb:linear-gradient(#E9FBD9,#C8F2B0)}.qt:nth-child(2){--qb:linear-gradient(#EFE6FF,#DCCBFF)}.qt:nth-child(3){--qb:linear-gradient(#FFE6EF,#FFC9DC)}.qt:nth-child(4){--qb:linear-gradient(#E1F2FF,#C3E3FF)}.qt:nth-child(5){--qb:linear-gradient(#F3EDFF,#E2D6FF)}
+.tip{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:center;background:linear-gradient(#8B5CF6,#5B21B6);color:#fff;border:3px solid #FFD43B;border-radius:24px;padding:10px 14px;box-shadow:0 5px 0 #3B0F8C}
+.tip .e{font-size:2.2rem;line-height:1}.tip b{font-family:var(--font-title);font-weight:700;font-size:1.05rem}.tip p{font-size:.84rem;opacity:.95}
+.item .kmini{width:44px;height:44px;border-radius:14px;overflow:hidden;background:radial-gradient(circle at 40% 30%,#FFE9F5,#E9D5FF);border:2px solid #fff;display:grid;place-items:end center;box-shadow:0 2px 0 #C3AFF5}
+.item .kmini img{width:118%;margin-bottom:-22%}
+/* ---------- mundo libre ---------- */
+.ghud{gap:8px}
+.gchip{font-family:var(--font-title);font-weight:600;border:3px solid #fff;border-radius:999px;background:linear-gradient(#FFFFFF,#EEE6FF);color:#3B1A8F;box-shadow:0 3px 0 #4C1D95;padding:4px 10px}
+.gzn{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(#8B5CF6,#6D28D9);color:#fff;border:3px solid #fff;border-radius:999px;padding:3px 12px 3px 3px;box-shadow:0 3px 0 #4C1D95;font-family:var(--font-title)}
+.gzn .e{font-size:1.5rem;line-height:1}
+.gzn b{display:block;white-space:nowrap;font-weight:700;font-size:.95rem;line-height:1}.gzn small{display:block;white-space:nowrap;font-weight:500;font-size:.72rem;opacity:.9;line-height:1.1}
+.gexp{display:inline-flex;align-items:center;gap:5px;background:linear-gradient(#FFFFFF,#EEE6FF);border:3px solid #fff;border-radius:999px;padding:2px 4px 2px 8px;box-shadow:0 3px 0 #4C1D95;font-family:var(--font-title);font-weight:600;color:#3B1A8F;font-size:.72rem}
+.gexp .eb{width:60px;height:9px;border-radius:999px;background:#E2DAF5;overflow:hidden}.gexp .eb i{display:block;height:100%;background:linear-gradient(#7BEA8F,#22B14C)}
+.gmapbtn{display:grid;justify-items:center;border:0;background:transparent;padding:0}
+.gmapbtn .ic{width:50px;height:44px;border-radius:14px;background:linear-gradient(#FFFFFF,#EEE6FF);border:3px solid #fff;box-shadow:0 3px 0 #4C1D95;display:grid;place-items:center;font-size:1.6rem}
+.gmapbtn .lb{margin-top:-8px;background:linear-gradient(#8B5CF6,#6D28D9);color:#fff;font-family:var(--font-title);font-weight:600;font-size:.7rem;padding:1px 8px;border-radius:999px;border:2px solid #fff}
+.gleft{position:absolute;left:12px;top:96px;display:grid;gap:10px}
+.gleft .sbtn .ic{width:50px;height:46px}
+.ghud .gres{background:linear-gradient(#FFF07A,#FFC928)}
+.gdlg{border-radius:22px;border-color:#fff;box-shadow:0 6px 0 #4C1D95,0 0 0 3px #8B5CF6;font-family:var(--font-title);font-weight:500}
+.gcard{background:linear-gradient(#FFFFFF,#F1EBFF);border:3px solid #fff;box-shadow:0 6px 0 #4C1D95}
+
+body.homescr header.top{display:none}
+body.homescr .wrap{padding-top:calc(env(safe-area-inset-top,0px) + 14px)}
+.kbar{margin-top:auto}
+@media (max-width:420px){.mtab{font-size:.78rem;gap:3px;padding:7px 4px}.mtab .ti{font-size:1rem}.mtab img{width:22px;height:22px}}
+.ghud{display:grid!important;grid-template-columns:auto 1fr auto;align-items:center;gap:6px 8px}.ghud .gexp{justify-self:start}.ghud .gmapbtn{grid-row:1/3;grid-column:3;align-self:start}.ghud .gchip,.ghud .gen,.ghud .gres{grid-row:2}.ghud .gen{grid-column:2;width:auto;max-width:140px}
+.gleft{top:118px}
+.gbanner{top:110px;font-family:var(--font-title);border-radius:999px;background:linear-gradient(#8B5CF6,#6D28D9);border:3px solid #fff;box-shadow:0 4px 0 #3B0F8C}
 </style>
 
 <div class="wrap">
   <header class="top">
-    <div class="brand"><span class="coin" aria-hidden="true"></span>Fichamigo</div>
+    <div class="brand"><span class="logo">Ficha<b>migo</b></span></div>
     <div class="hright" id="hright"></div>
   </header>
   <div id="notice"></div>
@@ -1596,7 +1817,7 @@ function drawHumanVec(c,o){
 
 
 /* ================= Personajes por piezas (recortados de la ficha de personajes) ================= */
-const AVK=[{"h":[131,108,77,105],"t":[106,56,50,-1,51],"b":[80,46,50,5],"e":[[57.3,75.4],[95.5,71.8]],"sk":[249,181,110],"hair":false},{"h":[136,157,80,104],"t":[110,57,53,-1,52],"b":[101,42,53,5],"e":[[65.1,71.3],[103.3,67.8]],"sk":[244,180,109],"hair":true},{"h":[132,111,79,108],"t":[126,48,74,-1,43],"b":[75,49,47,5],"e":[[57.6,68.2],[96.2,65.9]],"sk":[248,167,93],"hair":false},{"h":[154,161,89,103],"t":[116,66,44,-1,61],"b":[77,33,43,5],"e":[[75.7,71.4],[115.0,67.9]],"sk":[247,183,121],"hair":true},{"h":[150,106,82,103],"t":[108,57,45,-1,52],"b":[92,46,42,5],"e":[[83.5,50.3],[122.8,54.1]],"sk":[247,183,112],"hair":false},{"h":[133,156,93,104],"t":[92,56,56,-1,51],"b":[93,50,57,5],"e":[[67.9,81.7],[123.5,75.3]],"sk":[247,179,96],"hair":true},{"h":[114,106,67,103],"t":[122,53,61,-1,48],"b":[125,49,61,5],"e":[[49.8,66.5],[87.8,64.3]],"sk":[248,177,105],"hair":false},{"h":[148,150,86,107],"t":[110,65,48,-1,60],"b":[76,31,45,5],"e":[[70.8,75.2],[110.4,71.1]],"sk":[248,181,116],"hair":true},{"h":[151,111,81,108],"t":[106,64,49,-1,59],"b":[78,34,46,5],"e":[[67.9,75.4],[104.9,71.9]],"sk":[248,177,112],"hair":false},{"h":[131,158,76,103],"t":[121,59,60,-1,54],"b":[114,37,58,5],"e":[[66.7,74.4],[105.6,71.3]],"sk":[247,180,113],"hair":true},{"h":[132,105,76,102],"t":[107,47,64,-1,42],"b":[89,45,46,5],"e":[[58.9,71.8],[98.8,68.2]],"sk":[249,184,115],"hair":false},{"h":[161,145,83,100],"t":[114,49,44,-1,44],"b":[88,42,45,5],"e":[[12.1,66.2],[67.1,66.4]],"sk":[249,182,118],"hair":true},{"h":[131,104,76,101],"t":[102,58,42,-1,53],"b":[88,34,39,5],"e":[[64.1,72.4],[102.2,68.7]],"sk":[243,180,115],"hair":false},{"h":[132,103,73,100],"t":[107,56,66,-1,51],"b":[103,36,62,5],"e":[[59.7,66.3],[98.2,62.6]],"sk":[237,185,103],"hair":false},{"h":[130,104,71,101],"t":[143,55,84,-1,50],"b":[129,38,85,5],"e":[[51.2,67.9],[89.4,64.6]],"sk":[246,182,119],"hair":false},{"h":[153,130,95,103],"t":[139,31,87,-1,26],"b":[121,53,69,5],"e":[[79.6,63.6],[137.7,66.1]],"sk":[249,180,119],"hair":true},{"h":[128,108,76,105],"t":[102,49,65,-1,44],"b":[100,39,63,5],"e":[[61.0,68.0],[99.3,64.6]],"sk":[245,183,107],"hair":false},{"h":[149,140,120,105],"t":[113,39,94,-1,34],"b":[122,44,95,5],"e":[[71.4,56.0],[108.4,53.2]],"sk":[249,179,118],"hair":true},{"h":[144,108,78,105],"t":[111,41,45,-1,36],"b":[106,45,45,5],"e":[[62.3,66.7],[99.7,61.7]],"sk":[250,180,108],"hair":false},{"h":[152,148,77,102],"t":[101,50,30,-1,45],"b":[71,34,30,5],"e":[[64.1,61.3],[102.4,56.9]],"sk":[247,186,114],"hair":true},{"h":[121,103,65,100],"t":[106,47,54,-1,42],"b":[100,39,54,5],"e":[[49.2,65.7],[87.4,64.1]],"sk":[247,179,112],"hair":false},{"h":[152,132,82,100],"t":[121,36,53,-1,31],"b":[104,50,51,5],"e":[[69.6,69.0],[108.2,65.5]],"sk":[246,179,112],"hair":true},{"h":[137,106,105,103],"t":[104,41,72,-1,36],"b":[94,43,78,5],"e":[[59.0,61.4],[96.8,56.3]],"sk":[241,176,110],"hair":false},{"h":[146,143,86,102],"t":[82,50,48,-1,45],"b":[82,34,48,5],"e":[[69.3,65.9],[108.0,62.8]],"sk":[248,182,122],"hair":true},{"h":[128,105,79,102],"t":[84,54,50,-1,49],"b":[84,35,50,5],"e":[[62.6,72.4],[100.7,68.6]],"sk":[246,174,94],"hair":false},{"h":[128,140,79,100],"t":[132,44,81,-1,39],"b":[99,38,46,5],"e":[[65.3,60.2],[104.3,55.6]],"sk":[250,180,112],"hair":true},{"h":[151,103,77,100],"t":[112,62,41,-1,57],"b":[72,26,37,5],"e":[[64.4,71.4],[102.3,68.1]],"sk":[248,182,98],"hair":false},{"h":[139,117,81,101],"t":[104,43,61,-1,38],"b":[97,42,61,5],"e":[[5.8,62.9],[61.0,64.2]],"sk":[248,180,121],"hair":true},{"h":[142,103,76,100],"t":[119,39,63,-1,34],"b":[104,53,55,5],"e":[[61.5,66.4],[99.6,64.1]],"sk":[247,178,109],"hair":false},{"h":[149,140,114,100],"t":[122,44,84,-1,39],"b":[117,40,84,5],"e":[[62.1,59.1],[101.2,53.9]],"sk":[246,180,110],"hair":true},{"h":[132,103,81,100],"t":[120,54,61,-1,49],"b":[112,40,61,5],"e":[[60.9,55.4],[103.2,51.9]],"sk":[245,180,111],"hair":false},{"h":[164,145,100,98],"t":[118,51,54,-1,46],"b":[118,37,54,5],"e":[[83.4,58.6],[122.3,54.4]],"sk":[248,178,111],"hair":true},{"h":[139,106,83,103],"t":[120,51,65,-1,46],"b":[81,42,50,5],"e":[[66.2,74.3],[103.1,70.3]],"sk":[250,183,110],"hair":false},{"h":[139,155,78,98],"t":[120,61,64,-1,56],"b":[68,32,36,5],"e":[[64.1,66.9],[101.7,62.8]],"sk":[249,183,112],"hair":true},{"h":[139,101,64,98],"t":[107,56,21,-1,51],"b":[94,32,21,5],"e":[[59.6,66.0],[95.5,59.1]],"sk":[250,186,114],"hair":false},{"h":[131,101,77,98],"t":[127,41,75,-1,36],"b":[111,55,73,5],"e":[[55.8,66.5],[94.2,62.7]],"sk":[249,179,117],"hair":false},{"h":[160,106,82,103],"t":[121,51,56,-1,46],"b":[90,41,56,5],"e":[],"sk":[247,184,111],"hair":false},{"h":[125,103,71,100],"t":[152,44,85,-1,39],"b":[149,49,85,5],"e":[[56.7,65.0],[95.5,59.1]],"sk":[250,179,124],"hair":false},{"h":[118,103,71,100],"t":[105,56,57,-1,51],"b":[89,33,53,5],"e":[[59.0,60.3],[95.5,54.3]],"sk":[248,185,112],"hair":false},{"h":[162,143,98,98],"t":[111,56,43,-1,51],"b":[90,33,34,5],"e":[[80.1,59.2],[118.8,54.9]],"sk":[247,182,113],"hair":true},{"h":[148,153,84,100],"t":[110,62,46,-1,57],"b":[99,36,46,5],"e":[[68.5,72.1],[107.2,68.1]],"sk":[248,180,117],"hair":true},{"h":[109,101,65,98],"t":[112,51,53,-1,46],"b":[106,50,53,5],"e":[[48.8,59.6],[85.7,55.9]],"sk":[248,178,110],"hair":false},{"h":[139,106,71,103],"t":[115,56,47,-1,51],"b":[96,41,47,5],"e":[[56.8,71.0],[93.8,66.7]],"sk":[249,180,109],"hair":false},{"h":[143,151,80,100],"t":[122,59,59,-1,54],"b":[95,40,59,5],"e":[[64.9,71.1],[103.3,66.8]],"sk":[249,181,117],"hair":true},{"h":[159,106,86,103],"t":[120,59,59,-1,54],"b":[107,33,62,5],"e":[[68.4,57.9],[124.7,55.3]],"sk":[249,176,96],"hair":false},{"h":[127,103,65,100],"t":[105,49,43,-1,44],"b":[97,45,41,5],"e":[[50.6,65.7],[88.6,62.0]],"sk":[250,182,112],"hair":false},{"h":[139,145,79,100],"t":[78,49,34,-1,44],"b":[62,44,36,5],"e":[[84.5,76.9],[122.7,77.6]],"sk":[248,180,118],"hair":true},{"h":[151,120,132,100],"t":[143,24,124,-1,19],"b":[140,67,121,5],"e":[[71.6,57.1],[129.5,53.3]],"sk":[247,171,99],"hair":true},{"h":[156,103,88,100],"t":[110,54,41,-1,49],"b":[71,41,41,5],"e":[[72.7,62.3],[109.2,60.1]],"sk":[245,181,119],"hair":false},{"h":[129,103,82,100],"t":[113,54,71,-1,49],"b":[109,33,69,5],"e":[[45.7,59.9],[97.5,58.1]],"sk":[238,175,111],"hair":false}];
+const AVK=[{"h":[131,108,77,105],"t":[106,56,50,-1,51],"b":[80,46,50,5],"e":[[57.3,75.4],[95.5,71.8]],"sk":[249,181,110],"hair":false},{"h":[136,157,80,104],"t":[110,57,53,-1,52],"b":[101,42,53,5],"e":[[65.1,71.3],[103.3,67.8]],"sk":[244,180,109],"hair":true},{"h":[132,111,79,108],"t":[126,48,74,-1,43],"b":[75,49,47,5],"e":[[57.6,68.2],[96.2,65.9]],"sk":[248,167,93],"hair":false},{"h":[154,161,89,103],"t":[116,66,44,-1,61],"b":[77,33,43,5],"e":[[75.7,71.4],[115.0,67.9]],"sk":[247,183,121],"hair":true},{"h":[150,106,82,103],"t":[108,57,45,-1,52],"b":[92,46,42,5],"e":[[83.5,50.3],[122.8,54.1]],"sk":[247,183,112],"hair":false},{"h":[133,156,93,104],"t":[92,56,56,-1,51],"b":[93,50,57,5],"e":[[67.9,81.7],[123.5,75.3]],"sk":[247,179,96],"hair":true},{"h":[114,106,67,103],"t":[122,53,61,-1,48],"b":[125,49,61,5],"e":[[49.8,66.5],[87.8,64.3]],"sk":[248,177,105],"hair":false},{"h":[148,150,86,107],"t":[110,65,48,-1,60],"b":[76,31,45,5],"e":[[70.8,75.2],[110.4,71.1]],"sk":[248,181,116],"hair":true},{"h":[151,111,81,108],"t":[106,64,49,-1,59],"b":[78,34,46,5],"e":[[67.9,75.4],[104.9,71.9]],"sk":[248,177,112],"hair":false},{"h":[131,158,76,103],"t":[121,59,60,-1,54],"b":[114,37,58,5],"e":[[66.7,74.4],[105.6,71.3]],"sk":[247,180,113],"hair":true},{"h":[132,105,76,102],"t":[107,47,64,-1,42],"b":[89,45,46,5],"e":[[58.9,71.8],[98.8,68.2]],"sk":[249,184,115],"hair":false},{"h":[161,145,83,100],"t":[114,49,44,-1,44],"b":[88,42,45,5],"e":[[12.1,66.2],[67.1,66.4]],"sk":[249,182,118],"hair":true},{"h":[131,104,76,101],"t":[102,58,42,-1,53],"b":[88,34,39,5],"e":[[64.1,72.4],[102.2,68.7]],"sk":[243,180,115],"hair":false},{"h":[132,103,73,100],"t":[107,56,66,-1,51],"b":[103,36,62,5],"e":[[59.7,66.3],[98.2,62.6]],"sk":[237,185,103],"hair":false},{"h":[130,104,71,101],"t":[143,55,84,-1,50],"b":[129,38,85,5],"e":[[51.2,67.9],[89.4,64.6]],"sk":[246,182,119],"hair":false},{"h":[153,130,95,103],"t":[139,31,87,-1,26],"b":[121,53,69,5],"e":[[79.6,63.6],[137.7,66.1]],"sk":[249,180,119],"hair":true},{"h":[128,108,76,105],"t":[102,49,65,-1,44],"b":[100,39,63,5],"e":[[61.0,68.0],[99.3,64.6]],"sk":[245,183,107],"hair":false},{"h":[149,140,120,105],"t":[113,39,94,-1,34],"b":[122,44,95,5],"e":[[71.4,56.0],[108.4,53.2]],"sk":[249,179,118],"hair":true},{"h":[144,108,78,105],"t":[111,41,45,-1,36],"b":[106,45,45,5],"e":[[62.3,66.7],[99.7,61.7]],"sk":[250,180,108],"hair":false},{"h":[152,148,77,102],"t":[101,50,30,-1,45],"b":[71,34,30,5],"e":[[64.1,61.3],[102.4,56.9]],"sk":[247,186,114],"hair":true},{"h":[121,103,65,100],"t":[106,47,54,-1,42],"b":[100,39,54,5],"e":[[49.2,65.7],[87.4,64.1]],"sk":[247,179,112],"hair":false},{"h":[152,132,82,100],"t":[121,36,53,-1,31],"b":[104,50,51,5],"e":[[69.6,69.0],[108.2,65.5]],"sk":[246,179,112],"hair":true},{"h":[137,106,105,103],"t":[104,41,72,-1,36],"b":[94,43,78,5],"e":[[59.0,61.4],[96.8,56.3]],"sk":[241,176,110],"hair":false},{"h":[146,143,86,102],"t":[82,50,48,-1,45],"b":[82,34,48,5],"e":[[69.3,65.9],[108.0,62.8]],"sk":[248,182,122],"hair":true},{"h":[128,105,79,102],"t":[84,54,50,-1,49],"b":[84,35,50,5],"e":[[62.6,72.4],[100.7,68.6]],"sk":[246,174,94],"hair":false},{"h":[128,140,79,100],"t":[132,44,81,-1,39],"b":[99,38,46,5],"e":[[65.3,60.2],[104.3,55.6]],"sk":[250,180,112],"hair":true},{"h":[151,103,77,100],"t":[112,62,41,-1,57],"b":[72,26,37,5],"e":[[64.4,71.4],[102.3,68.1]],"sk":[248,182,98],"hair":false},{"h":[139,117,81,101],"t":[104,43,61,-1,38],"b":[97,42,61,5],"e":[[5.8,62.9],[61.0,64.2]],"sk":[248,180,121],"hair":true},{"h":[142,103,76,100],"t":[119,39,63,-1,34],"b":[104,53,55,5],"e":[[61.5,66.4],[99.6,64.1]],"sk":[247,178,109],"hair":false},{"h":[149,140,114,100],"t":[122,44,84,-1,39],"b":[117,40,84,5],"e":[[62.1,59.1],[101.2,53.9]],"sk":[246,180,110],"hair":true},{"h":[132,103,81,100],"t":[120,54,61,-1,49],"b":[112,40,61,5],"e":[[60.9,55.4],[103.2,51.9]],"sk":[245,180,111],"hair":false},{"h":[149,112,100,98],"t":[118,51,54,-1,46],"b":[118,37,54,5],"e":[[83.4,58.6],[122.3,54.4]],"sk":[248,178,111],"hair":true},{"h":[139,106,83,103],"t":[120,51,65,-1,46],"b":[81,42,50,5],"e":[[66.2,74.3],[103.1,70.3]],"sk":[250,183,110],"hair":false},{"h":[139,155,78,98],"t":[120,61,64,-1,56],"b":[68,32,36,5],"e":[[64.1,66.9],[101.7,62.8]],"sk":[249,183,112],"hair":true},{"h":[139,101,64,98],"t":[107,56,21,-1,51],"b":[94,32,21,5],"e":[[59.6,66.0],[95.5,59.1]],"sk":[250,186,114],"hair":false},{"h":[131,101,77,98],"t":[127,41,75,-1,36],"b":[111,55,73,5],"e":[[55.8,66.5],[94.2,62.7]],"sk":[249,179,117],"hair":false},{"h":[160,106,82,103],"t":[121,51,56,-1,46],"b":[90,41,56,5],"e":[],"sk":[247,184,111],"hair":false},{"h":[125,103,71,100],"t":[152,44,85,-1,39],"b":[149,49,85,5],"e":[[56.7,65.0],[95.5,59.1]],"sk":[250,179,124],"hair":false},{"h":[118,103,71,100],"t":[105,56,57,-1,51],"b":[89,33,53,5],"e":[[59.0,60.3],[95.5,54.3]],"sk":[248,185,112],"hair":false},{"h":[162,143,98,98],"t":[111,56,43,-1,51],"b":[90,33,34,5],"e":[[80.1,59.2],[118.8,54.9]],"sk":[247,182,113],"hair":true},{"h":[148,153,84,100],"t":[110,62,46,-1,57],"b":[99,36,46,5],"e":[[68.5,72.1],[107.2,68.1]],"sk":[248,180,117],"hair":true},{"h":[109,101,65,98],"t":[112,51,53,-1,46],"b":[106,50,53,5],"e":[[48.8,59.6],[85.7,55.9]],"sk":[248,178,110],"hair":false},{"h":[139,106,71,103],"t":[115,56,47,-1,51],"b":[96,41,47,5],"e":[[56.8,71.0],[93.8,66.7]],"sk":[249,180,109],"hair":false},{"h":[143,151,80,100],"t":[122,59,59,-1,54],"b":[95,40,59,5],"e":[[64.9,71.1],[103.3,66.8]],"sk":[249,181,117],"hair":true},{"h":[159,106,86,103],"t":[120,59,59,-1,54],"b":[107,33,62,5],"e":[[68.4,57.9],[124.7,55.3]],"sk":[249,176,96],"hair":false},{"h":[119,103,65,100],"t":[105,49,43,-1,44],"b":[97,45,41,5],"e":[[50.6,65.7],[88.6,62.0]],"sk":[250,182,112],"hair":false},{"h":[139,145,79,100],"t":[78,49,34,-1,44],"b":[62,44,36,5],"e":[[84.5,76.9],[122.7,77.6]],"sk":[248,180,118],"hair":true},{"h":[151,120,132,100],"t":[143,24,124,-1,19],"b":[140,67,121,5],"e":[[71.6,57.1],[129.5,53.3]],"sk":[247,171,99],"hair":true},{"h":[145,103,88,100],"t":[110,54,41,-1,49],"b":[71,41,41,5],"e":[[72.7,62.3],[109.2,60.1]],"sk":[245,181,119],"hair":false},{"h":[129,103,82,100],"t":[113,54,71,-1,49],"b":[109,33,69,5],"e":[[45.7,59.9],[97.5,58.1]],"sk":[238,175,111],"hair":false}];
 const AVN=["Constructor", "Exploradora", "Astronauta", "Científica", "Granjero", "Guardiana", "Futbolista", "Enfermera", "Chef", "Pintora", "Gamer", "Rockera", "Lector", "Scout", "Superhéroe", "Hada", "Aviador", "Sobre ruedas", "Surfista", "Inventora", "Observador", "Campesina", "Skater", "Gatita", "Guardián", "Nadadora", "Detective", "Astronauta lila", "Baterista", "Veterinaria", "Programador", "Futbolista", "Bombero", "Fotógrafa", "Viajero del mundo", "Bailarina", "Pirata", "Sirena", "Mochilero", "Robótica", "Cohetera", "Basquetbolista", "Arquitecto", "Artista", "Mago", "Jardinero", "Cantante", "Bailarina folclórica", "Científica", "Polar"];
 const AV_GIRL=new Set([1, 3, 5, 7, 9, 11, 15, 17, 19, 21, 23, 25, 27, 29, 31, 33, 35, 37, 39, 40, 43, 46, 47, 48]), AV_FREE=new Set([0, 6, 10, 22, 28, 38, 41, 11, 17, 23, 25, 31, 46]);
 const AV_NOBOT=new Set([37]); // la sirena no tiene piernas para mezclar
@@ -2129,8 +2350,10 @@ function gameScreen(){
   else if(G.dialog){const d=G.dialog;over=`<div class="gdlg" ${d.ask?"":`data-act="gnext"`}><p>${esc(d.lines[d.i])}</p>${d.ask==="player"?`<div class="gbtns"><button class="btn" data-act="pwave">👋 Saludar</button>${!d.op.fr?`<button class="btn coinb" data-act="pfriend">Pedir amistad</button>`:""}<button class="btn ghost" data-act="gstay">Seguir</button></div>`:d.ask==="npc"?`<div class="gbtns"><button class="btn" data-act="npcplay">¡Sí, juguemos!</button><button class="btn ghost" data-act="gstay">Ahora no</button></div>`:d.ask?`<div class="gbtns"><button class="btn" data-act="gfinish">Sí, volver a casa</button><button class="btn ghost" data-act="gstay">Seguir explorando</button></div>`:`<span class="gmore">▼</span>`}</div>`}
   return `<div class="play game" style="--shell:${esc(k.color||COLORS[0])}">
     <div class="lcdwrap"><canvas id="gcv" width="256" height="320" aria-label="Mapa de exploración"></canvas>
-      <div class="ghud"><span class="gchip" id="gzone">${G.zone}</span><span class="gchip">${cI("m")}<b id="gcoins" class="num">${G.coins}</b></span>
-        <span class="gen" title="Energía"><i id="genergy" style="width:${G.energy/ENERGY*100}%"></i></span><button class="gchip gx" data-act="gmap">${MAPICON}Mapa</button><button class="gchip" data-act="ghome">Casa</button>${G.dest&&!G.path&&!G.enc&&!G.dialog&&!MG&&!G.end?`<button class="gchip gres" data-act="gresume">▶ Seguir a ${esc(G.dest.n)}</button>`:""}</div>
+      <div class="ghud"><span class="gzn"><span class="e">🌎</span><span><b>Mundo Libre</b><small id="gzone">${G.zone}</small></span></span><span class="gexp" title="Lugares descubiertos"><span>Explorador</span><span class="eb"><i style="width:${Math.round(((G.visited&&G.visited.size)||0)/(LANDMARKS.length)*100)}%"></i></span>🧰</span>
+        <button class="gmapbtn gx" data-act="gmap" aria-label="Abrir mapa"><span class="ic">🗺️</span><span class="lb">Mapa</span></button>
+        <span class="gchip">${cI("m")}<b id="gcoins" class="num">${G.coins}</b></span><span class="gen" title="Energía"><i id="genergy" style="width:${G.energy/ENERGY*100}%"></i></span>${G.dest&&!G.path&&!G.enc&&!G.dialog&&!MG&&!G.end?`<button class="gchip gres" data-act="gresume">▶ Seguir a ${esc(G.dest.n)}</button>`:""}</div>
+      ${!G.end&&!G.enc&&!MG&&!G.map?`<div class="gleft"><button class="sbtn" data-act="ghome"><span class="ic">🏠</span><span class="lb">Casa</span></button><button class="sbtn" data-act="gmap"><span class="ic">🧭</span><span class="lb">Destinos</span></button></div>`:""}
       <div id="gbanner" class="gbanner px" hidden></div>
       ${over}
     </div></div>`;
@@ -2428,6 +2651,7 @@ function render(){
   $("#hright").innerHTML=header();
   preserve(()=>{$("#app").innerHTML=loading?'<p class="muted">Cargando…</p>':screen()});
   document.body.classList.toggle("playing",!!document.querySelector(".play"));
+  document.body.classList.toggle("homescr",!!document.querySelector(".welcome.home"));
   if(localMode&&!$("#notice").innerHTML)$("#notice").innerHTML='<div class="notice">Modo de prueba: los datos se guardan solo en este dispositivo.</div>';
   paintAll();if(MG&&MG.id==="topos"&&MG.phase==="play")mgPaintHoles();
   let pv=document.getElementById("photoview");if(photoView){if(!pv){pv=document.createElement("div");pv.id="photoview";pv.className="photoview";pv.dataset.act="closephoto";document.body.appendChild(pv)}pv.innerHTML=`<img src="${esc(photoView)}" alt="Foto de prueba"><button class="btn" data-act="closephoto">Cerrar</button>`}else if(pv)pv.remove();
@@ -2548,10 +2772,13 @@ function welcome(){
     <label class="f">Código del Fichamigo (6 dígitos)<input id="kr-code" data-keep="no" inputmode="numeric" maxlength="6" pattern="[0-9]{6}" autocomplete="off" required></label>
     <label class="f">PIN de papá o mamá<input id="kr-pin" data-keep="no" type="password" inputmode="numeric" maxlength="4" pattern="[0-9]{4}" autocomplete="off" required></label>
     <button class="btn block" type="submit">Abrir mi Fichamigo</button><button class="link" type="button" data-act="wstep" data-v="kid">Volver</button></form></div>`;
-  return `<div class="welcome">${demo}<h1>Fichamigo</h1><p class="lead">Cada deber cumplido te da fichas. Con ellas alimentas y cuidas a tu mascota, y ahorras para la meta que pactaste en casa.</p>
-    ${installEvt?`<button class="btn coinb block" data-act="installapp" style="max-width:360px">📲 Instalar Fichamigo en este celular</button>`:""}
-    <button class="gstart" data-act="guide"><img src="fm/p00.webp" alt="" width="40">¿Primera vez? Te explico cómo empezar</button>
-    <div class="choices"><button class="btn block" data-act="wstep" data-v="kid">${devKid&&S.kids[devKid]?`Entrar como ${esc(S.kids[devKid].name)}`:"Soy un joven"}</button><button class="btn ghost block" data-act="wstep" data-v="parent">Soy papá o mamá</button>${remote?`<button class="btn ghost block" data-act="wstep" data-v="teacher">Soy docente</button>`:""}</div>
+  return `<div class="welcome home"><span class="logo big">Ficha<b>migo</b></span><span class="tagline">✦ Aprende, cumple y crece ✦</span>
+    <div class="homegrid"><div class="feats"><div class="feat"><span class="e">📋</span>Cumple tus deberes</div><div class="feat"><span class="e">🐾</span>Cuida a tu mascota</div><div class="feat"><span class="e">🎯</span>Alcanza tus metas</div></div>
+      <div class="herocv"><canvas id="lcd" width="128" height="120" data-mode="demo" aria-label="Un niño y su fichamigo en su cuarto"></canvas></div></div>
+    ${installEvt?`<button class="btn coinb block" data-act="installapp" style="max-width:480px">📲 Instalar Fichamigo en este celular</button>`:""}
+    <button class="gstart" data-act="guide"><img src="fm/p00.webp" alt="" width="54"><span style="text-align:left;line-height:1.2"><b style="font-size:1.05rem">¿Primera vez?</b><br><span style="font-weight:500">Te explicamos cómo empezar.</span></span><span class="go">▶</span></button>
+    <button class="btn bigyel" data-act="wstep" data-v="kid">🎮 ${devKid&&S.kids[devKid]?`Entrar como ${esc(S.kids[devKid].name)}`:"Entrar a mi Fichamigo"}</button>
+    <div class="duo"><button class="btn ${remote?"":"one"}" data-act="wstep" data-v="parent">👨‍👧 Soy papá o mamá</button>${remote?`<button class="btn" data-act="wstep" data-v="teacher">🎓 Soy docente</button>`:""}</div>
     <p class="legal"><a href="/privacidad.html" target="_blank" rel="noopener">Privacidad</a> · <a href="/terminos.html" target="_blank" rel="noopener">Términos</a></p></div>`;
 }
 
@@ -2606,6 +2833,21 @@ function petRow(kidId,sel,asParent){
   if(pl.length<2&&!extra)return"";
   return `<div class="petrow" role="tablist" aria-label="Tus fichamigos">${pl.map(o=>`<button class="petchip" role="tab" data-act="selpet" data-id="${o.id}" data-kid="${kidId}" aria-selected="${o.id===sel}"><i style="background:${moodDot(calc(o.p))}"></i>${esc(o.p.name||"Fichamigo")}</button>`).join("")}${extra}</div>`;
 }
+
+/* ---------- ayudas del nuevo diseño ---------- */
+const pad2=n=>String(n).padStart(2,"0");
+function headSrc(kidId){const a=(S.pets[kidId]||{}).avatar;return "av/h"+pad2(avPick(a).hd)+".webp"}
+function kidTitle(kidId){const a=(S.pets[kidId]||{}).avatar;return AVN[avPick(a).tp]||"Explorador"}
+function kidLevel(earned){earned=Math.max(0,earned||0);const n=1+Math.floor(Math.sqrt(earned/40)),lo=40*(n-1)**2,hi=40*n*n;return {n,pct:Math.round((earned-lo)/(hi-lo)*100)}}
+const TASK_E=[[/le(e|er|ctura)|libro/i,"📚"],[/viol[ií]n|guitarra|piano|m[uú]sica|flauta|bater/i,"🎻"],[/plato|loza|cocina/i,"🍽️"],[/perr|pasear|mascota|gato/i,"🐕"],[/dibuj|pint|arte/i,"🎨"],[/ejercicio|deporte|correr|f[uú]tbol|nadar|bici/i,"🏋️"],
+  [/cama|tender/i,"🛏️"],[/ba[ñn]ar|ducha|dientes|aseo/i,"🛁"],[/ordenar|cuarto|limpi|barrer|aspir/i,"🧹"],[/ropa|lavar/i,"👕"],[/basura|reciclar/i,"♻️"],[/planta|regar|jard/i,"🪴"],[/hermano|hermana|ayudar|beb[eé]|lala/i,"🤗"],[/tarea|matem|estudi|colegio|escrib|ingl/i,"✏️"],[/comer|fruta|verdura|almuerzo/i,"🥦"],[/dormir|temprano/i,"🌙"]];
+function taskEmoji(t){for(const [r,e] of TASK_E)if(r.test(t.title||""))return e;return t.school?"🏫":t.cat==="escuela"?"📒":t.cat==="casa"?"🏠":"⭐"}
+const GLY={eat:'<svg viewBox="0 0 24 24"><path fill="currentColor" d="M7 2a1 1 0 0 1 1 1v6a2 2 0 0 0 1-1.7V3a1 1 0 1 1 2 0v4.3A4 4 0 0 1 8.9 11L9 21a1.5 1.5 0 0 1-3 0l.1-10A4 4 0 0 1 4 7.3V3a1 1 0 1 1 2 0v4.3A2 2 0 0 0 7 9V3a1 1 0 0 1 0-1Zm10 0c2.2 0 3.5 2.6 3.5 6 0 2.3-1 3.7-2.3 4.2L18.5 21a1.5 1.5 0 0 1-3 0l.3-8.8C14.5 11.7 13.5 10.3 13.5 8c0-3.4 1.3-6 3.5-6Z"/></svg>',
+  game:'<svg viewBox="0 0 24 24"><path fill="currentColor" d="M7.5 6h9a5.5 5.5 0 0 1 5.3 7l-1 3.6a2.8 2.8 0 0 1-4.8 1.1L14.4 16H9.6L8 17.7a2.8 2.8 0 0 1-4.8-1.1l-1-3.6A5.5 5.5 0 0 1 7.5 6Zm0 3a1 1 0 0 0-1 1v1h-1a1 1 0 1 0 0 2h1v1a1 1 0 1 0 2 0v-1h1a1 1 0 1 0 0-2h-1v-1a1 1 0 0 0-1-1Zm9 0a1.2 1.2 0 1 0 0 2.4 1.2 1.2 0 0 0 0-2.4Zm-2 2.6a1.2 1.2 0 1 0 0 2.4 1.2 1.2 0 0 0 0-2.4Z"/></svg>',
+  shower:'<svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 2a1 1 0 0 1 1 1v1.1A7 7 0 0 1 19 11a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1 7 7 0 0 1 6-6.9V3a1 1 0 0 1 1-1ZM7 14a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0v-1a1 1 0 0 1 1-1Zm5 0a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0v-1a1 1 0 0 1 1-1Zm5 0a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0v-1a1 1 0 0 1 1-1ZM9.5 18a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0v-1a1 1 0 0 1 1-1Zm5 0a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0v-1a1 1 0 0 1 1-1Z"/></svg>',
+  shirt:'<svg viewBox="0 0 24 24"><path fill="currentColor" d="M8.5 3h1.2a2.4 2.4 0 0 0 4.6 0h1.2l5.5 3.2-2.2 4.2-2.3-1.1V20a1 1 0 0 1-1 1H8.5a1 1 0 0 1-1-1V9.3l-2.3 1.1L3 6.2 8.5 3Z"/></svg>',
+  grid:'<svg viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="2.5" fill="currentColor"/><rect x="13" y="3" width="8" height="8" rx="2.5" fill="currentColor"/><rect x="3" y="13" width="8" height="8" rx="2.5" fill="currentColor"/><rect x="13" y="13" width="8" height="8" rx="2.5" fill="currentColor"/></svg>'};
+function sChip(e,lbl,v){const cls=v<30?"low":v<60?"mid":"";return `<div class="schip ${cls}" title="${lbl}: ${Math.round(v)}%"><span class="e">${e}</span><b>${lbl}</b><span class="sb"><i style="width:${Math.max(4,Math.round(v))}%"></i></span></div>`}
 function kidScreen(kidId,asParent){
   if(G&&G.kid===kidId)return gameScreen();
   const k=S.kids[kidId], main=S.pets[kidId];
@@ -2613,7 +2855,7 @@ function kidScreen(kidId,asParent){
   if(!main.avatar&&!asParent)return avatarCreator(kidId);
   if(!main.species)return chooser(kidId,kidId);
   if(adoptFor&&adoptFor.kid===kidId&&!asParent)return chooser(kidId,adoptFor.id);
-  const pid=selPet(kidId), p=S.pets[pid], st=calc(p), xi=xpInfo(pid), m=money(kidId);
+  const pid=selPet(kidId), p=S.pets[pid], st=calc(p), xi=xpInfo(pid), m=money(kidId), lv=kidLevel(m.earned);
   const dis=st.egg||st.dead?"disabled":"";
   const pend=arr("tasks").filter(t=>t.kidId===kidId&&t.status==="pendiente").length;
   const goalsReady=arr("goals").filter(g=>g.kidId===kidId&&g.status==="activa"&&m.goalPts>=g.cost).length;
@@ -2623,27 +2865,29 @@ function kidScreen(kidId,asParent){
   const pair=!k.linked?`<div class="paircard"><span>Código para unirte a tu familia</span><b class="px">${esc(k.code)}</b><small>Tu papá o mamá lo escribe en Familia → Agregar dispositivo</small></div>`:"";
   const sheet=menuOpen?`<div class="scrim" data-act="closemenu"></div>
     <div class="sheet" role="dialog" aria-modal="true" aria-label="Menú">
-      <div class="sheethead"><nav class="tabs" aria-label="Secciones">${tabs.map(([key,l,n])=>`<button data-act="ktab" data-v="${key}" aria-pressed="${ktab===key}">${l}${n?`<span class="badge">${n}</span>`:""}</button>`).join("")}</nav>
-      <button class="closeb" data-act="closemenu" aria-label="Cerrar menú">✕</button></div>
+      <div class="sheethead"><nav class="mtabs" aria-label="Secciones">${tabs.slice(0,3).map(([key,l,n])=>`<button class="mtab" data-act="ktab" data-v="${key}" aria-pressed="${ktab===key}">${key==="personaje"?`<img src="${headSrc(kidId)}" alt="">`:`<span class="ti">${key==="deberes"?"📋":"🏪"}</span>`}${l}${n?`<span class="badge">${n}</span>`:""}</button>`).join("")}</nav>
+      <button class="closeb" data-act="closemenu" aria-label="Cerrar menú">✕</button>
+      <nav class="mtabs2" aria-label="Más secciones">${tabs.slice(3).map(([key,l,n])=>`<button data-act="ktab" data-v="${key}" aria-pressed="${ktab===key}">${{metas:"🎯",chat:"💬",album:"📖",registro:"🧾",padres:"🔒"}[key]||""} ${l}${n?`<span class="badge">${n}</span>`:""}</button>`).join("")}</nav></div>
       <div class="sheetbody">${pair}${body}</div></div>`:"";
   const badge=pend+goalsReady;
   return `<div class="play" style="--shell:${esc(k.color||COLORS[0])}">
-    <div class="ptop">
-      ${asParent?`<button class="iconbtn" data-act="pback" aria-label="Volver a Familia">←</button>`:""}
-      <div class="pid"><span class="pname">${esc(p.name||"")}</span><span class="stage">${st.egg?"Huevo":stageLabel(xi)}${asParent?` · de ${esc(k.name)}`:""}</span></div>
-      <span class="pchip num" title="Fichas de deberes">${cI("f")}${m.wallet}</span><span class="pchip num m" title="Monedas de explorar">${cI("m")}${m.mon}</span>
-      ${!asParent&&remote&&pushStatus()!=="on"&&pushStatus()!=="nofamily"?`<button class="iconbtn bell" data-act="enablepush" aria-label="Activar notificaciones">🔔<i></i></button>`:""}
-      <button class="iconbtn" data-act="mute" aria-label="${muted?"Activar sonido":"Silenciar"}">${muted?"🔇":"🔊"}</button>
+    <div class="ktop">
+      ${asParent?`<button class="kicon" data-act="pback" aria-label="Volver a Familia" style="color:#fff">←</button>`:""}
+      <div class="kme"><span class="kav"><img src="${headSrc(kidId)}" alt=""></span><div class="kmi"><b>${esc(k.name)}</b><small>${esc(kidTitle(kidId))}</small><span class="lvl"><span class="st">★</span><span class="lb"><i style="width:${lv.pct}%"></i><em>Nivel ${lv.n}</em></span></span></div></div>
+      <span class="logo">Ficha<b>migo</b></span>
+      <span class="cpill" title="Fichas de deberes">${cI("f")}<span class="num">${m.wallet}</span>${asParent?"":`<button class="plus" data-act="kgo" data-v="deberes" aria-label="Ganar más fichas">+</button>`}</span>
+      <span class="cpill" title="Monedas de explorar">${cI("m")}<span class="num">${m.mon}</span>${asParent?"":`<button class="plus" data-act="explore" data-id="${kidId}" aria-label="Ganar monedas explorando">+</button>`}</span>
+      ${!asParent&&remote&&pushStatus()!=="on"&&pushStatus()!=="nofamily"?`<button class="kicon" data-act="enablepush" aria-label="Activar notificaciones">🔔<i></i></button>`:`<button class="kicon" data-act="mute" aria-label="${muted?"Activar sonido":"Silenciar"}">${muted?"🔇":"🔔"}</button>`}
     </div>
     ${petRow(kidId,pid,asParent)}
     ${!k.linked&&!menuOpen?pair:""}
-    <div class="lcdwrap"><canvas id="lcd" width="128" height="96" data-mode="kid" data-kid="${kidId}" aria-label="Tu cuarto con tu personaje y ${esc(p.name||"tu fichamigo")}. Toca a un fichamigo para ver qué sabe hacer."></canvas>${petMenu&&!dis?petMenuHtml(pid,p,st):""}</div>
+    <div class="lcdwrap"><canvas id="lcd" width="128" height="96" data-mode="kid" data-kid="${kidId}" aria-label="Tu cuarto con tu personaje y ${esc(p.name||"tu fichamigo")}. Toca a un fichamigo para ver qué sabe hacer."></canvas>${petMenu&&!dis?petMenuHtml(pid,p,st):""}${asParent?"":`<div class="rside"><button class="sbtn" data-act="kgo" data-v="deberes"><span class="ic">📅</span><span class="lb">Misiones</span>${pend?`<span class="badge">${pend}</span>`:""}</button><button class="sbtn" data-act="kgo" data-v="metas"><span class="ic">🎁</span><span class="lb">Recompensas</span>${goalsReady?`<span class="badge">${goalsReady}</span>`:""}</button><button class="sbtn" data-act="kgo" data-v="tienda"><span class="ic">🏪</span><span class="lb">Tienda</span></button></div>`}</div>
     ${dis?"":`<div class="hint">Toca a ${esc(p.name)} para jugar · Mantén presionado para acariciar · Arrastra para cargarlo</div>`}
-    ${st.egg||st.dead?"":`<div class="stats">${statBar("Comida",st.h)}${statBar("Ánimo",st.hp)}${statBar("Limpieza",st.c)}</div>`}
+    ${st.egg||st.dead?"":`<div class="stats">${sChip("🍎","Comida",st.h)}${sChip("💗","Ánimo",st.hp)}${sChip("🫧","Limpieza",st.c)}</div>`}
     <div class="status">${statusMsg(p,st,xi)}</div>
     ${foodOpen&&!dis?`<div class="drawer">${FOODS.map(f=>`<div class="food"><img class="foodimg" src="st/${(FOOD_OLD[f.id]||f.id)}.webp" alt="">${f.n}<div class="fpay"><button data-act="feed" data-id="${pid}" data-f="${f.id}" data-cur="f" ${m.wallet<f.p?"disabled":""} aria-label="${f.n} por ${f.p} fichas">${cI("f")}${f.p}</button><button data-act="feed" data-id="${pid}" data-f="${f.id}" data-cur="m" ${m.mon<f.p*RATE?"disabled":""} aria-label="${f.n} por ${f.p*RATE} monedas">${cI("m")}${f.p*RATE}</button></div></div>`).join("")}</div>`:""}
     ${st.dead?`<div class="btns">${asParent?`<button class="btn coinb" data-act="revive" data-id="${pid}">Revivir</button>`:""}<button class="btn" data-act="newegg" data-id="${pid}">Huevo nuevo</button><button class="rb c5" data-act="explore" data-id="${kidId}"><span class="k">${MAPICON}</span>Explorar</button><button class="rb c4" data-act="openmenu"><span class="k">${IC.menu}</span>Menú</button></div>`
-    :`<div class="btns"><button class="rb c1" data-act="feedmenu" ${dis} aria-expanded="${foodOpen}"><span class="k">${IC.food}</span>Comer</button><button class="rb c2" data-act="play" data-id="${pid}" ${dis}><span class="k">${IC.play}</span>Jugar</button><button class="rb c3" data-act="clean" data-id="${pid}" ${dis}><span class="k">${IC.clean}</span>Limpiar</button><button class="rb c5" data-act="explore" data-id="${kidId}"><span class="k">${MAPICON}</span>Explorar</button><button class="rb c4" data-act="openmenu" aria-haspopup="dialog"><span class="k">${IC.menu}${badge?`<i class="dot">${badge}</i>`:""}</span>Menú</button></div>`}
+    :`<div class="kbar"><button class="kb c1" data-act="feedmenu" ${dis} aria-expanded="${foodOpen}"><span class="k">${GLY.eat}</span>Comer</button><button class="kb c2" data-act="play" data-id="${pid}" ${dis}><span class="k">${GLY.game}</span>Jugar</button><button class="kb c3" data-act="clean" data-id="${pid}" ${dis}><span class="k">${GLY.shower}</span>Limpiar</button><button class="kb c4" data-act="explore" data-id="${kidId}"><span class="k">${MAPICON}</span>Explorar</button>${asParent?"":`<button class="kb c5" data-act="kgo" data-v="personaje"><span class="k">${GLY.shirt}</span>Vestir</button>`}<button class="kb c6" data-act="openmenu" aria-haspopup="dialog"><span class="k">${GLY.grid}</span>${badge?`<i class="dot">${badge}</i>`:""}Más</button></div>`}
   </div>${sheet}`;
 }
 function chooser(kidId,petId){
@@ -2747,12 +2991,15 @@ function kDeberes(kidId,m,xi){
   const tasks=arr("tasks").filter(t=>t.kidId===kidId);
   const pend=tasks.filter(t=>t.status==="pendiente").sort((a,b)=>(a.due||"9").localeCompare(b.due||"9"));
   const rev=tasks.filter(t=>t.status==="revision");
-  return `<section><div class="sechead"><h2>Por hacer</h2><p>Total ganado: ${tok(m.earned)}</p></div>
-    <div class="list">${pend.length?pend.map(t=>`<div class="item"><span class="cat ${t.cat}"></span><div class="body"><div class="t">${esc(t.title)}</div>
-      <div class="meta">${t.school?`<span class="pill plain">🏫 ${esc(t.school.tname)} · ${esc(t.school.gname)}</span>`:`<span>${CATS[t.cat]||""}</span>`}${dueTag(t)}${repTag(t)}${t.note?`<span class="pill warn">${esc(t.note)}</span>`:""}</div>${t.desc?`<div class="tdesc">${esc(t.desc)}</div>`:""}</div>
-      <div class="actions">${t.school?`<span class="tok num">${cI("e")}${t.tokens}</span>`:tok(t.tokens)}<button class="btn okb sm" data-act="done" data-id="${t.id}">${t.needPhoto?"📷 ¡Lo hice!":"¡Lo hice!"}</button></div></div>`).join("")
-      :`<div class="empty">No tienes deberes pendientes. Tu mascota está orgullosa.</div>`}</div></section>
-  ${rev.length?`<section><div class="sechead"><h2>En revisión</h2><p>Cuando los aprueben, recibes las fichas</p></div><div class="list">${rev.map(t=>`<div class="item"><span class="cat ${t.cat}"></span><div class="body"><div class="t">${esc(t.title)}</div><div class="meta"><span class="pill warn">${t.school?"Esperando a tu docente":"Esperando aprobación"}</span></div></div><div class="actions">${proofThumb(t)}${t.school?`<span class="tok num">${cI("e")}${t.tokens}</span>`:tok(t.tokens)}</div></div>`).join("")}</div></section>`:""}`;
+  const td=today(), doneT=tasks.filter(t=>t.status!=="pendiente"&&t.doneAt&&new Date(t.doneAt).toISOString().slice(0,10)===td).length, tot=Math.max(1,doneT+pend.filter(t=>!t.due||t.due<=td).length);
+  const meta=t=>`${t.school?`<span>🏫 ${esc(t.school.tname)} · ${esc(t.school.gname)}</span>`:`<span>${t.cat==="escuela"?"🎒":t.cat==="casa"?"🏠":"⭐"} ${CATS[t.cat]||""}</span>`}${t.due?(t.due<td&&t.status==="pendiente"?`<span class="pill bad">Vencida · ${fmtDate(t.due)}</span>`:`<span>📅 ${t.due===td?"Hoy":fmtDate(t.due)}</span>`):""}${t.repeat==="daily"?"<span>🔁 Diaria</span>":t.repeat==="weekly"?"<span>🔁 Semanal</span>":""}${t.note?`<span class="pill warn">${esc(t.note)}</span>`:""}`;
+  const amt=t=>t.school?`<span class="tok num">${cI("e")}${t.tokens}</span>`:tok(t.tokens);
+  return `<div class="hero"><span class="hart"><img src="${headSrc(kidId)}" alt=""></span><div><h2>Por hacer</h2><p>Completa tus deberes, gana fichas y desbloquea recompensas.</p></div><div class="hstat"><span class="e">⭐</span>Total ganado<b>${cI("f")}${m.earned}</b></div></div>
+  <section><div class="list">${pend.length?pend.map(t=>`<div class="trow"><span class="ticon">${taskEmoji(t)}</span><div class="tb"><div class="tt">${esc(t.title)}</div><div class="tm">${meta(t)}</div>${t.desc?`<div class="tdesc">${esc(t.desc)}</div>`:""}</div>
+      <div class="ta">${amt(t)}<button class="btn okb sm" data-act="done" data-id="${t.id}">${t.needPhoto?"📷 ¡Lo hice!":"✔ ¡Lo hice!"}</button></div></div>`).join("")
+      :`<div class="empty">No tienes deberes pendientes. Tu fichamigo está orgulloso. 🎉</div>`}</div></section>
+  ${rev.length?`<section><div class="sechead"><h2>En revisión</h2><p>Cuando los aprueben, recibes las fichas</p></div><div class="list">${rev.map(t=>`<div class="trow"><span class="ticon">${taskEmoji(t)}</span><div class="tb"><div class="tt">${esc(t.title)}</div><div class="tm"><span class="pill warn">${t.school?"Esperando a tu docente":"Esperando aprobación"}</span></div></div><div class="ta">${proofThumb(t)}${amt(t)}</div></div>`).join("")}</div></section>`:""}
+  <div class="prog"><span class="e">🧰</span><div><b>Tu progreso de hoy</b><div class="pb">${Array.from({length:Math.min(10,tot)},(_,i)=>`<i class="${i<Math.round(doneT/tot*Math.min(10,tot))?"on":""}"></i>`).join("")}</div><small>${doneT} de ${tot} deberes</small></div></div>`;
 }
 function payBtns(k,kidId,w,price,m,block,blockLbl){if(block)return `<span class="pill plain">${blockLbl}</span>`;
   return `<div class="pay"><button class="btn coinb sm" data-act="buy" data-k="${k}" data-id="${kidId}" data-w="${w}" data-cur="f" ${m.wallet<price?"disabled":""} aria-label="Comprar con ${price} fichas">${cI("f")}${price}</button><button class="btn monb sm" data-act="buy" data-k="${k}" data-id="${kidId}" data-w="${w}" data-cur="m" ${m.mon<price*RATE?"disabled":""} aria-label="Comprar con ${price*RATE} monedas">${cI("m")}${price*RATE}</button></div>`}
@@ -2863,9 +3110,15 @@ function parentScreen(){
   const fk=role.fromKid&&S.kids[role.fromKid];
   const consent=remote&&family&&!S.config.consent?`<form class="form consentcard" data-form="consent"><h2>Autorización de datos</h2><p class="muted">Para seguir usando Fichamigo con tus hijos necesitamos tu autorización como padre, madre o representante legal (Ley 1581 de 2012).</p>
     <label class="toggle consent"><input id="consent2" type="checkbox" required><span>Autorizo el tratamiento de los datos de mis hijos según la <a href="/privacidad.html" target="_blank" rel="noopener">Política de privacidad</a> y los <a href="/terminos.html" target="_blank" rel="noopener">Términos de uso</a>.</span></label><div><button class="btn" type="submit">Aceptar</button></div></form>`:"";
-  return `${consent}<div class="pnav"><button class="btn ghost sm" data-act="logout">← Menú principal</button>${fk?`<button class="btn ghost sm" data-act="askkid" data-id="${role.fromKid}">Volver al Fichamigo de ${esc(fk.name)}</button>`:""}<span class="muted" style="font-size:.85rem;margin-left:auto">Zona de padres</span></div>
-  <nav class="tabs" aria-label="Secciones">${tabs.map(([k,l,n])=>`<button data-act="ptab" data-v="${k}" aria-pressed="${ptab===k}">${l}${n?`<span class="badge">${n}</span>`:""}</button>`).join("")}</nav>${body}`;
+  const TI={familia:"🏠",revisar:"✅",deberes:"📖",metas:"🏆",colegio:"🏫",amigos:"💬",registro:"🧾",ajustes:"⚙️"};
+  const HD={familia:["Zona de Padres","Gestiona, acompaña y cuida la experiencia de tus hijos"],revisar:["Revisar actividades","Aprueba los deberes que tus hijos completaron para entregarles sus fichas"],deberes:["Deberes","Crea tareas y decide cuántas fichas vale cada una"],metas:["Metas","Pacten premios reales que se ganan con fichas"],colegio:["Colegio","Solicitudes y tareas de los docentes"],amigos:["Amigos y chat","Aprueba amistades y revisa conversaciones"],registro:["Reportes","Todo lo que pasó con fichas y monedas"],ajustes:["Controles","PIN, código de familia, notificaciones y privacidad"]}[ptab]||["Zona de Padres",""];
+  const ill={familia:"fm/p41.webp",revisar:"fm/p09.webp",deberes:"fm/p00.webp",metas:"fm/p19.webp",colegio:"fm/p09.webp",amigos:"fm/p05.webp",registro:"fm/p10.webp",ajustes:"fm/p39.webp"}[ptab]||"fm/p41.webp";
+  return `${consent}<div class="phead"><span class="pill2"><img src="${ill}" alt=""></span><div><h2>🛡️ ${HD[0]}</h2><p>${HD[1]}</p></div>
+    <div class="pbtns"><button class="btn ghost sm" data-act="logout">← Menú principal</button>${fk?`<button class="btn ghost sm" data-act="askkid" data-id="${role.fromKid}">👤 Volver al Fichamigo de ${esc(fk.name)}</button>`:""}</div></div>
+  <nav class="tabs" aria-label="Secciones">${tabs.map(([k,l,n])=>`<button data-act="ptab" data-v="${k}" aria-pressed="${ptab===k}"><span class="ti">${TI[k]||""}</span>${k==="ajustes"?"Controles":k==="registro"?"Reportes":l}${n?`<span class="badge">${n}</span>`:""}</button>`).join("")}</nav>${body}
+  <div class="tip"><span class="e">💡</span><div><b>Consejo para padres</b><p>${PTIPS[(new Date().getDate()+ptab.length)%PTIPS.length]}</p></div></div>`;
 }
+const PTIPS=["Revisa las metas semanales y reconoce los logros de tus hijos. ¡Esto los motiva a seguir aprendiendo!","Revisa las evidencias, valora el esfuerzo y reconoce el cumplimiento de sus responsabilidades.","Pacten metas pequeñas y alcanzables primero; el éxito temprano engancha.","Aprueba los deberes el mismo día: la recompensa rápida refuerza el hábito.","Usa los bonos para premiar actitudes, no solo tareas: amabilidad, ayudar sin que se lo pidan."];
 const needKids=()=>`<div class="empty">Primero agrega los dispositivos de tus hijos en la pestaña <b>Familia</b>.</div>`;
 function miniBar(lbl,v){const cls=v<30?"low":v<60?"mid":"";return `<span>${lbl}</span><div class="bar ${cls}"><i style="width:${Math.round(v)}%"></i></div>`}
 function petPill(p,st){const mood=moodOf(st);return !p||!p.species?'<span class="pill plain">Sin elegir mascota</span>':st.egg?'<span class="pill plain">Huevo</span>':st.dead?'<span class="pill bad">Murió</span>':mood==="sick"?'<span class="pill bad">Enfermo</span>':mood==="hungry"?'<span class="pill warn">Con hambre</span>':mood==="dirty"?'<span class="pill warn">Sucio</span>':mood==="sad"?'<span class="pill warn">Aburrido</span>':'<span class="pill ok">Bien</span>'}
@@ -2874,7 +3127,13 @@ function pFamilia(){
   const cards=kids.map(k=>{const p=S.pets[k.id],st=calc(p),xi=xpInfo(k.id),m=money(k.id),mood=moodOf(st);
     const pill=petPill(p,st), extras=petsOf(k.id).slice(1).filter(o=>o.p.species), mp=k.maxPets||"auto";
     const goal=arr("goals").filter(g=>g.kidId===k.id&&g.status==="activa").sort((a,b)=>a.cost-b.cost)[0];
-    return `<div class="kidcard" style="--kc:${esc(k.color)}"><canvas width="512" height="480" data-paint="mini:${k.id}" aria-label="Mascota de ${esc(k.name)}"></canvas>
+    const lv=kidLevel(m.earned),bar=(e,l,v)=>`<span>${e} ${l}</span><span class="bb"><i style="width:${Math.round(v)}%"></i></span><span>${Math.round(v)}%</span>`;
+    return `<div class="kc2"><span class="kph"><img src="${headSrc(k.id)}" alt=""><span class="klv">★ Nivel ${lv.n}</span></span>
+    <div class="kb2"><h3>${esc(k.name)}</h3><div class="row">${k.age?`<span>${esc(k.age)} años</span>`:""}${pill}</div>
+      <div class="mon3"><span>${cI("f")}${m.wallet} Fichas</span><span>${cI("m")}${m.mon} Monedas</span><span>🏆 ${m.earned} En deberes</span></div>
+      ${st&&!st.egg&&!st.dead?`<div class="bars">${bar("🍎","Comida",st.h)}${bar("💗","Ánimo",st.hp)}${bar("🫧","Limpieza",st.c)}</div>`:""}</div>
+    <button class="go" data-act="pview" data-id="${k.id}" aria-label="Abrir el Fichamigo de ${esc(k.name)}">›</button>
+    <details><summary>Más opciones de ${esc(k.name)}</summary><div class="opts">
     <div class="info"><div style="display:flex;justify-content:space-between;gap:6px;align-items:center;flex-wrap:wrap"><h3>${esc(k.name)}${k.age?` <span class="muted">· ${esc(k.age)} años</span>`:""}</h3>${pill}</div>
       <div class="meta">${p&&p.name?`<span>${esc(p.name)} · ${stageLabel(xi)}</span>`:""}<span>Fichas ${tok(m.wallet)}</span><span>Monedas ${mon(m.mon)}</span><span>Ganado en deberes ${m.earned}</span></div>
       ${st&&!st.egg&&!st.dead?`<div class="mini">${miniBar("Comida",st.h)}${miniBar("Ánimo",st.hp)}${miniBar("Limpieza",st.c)}</div>`:""}
@@ -2885,13 +3144,16 @@ function pFamilia(){
       <label class="msel">Fichamigos<select data-maxpets="${k.id}" aria-label="Cuántos fichamigos puede tener ${esc(k.name)}"><option value="auto" ${mp==="auto"?"selected":""}>Por responsabilidad (${petSlots(k.id)})</option>${[1,2,3].map(n=>`<option value="${n}" ${String(mp)===String(n)?"selected":""}>${n}</option>`).join("")}</select></label>
       ${st&&st.dead?`<button class="btn coinb sm" data-act="revive" data-id="${k.id}">Revivir</button>`:""}
       <form data-form="bonus" data-id="${k.id}" style="display:flex;gap:6px"><input id="b-${k.id}" type="number" placeholder="± fichas" style="width:96px" aria-label="Bono o descuento para ${esc(k.name)}" required><button class="btn ghost sm" type="submit">Bono</button></form>
-      <button class="x" data-act="delkid" data-id="${k.id}">Quitar</button></div></div>`}).join("");
+      <button class="x" data-act="delkid" data-id="${k.id}">Quitar</button></div></div></div></details></div>`}).join("");
   const waiting=arr("kids").filter(k=>!k.linked).sort((a,b)=>b.createdAt-a.createdAt);
   const pend=waiting.length?`<section><div class="sechead"><h2>Dispositivos esperando</h2><p>Perfiles creados que aún no están en tu familia</p></div><div class="list">${waiting.map(k=>`<div class="item">${av(k)}<div class="body"><div class="t">${esc(k.name)}</div>
     <div class="meta"><span>Código <span class="code">${esc(k.code)}</span></span><span>Creado ${fmtTs(k.createdAt)}</span></div></div>
     <div class="actions"><button class="btn okb sm" data-act="linkkid" data-id="${k.id}">Agregar</button><button class="btn ghost sm" data-act="askkid" data-id="${k.id}">Usar este celular como suyo</button><button class="x" data-act="delkid" data-id="${k.id}">Quitar</button></div></div>`).join("")}</div></section>`:"";
-  return `${pend}<section><div class="sechead"><h2>Tu familia</h2><p>${kids.length} perfil${kids.length===1?"":"es"}</p></div>${cards||'<div class="empty">Aún no hay dispositivos en tu familia. En el celular de cada joven abre Fichamigo, elige “Soy un joven” y escribe aquí abajo el código que aparece.</div>'}</section>
-  <form class="form" data-form="link"><h2>Agregar dispositivo</h2>
+  const totalPts=kids.reduce((a,k)=>a+money(k.id).earned,0);
+  return `${pend}<div class="fsum"><span class="e">🏡</span><div><h2>Tu Familia</h2><p>Gestiona los perfiles, avances y responsabilidades.</p></div><span class="fbox"><b>${kids.length}</b>Perfiles</span><span class="fbox"><b>⭐ ${totalPts}</b>Puntos totales</span></div>
+  <section>${cards||'<div class="empty">Aún no hay dispositivos en tu familia. En el celular de cada joven abre Fichamigo, elige “Soy un joven” y escribe aquí abajo el código que aparece.</div>'}</section>
+  <div class="qtiles"><button class="qt" data-act="qlink"><span class="e">🧑‍🤝‍🧑</span>Agregar perfil</button><button class="qt" data-act="qlink"><span class="e">📱</span>Agregar dispositivo</button><button class="qt" data-act="qbonus"><span class="e">🎁</span>Gestionar bonos</button><button class="qt" data-act="ptab" data-v="registro"><span class="e">📊</span>Ver reportes</button><button class="qt" data-act="ptab" data-v="ajustes"><span class="e">🎛️</span>Configurar controles</button></div>
+  <form class="form" data-form="link" id="linkform"><h2>📱 Agregar dispositivo</h2>
     <p class="muted" style="font-size:.88rem">En el celular del joven abre Fichamigo y elige “Soy un joven”. Te mostrará un código de 6 dígitos.</p>
     <label class="f">Código del dispositivo<input id="l-code" inputmode="numeric" maxlength="6" pattern="[0-9]{6}" required placeholder="000000"></label>
     <div><button class="btn" type="submit">Agregar a la familia</button></div></form>`;
@@ -2901,7 +3163,7 @@ function pRevisar(){
   return `${sl.length?`<section><div class="sechead"><h2>Solicitudes del colegio</h2><p>Un docente quiere agregar a tu hijo a su grupo</p></div><div class="list">${sl.map(l=>`<div class="item"><span class="cat escuela"></span><div class="body"><div class="t">${esc(l.tname)} · ${esc(l.gname)}</div><div class="meta"><b>${kidName(l.kidId)}</b><span>Solo verá sus tareas de este grupo y las fotos de esas tareas</span></div></div>
       <div class="actions"><button class="btn ghost sm" data-act="sdecide" data-id="${l.id}" data-v="reject">Rechazar</button><button class="btn okb sm" data-act="sdecide" data-id="${l.id}" data-v="approve">Aprobar</button></div></div>`).join("")}</div></section>`:""}
   <section><div class="sechead"><h2>Deberes por aprobar</h2><p>Al aprobar se pagan las fichas</p></div>
-    <div class="list">${rev.length?rev.map(t=>`<div class="item"><span class="cat ${t.cat}"></span><div class="body"><div class="t">${esc(t.title)}</div><div class="meta"><b>${kidName(t.kidId)}</b><span>${CATS[t.cat]||""}</span>${repTag(t)}</div></div>
+    <div class="list">${rev.length?rev.map(t=>`<div class="item"><span class="kmini"><img src="${headSrc(t.kidId)}" alt=""></span><div class="body"><div class="t">${esc(t.title)}</div><div class="meta"><b>${kidName(t.kidId)}</b><span>${CATS[t.cat]||""}</span>${repTag(t)}</div></div>
       <div class="actions">${proofThumb(t)}${tok(t.tokens)}<button class="btn ghost sm" data-act="reject" data-id="${t.id}">Devolver</button><button class="btn okb sm" data-act="approve" data-id="${t.id}">Aprobar</button></div></div>`).join("")
       :`<div class="empty">Nada por revisar. Cuando un joven marque “¡Lo hice!”, aparece aquí.</div>`}</div></section>
   ${srev.length?`<section><div class="sechead"><h2>Tareas del colegio entregadas</h2><p>Las revisa y aprueba el docente</p></div><div class="list">${srev.map(t=>`<div class="item"><span class="cat escuela"></span><div class="body"><div class="t">${esc(t.title)}</div><div class="meta"><b>${kidName(t.kidId)}</b><span>${esc(t.school.tname)} · ${esc(t.school.gname)}</span><span class="pill warn">Esperando al docente</span></div></div><div class="actions">${proofThumb(t)}<span class="tok num">${cI("e")}${t.tokens}</span></div></div>`).join("")}</div></section>`:""}
@@ -3047,6 +3309,9 @@ document.addEventListener("click",async e=>{
   if(a==="pmteach"){petMenu="teach";render();return}
   if(a==="pmmain"){petMenu="main";render();return}
   if(a==="practice"){await practice(id,b.dataset.v);return}
+  if(a==="qlink"){const f=document.getElementById("linkform");if(f){f.scrollIntoView({behavior:"smooth",block:"center"});setTimeout(()=>{const i=document.getElementById("l-code");if(i)i.focus()},400)}return}
+  if(a==="qbonus"){const d=document.querySelector(".kc2 details");if(d){d.open=true;d.scrollIntoView({behavior:"smooth",block:"center"})}else toast("Primero agrega a tus hijos.");return}
+  if(a==="kgo"){petMenu=null;menuOpen=true;foodOpen=false;ktab=b.dataset.v;beep(700);render();return}
   if(a==="openmenu"){petMenu=null;menuOpen=true;foodOpen=false;beep(700);render();return}
   if(a==="closemenu"){menuOpen=false;render();return}
   if(a==="linkkid"){await put("kids",id,{...S.kids[id],linked:true,linkedAt:Date.now(),color:COLORS[famKids().length%COLORS.length]});tune([[523,.06],[784,.1]]);toast(`${S.kids[id].name} se unió a la familia`);return}
