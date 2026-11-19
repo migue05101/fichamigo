@@ -730,17 +730,26 @@ body.homescr .wrap{padding-top:calc(env(safe-area-inset-top,0px) + 14px)}
 .gpanel{max-height:calc(100% - 20px);overflow:auto;display:grid;gap:10px;width:min(560px,100%)}
 .gleft{gap:8px}.gleft .sbtn .ic{width:46px;height:42px;font-size:1.4rem}
 .rside{gap:6px}.rside .sbtn .ic{width:46px;height:40px;font-size:1.35rem}
-.homeart{position:relative;width:min(100%,calc((100dvh - 70px) * 0.75),560px);aspect-ratio:1086/1448;border-radius:26px;overflow:hidden;box-shadow:0 14px 34px rgb(59 15 140 / .4);margin-inline:auto}
-.homebg{position:absolute;inset:0;width:100%;height:100%;display:block;user-select:none;-webkit-user-drag:none}
-.homecv{position:absolute;border-radius:9%/10%;overflow:hidden;border:4px solid rgb(255 255 255 / .9);box-shadow:0 0 0 3px rgb(139 92 246 / .6),0 0 28px rgb(255 214 120 / .55),0 10px 24px rgb(59 15 140 / .4);background:#E9DDFF}
-.homecv canvas{display:block;width:100%;height:100%;object-fit:cover}
+.homeart{position:fixed;inset:0;z-index:20;display:flex;flex-direction:column;width:100%;max-width:620px;margin:0 auto;background:radial-gradient(90% 55% at 60% 45%,#B07CF0 0%,#7A3BD6 45%,#4E1A9E 100%);overflow:hidden}
+@media (min-width:640px){.homeart{box-shadow:0 0 60px rgb(0 0 0 / .35)}}
+.htop{display:block;width:100%;height:auto;flex:none;margin-top:env(safe-area-inset-top,0px);position:relative;z-index:1}
+.hmid::before,.hmid::after{content:"";position:absolute;pointer-events:none;border-radius:50%;filter:blur(30px);opacity:.55}.hmid::before{width:46%;height:30%;left:-12%;top:8%;background:#E9B7FF}.hmid::after{width:40%;height:28%;right:-10%;bottom:6%;background:#8AE07A;opacity:.35}
+.homeart::before{content:"";position:absolute;left:0;right:0;top:0;height:calc(env(safe-area-inset-top,0px) + 8px);background:#7A3BD6}
+.hmid{position:relative;flex:1;min-height:0;display:flex;align-items:center;justify-content:center;gap:2.5%;padding:0 4% 2% 2.8%;margin-top:-2%}
+.hcol{flex:0 0 22.5%;align-self:center;border:0;background:transparent;padding:0;cursor:pointer}
+.hcol img{display:block;width:100%;height:auto;filter:drop-shadow(0 6px 14px rgb(59 15 140 / .45))}
+.homecv{position:relative;flex:1;min-width:0;max-width:76%;aspect-ratio:128/176;max-height:100%;border-radius:24px;overflow:hidden;border:4px solid rgb(255 255 255 / .92);box-shadow:0 0 0 3px rgb(139 92 246 / .6),0 0 28px rgb(255 214 120 / .5),0 10px 24px rgb(59 15 140 / .4);background:#E9DDFF}
+.homecv canvas{display:block;width:100%;height:100%}
+.hbot{position:relative;flex:none;padding-bottom:env(safe-area-inset-bottom,0px);background:#3F1490}
+.hbot>img{display:block;width:100%;height:auto}
 .hot{position:absolute;border:0;background:transparent;border-radius:999px;padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .12s,background .12s}
 .hot:active{transform:scale(.97);background:rgb(255 255 255 / .18)}
 .hot:focus-visible{outline:3px solid #FFD43B;outline-offset:2px}
-html:has(body.homescr),body.homescr{background:radial-gradient(120% 70% at 50% 40%,#7A3BD6,#4C1A9A) fixed;background-color:#4C1A9A}
-body.homescr .wrap{padding-top:calc(env(safe-area-inset-top,0px) + 8px)}
-body.homescr .legal,body.homescr .legal a{color:#E9DDFF}
-.welcome.home{gap:10px;min-height:calc(100dvh - env(safe-area-inset-top,0px) - 30px);align-content:center}
+.hlegal{position:absolute;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 1%);text-align:center;font-size:.72rem;margin:0}.hlegal a{color:#F3EDFF;font-weight:700}
+.hinst{position:absolute;right:3%;bottom:calc(env(safe-area-inset-bottom,0px) + 1%);border:2px solid #fff;border-radius:999px;background:linear-gradient(#FFF07A,#FFC21E);color:#3B1A8F;font-weight:900;font-size:.72rem;padding:3px 10px}
+body.homescr header.top{display:none}
+html:has(body.homescr),body.homescr{background:#3E1585}
+.welcome.home{min-height:0;padding:0}
 </style>
 
 <div class="wrap">
@@ -2808,15 +2817,17 @@ function welcome(){
     <label class="f">Código del Fichamigo (6 dígitos)<input id="kr-code" data-keep="no" inputmode="numeric" maxlength="6" pattern="[0-9]{6}" autocomplete="off" required></label>
     <label class="f">PIN de papá o mamá<input id="kr-pin" data-keep="no" type="password" inputmode="numeric" maxlength="4" pattern="[0-9]{4}" autocomplete="off" required></label>
     <button class="btn block" type="submit">Abrir mi Fichamigo</button><button class="link" type="button" data-act="wstep" data-v="kid">Volver</button></form></div>`;
-  return `<div class="welcome home"><div class="homeart"><img class="homebg" src="home.webp" alt="Fichamigo: aprende, cumple y crece. Cumple tus deberes, cuida a tu mascota y alcanza tus metas.">
-    <div class="homecv" style="left:24.68%;top:20.17%;width:67.40%;height:45.58%"><canvas id="lcd" width="128" height="120" data-mode="demo" aria-label="Un niño y su fichamigo en su cuarto"></canvas></div>
-    <button class="hot" style="left:2.76%;top:16.57%;width:20.72%;height:45.23%" data-act="guide" aria-label="Cumple tus deberes, cuida a tu mascota y alcanza tus metas: ver cómo funciona"></button>
-    <button class="hot" style="left:10.87%;top:66.44%;width:77.53%;height:9.67%" data-act="guide" aria-label="¿Primera vez? Te explicamos cómo empezar"></button>
-    <button class="hot" style="left:12.15%;top:78.18%;width:75.51%;height:8.29%" data-act="wstep" data-v="kid" aria-label="${devKid&&S.kids[devKid]?`Entrar como ${esc(S.kids[devKid].name)}`:"Entrar a mi Fichamigo"}"></button>
-    <button class="hot" style="left:10.68%;top:87.57%;width:39.23%;height:6.49%" data-act="wstep" data-v="parent" aria-label="Soy papá o mamá"></button>
-    <button class="hot" style="left:51.20%;top:87.57%;width:38.12%;height:6.49%" data-act="wstep" data-v="teacher" aria-label="Soy docente"></button></div>
-    ${installEvt?`<button class="btn coinb block" data-act="installapp" style="max-width:480px">📲 Instalar Fichamigo en este celular</button>`:""}
-    <p class="legal"><a href="/privacidad.html" target="_blank" rel="noopener">Privacidad</a> · <a href="/terminos.html" target="_blank" rel="noopener">Términos</a></p></div>`;
+  return `<div class="welcome home"><div class="homeart">
+    <img class="htop" src="home_top.webp" alt="Fichamigo: aprende, cumple y crece">
+    <div class="hmid"><button class="hcol" data-act="guide" aria-label="Cumple tus deberes, cuida a tu mascota y alcanza tus metas: ver cómo funciona"><img src="home_col.webp" alt=""></button>
+      <div class="homecv"><canvas id="lcd" width="128" height="120" data-mode="demo" aria-label="Un niño y su fichamigo en su cuarto"></canvas></div></div>
+    <div class="hbot"><img src="home_bot.webp" alt="">
+      <button class="hot" style="left:10.87%;top:1.42%;width:77.53%;height:28.40%" data-act="guide" aria-label="¿Primera vez? Te explicamos cómo empezar"></button>
+      <button class="hot" style="left:12.15%;top:35.90%;width:75.51%;height:24.34%" data-act="wstep" data-v="kid" aria-label="${devKid&&S.kids[devKid]?`Entrar como ${esc(S.kids[devKid].name)}`:"Entrar a mi Fichamigo"}"></button>
+      <button class="hot" style="left:10.68%;top:63.49%;width:39.23%;height:19.07%" data-act="wstep" data-v="parent" aria-label="Soy papá o mamá"></button>
+      <button class="hot" style="left:51.20%;top:63.49%;width:38.12%;height:19.07%" data-act="wstep" data-v="teacher" aria-label="Soy docente"></button>
+      ${installEvt?`<button class="hinst" data-act="installapp">📲 Instalar</button>`:""}
+      <p class="hlegal"><a href="/privacidad.html" target="_blank" rel="noopener">Privacidad</a> · <a href="/terminos.html" target="_blank" rel="noopener">Términos</a></p></div></div></div>`;
 }
 
 /* ---------- pantalla del joven ---------- */
