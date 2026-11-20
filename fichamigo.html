@@ -740,6 +740,10 @@ html:has(body.homescr),body.homescr{background:#3E1585}
 .pcs.locked img{opacity:.75}.pctag{position:absolute;right:3px;bottom:3px;background:linear-gradient(#FFF07A,#FFC928);color:#3B1A8F;font-weight:900;font-size:.68rem;border-radius:999px;padding:0 6px;border:2px solid #fff}.pctag.ok{background:#22C55E;color:#fff}
 .offs{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
 .buybox{display:grid;grid-template-columns:64px 1fr auto;gap:10px;align-items:center;background:#fff;border:3px solid #FFC928;border-radius:18px;padding:8px;margin-top:6px}.buybox img{width:64px;height:64px;object-fit:contain}.buybox b{font-family:var(--font-title)}
+
+.rooms{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:2px;width:100%}
+.rm{flex:none;display:inline-flex;align-items:center;gap:5px;border:2px solid #fff;border-radius:999px;background:linear-gradient(#FFFFFF,#F1EBFF);color:#3B1A8F;font-family:var(--font-title);font-weight:600;font-size:.86rem;padding:5px 12px;box-shadow:0 3px 0 #B9A5F2}
+.rm span{font-size:1.05rem;line-height:1}.rm[aria-pressed="true"]{background:linear-gradient(#FFF07A,#FFC928);box-shadow:0 3px 0 #C99400}.rm.lock{opacity:.7}
 </style>
 
 <div class="wrap">
@@ -1157,9 +1161,30 @@ const WALLS=[{id:"celeste",n:"Celeste",p:0,c:"#BFE3F2",d:"#A3D2E8"},{id:"menta",
   {id:"durazno",n:"Rombos durazno",p:15,c:"#FFDCC7",d:"#F7BFA0"},{id:"arcoiris",n:"Arcoíris",p:30,c:"#FFE5C2",d:"#FFD6E0"},{id:"nubes",n:"Cielo con nubes",p:30,c:"#9ED8F7",d:"#FFFFFF"},{id:"noche",n:"Noche estrellada",p:40,c:"#26305E",d:"#323D73"}];
 const FLOORS=[["#E9B57E","#D9A06A"],["#F4EEE6","#E2D9CE"],["#D7A06B","#C1885A"]];
 const furnPos=(p,f)=>(p&&p.place&&p.place[f.id])||f.d;
+/* ---------- casa con varias habitaciones ---------- */
+const ROOMS=[{id:"cuarto",n:"Cuarto",e:"🛏️",p:0,d:"Tu habitación."},{id:"sala",n:"Sala",e:"🛋️",p:150,d:"Para el sofá, el televisor y la música."},{id:"cocina",n:"Cocina",e:"🍳",p:200,d:"Con piso de baldosa para la nevera, la estufa y el comedor."},
+  {id:"bano",n:"Baño",e:"🚿",p:200,d:"Para la ducha, el inodoro y la lavadora."},{id:"patio",n:"Patio",e:"🌳",p:300,d:"Al aire libre: bicicleta, arco de fútbol y canasta."}];
+const FROOM={sala:"sofa sillon mesita tv biblioteca repisa reloj planta pecera farolito velas libros control vr audifonos laptop dron guitarra teclado bateria saxofon caballete colores pinceles puerta bombillo brote",
+  cocina:"comedor nevera estufa lavaplatos caneca reciclaje",bano:"inodoro ducha lavadora canasta",patio:"bici scooter skate patines arco canastabasket voleibol raqueta balon"};
+const FROOM_OF={};Object.entries(FROOM).forEach(([r,l])=>l.split(" ").forEach(id=>FROOM_OF[id]=r));
+function roomsOwned(p){const o=new Set(["cuarto",...((p&&p.rooms)||[])]),h=(p&&p.house)||1;if(h>=2){o.add("sala");o.add("cocina")}if(h>=3){o.add("bano");o.add("patio")}return o}
+function furnRoom(p,f,own){own=own||roomsOwned(p);const pl=p&&p.place&&p.place[f.id],r=(pl&&pl[2])||FROOM_OF[f.id]||"cuarto";return own.has(r)?r:"cuarto"}
+let curRoom="cuarto";const FS=1.42;
 /* pared y piso vectoriales (estilo sticker) */
-function roomBack(c,p,t,top,bottom){
-  const lvl=p&&p.house||1,w=WALLS.find(x=>x.id===(p&&p.wall||"celeste"))||WALLS[0];
+const ROOM_LOOK={sala:{wall:"durazno",floor:3},cocina:{wall:"menta",floor:2},bano:{wall:"celeste",floor:2,tint:"#CFEAF5"}};
+function patioBack(c,t,top,bottom){const g=c.createLinearGradient(0,top,0,FY0);g.addColorStop(0,"#8FD3FF");g.addColorStop(1,"#D8F3FF");c.fillStyle=g;c.fillRect(0,top,128,FY0-top);
+  c.fillStyle="#FFE873";c.beginPath();c.arc(106,top+14,7,0,Math.PI*2);c.fill();
+  [[18,14],[62,22],[92,30]].forEach(([x,y],i)=>{const xx=(x+t/900*(i+1))%150-10;c.fillStyle="#FFFFFF";c.beginPath();c.arc(xx,top+y,5,0,Math.PI*2);c.arc(xx+6,top+y-2,6,0,Math.PI*2);c.arc(xx+12,top+y,5,0,Math.PI*2);c.fill()});
+  c.fillStyle="#7BC96F";[[14,10],[44,13],[80,9],[112,12]].forEach(([x,r])=>{c.beginPath();c.arc(x,FY0-6,r,0,Math.PI*2);c.fill()});
+  for(let x=0;x<128;x+=9){c.fillStyle="#F2E2C4";c.fillRect(x+1,FY0-13,7,14);c.beginPath();c.moveTo(x+1,FY0-13);c.lineTo(x+4.5,FY0-17);c.lineTo(x+8,FY0-13);c.fill();c.fillStyle="rgba(120,80,40,.25)";c.fillRect(x+8,FY0-13,1,14)}
+  c.fillStyle="#D9C29A";c.fillRect(0,FY0-9,128,1.5);
+  const fg=c.createLinearGradient(0,FY0,0,bottom);fg.addColorStop(0,"#6CC45E");fg.addColorStop(1,"#8FDB7A");c.fillStyle=fg;c.fillRect(0,FY0+1,128,bottom-FY0);
+  c.fillStyle="rgba(255,255,255,.18)";for(let i=0;i<40;i++){const x=(i*37)%128,y=FY0+6+(i*53)%(Math.max(10,bottom-FY0-8));c.fillRect(x,y,1,2)}
+  [[20,FY0+12,"#FF8FAB"],[96,FY0+20,"#FFD166"],[60,FY0+8,"#FFFFFF"],[114,FY0+40,"#C9A7F5"],[8,FY0+44,"#FFD166"]].forEach(([x,y,col])=>{if(y<bottom-4){c.fillStyle=col;c.beginPath();c.arc(x,y,1.4,0,Math.PI*2);c.fill()}})}
+function roomBack(c,p,t,top,bottom,room){
+  if(room==="patio")return patioBack(c,t,top,bottom);
+  const LK=ROOM_LOOK[room];
+  const lvl=LK?LK.floor:1,w=WALLS.find(x=>x.id===(LK?LK.wall:(p&&p.wall||"celeste")))||WALLS[0];
   const g=c.createLinearGradient(0,top,0,FY0);g.addColorStop(0,mix(w.c,"#FFFFFF",.25));g.addColorStop(1,w.c);c.fillStyle=g;c.fillRect(0,top,128,FY0-top);
   c.save();c.beginPath();c.rect(0,top,128,FY0-top);c.clip();c.fillStyle=w.d;
   if(w.id==="menta")for(let x=0;x<128;x+=12)c.fillRect(x,top,5,FY0-top);
@@ -1170,23 +1195,23 @@ function roomBack(c,p,t,top,bottom){
   c.restore();
   if(lvl>=3){c.fillStyle="rgba(255,255,255,.55)";c.fillRect(0,FY0-16,128,12);c.fillStyle="rgba(0,0,0,.06)";c.fillRect(0,FY0-4,128,1)}
   c.fillStyle="#FFFFFF";c.fillRect(0,FY0-3,128,4);c.fillStyle="rgba(60,40,80,.18)";c.fillRect(0,FY0+1,128,1);
-  const F=FLOORS[lvl-1]||FLOORS[0],fg=c.createLinearGradient(0,FY0,0,bottom);fg.addColorStop(0,mix(F[0],"#7A4A2A",.12));fg.addColorStop(1,mix(F[0],"#FFFFFF",.08));c.fillStyle=fg;c.fillRect(0,FY0+1,128,bottom-FY0);
+  const F=LK&&LK.tint?[LK.tint,"#A9CFE0"]:(FLOORS[lvl-1]||FLOORS[0]),fg=c.createLinearGradient(0,FY0,0,bottom);fg.addColorStop(0,mix(F[0],"#7A4A2A",.12));fg.addColorStop(1,mix(F[0],"#FFFFFF",.08));c.fillStyle=fg;c.fillRect(0,FY0+1,128,bottom-FY0);
   c.strokeStyle=F[1];c.lineWidth=.6;
   if(lvl===2){for(let y=FY0+8;y<bottom;y+=12){c.beginPath();c.moveTo(0,y);c.lineTo(128,y);c.stroke()}for(let x=-120;x<250;x+=16){c.beginPath();c.moveTo(64+(x-64)*.75,FY0+1);c.lineTo(x,bottom);c.stroke()}}
   else for(let y=FY0+7,r=0;y<bottom;y+=7+r*.6,r++){c.beginPath();c.moveTo(0,y);c.lineTo(128,y);c.stroke();for(let x=(r%2)*18+9;x<128;x+=36){c.beginPath();c.moveTo(x,y-7-r*.6);c.lineTo(x,y);c.stroke()}}
   const sg=c.createLinearGradient(0,FY0,0,FY0+10);sg.addColorStop(0,"rgba(40,20,60,.16)");sg.addColorStop(1,"rgba(40,20,60,0)");c.fillStyle=sg;c.fillRect(0,FY0+1,128,10);
 }
 let furnBoxes=[], furnBounce={}, fdrag=null, roomBottom=116;
-function drawWorld(c,p,t,actors,top,bottom,live){
-  const lvl=p&&p.house||1,cap=(HOUSES[lvl-1]||HOUSES[0]).cap,own=furnOwned(p);
-  const placed=FURN.filter(f=>own.has(f.id)).slice(0,cap),boxes=[];
-  roomBack(c,p,t,top,bottom);
+function drawWorld(c,p,t,actors,top,bottom,live,roomId){
+  const own=furnOwned(p),ro=roomsOwned(p);if(live&&!ro.has(curRoom))curRoom="cuarto";const room=roomId||(live?curRoom:"cuarto");
+  const placed=FURN.filter(f=>own.has(f.id)&&furnRoom(p,f,ro)===room),boxes=[];
+  roomBack(c,p,t,top,bottom,room);
   const drawF=f=>{let [x,y]=furnPos(p,f);if(fdrag&&fdrag.id===f.id){x=fdrag.x;y=fdrag.y}
     const b=furnBounce[f.id]&&t-furnBounce[f.id]<500?Math.sin((t-furnBounce[f.id])/500*Math.PI):0,lifted=fdrag&&fdrag.id===f.id;
-    if(!f.wall&&!f.flat){c.fillStyle="rgba(50,30,20,.16)";c.beginPath();c.ellipse(x,y,f.h*(ST_AR[f.id]||1)*.42,2.2,0,0,Math.PI*2);c.fill()}
-    const r=drawStk(c,f.id,x,y-(lifted?3:0)-b*3,f.h*(1+b*.06),{sy:1-b*.04});boxes.push({id:f.id,...r,wall:f.wall,flat:f.flat,y})};
+    if(!f.wall&&!f.flat){c.fillStyle="rgba(50,30,20,.16)";c.beginPath();c.ellipse(x,y,f.h*FS*(ST_AR[f.id]||1)*.42,2.6,0,0,Math.PI*2);c.fill()}
+    const r=drawStk(c,f.id,x,y-(lifted?3:0)-b*3,f.h*FS*(1+b*.06),{sy:1-b*.04});boxes.push({id:f.id,...r,wall:f.wall,flat:f.flat,y})};
   placed.filter(f=>f.wall).sort((a,b)=>furnPos(p,a)[1]-furnPos(p,b)[1]).forEach(drawF);
-  if(own.has("ventana")&&isDay()&&placed.some(f=>f.id==="ventana")){const [vx]=furnPos(p,FURN[1]);c.fillStyle="rgba(255,250,215,.16)";c.beginPath();c.moveTo(vx-10,FY0+1);c.lineTo(vx+10,FY0+1);c.lineTo(vx+30,FY0+40);c.lineTo(vx-2,FY0+40);c.closePath();c.fill()}
+  if(room!=="patio"&&own.has("ventana")&&isDay()&&placed.some(f=>f.id==="ventana")){const [vx]=furnPos(p,FURN[1]);c.fillStyle="rgba(255,250,215,.16)";c.beginPath();c.moveTo(vx-10,FY0+1);c.lineTo(vx+10,FY0+1);c.lineTo(vx+30,FY0+40);c.lineTo(vx-2,FY0+40);c.closePath();c.fill()}
   placed.filter(f=>f.flat).forEach(drawF);
   const list=placed.filter(f=>!f.wall&&!f.flat).map(f=>({y:(fdrag&&fdrag.id===f.id?fdrag.y:furnPos(p,f)[1])-.5,draw:()=>drawF(f)})).concat(actors||[]);
   list.sort((a,b)=>a.y-b.y).forEach(o=>o.draw());
@@ -1215,7 +1240,7 @@ function sprVariant(im,f,key){const tinted=key&&TINT_F[key];const k=f+"|"+(tinte
   let src=im;const W=im.naturalWidth,H=im.naturalHeight;
   if(tinted){const cv=document.createElement("canvas");cv.width=W;cv.height=H;const x=cv.getContext("2d");if(typeof x.filter==="string"){x.filter=TINT_F[key];x.drawImage(im,0,0);src=cv}}
   return tintCache[k]=stickerOutline(src,W,H)}
-const PET_H=[0,20,26,32,38];
+const PET_H=[0,13,17,21,25];
 function drop(c,x,y,col){c.beginPath();c.moveTo(x,y-3);c.quadraticCurveTo(x+2.2,y,x,y+1.6);c.quadraticCurveTo(x-2.2,y,x,y-3);c.fillStyle=col;c.fill();c.lineWidth=.5;c.strokeStyle="rgba(40,60,120,.6)";c.stroke()}
 function drawPetSticker(c,o){
   const sp=SPECIES[o.sp]?o.sp:"blob", d=SPECIES[sp], stage=Math.max(1,o.stage||1), t=o.t||1000, mood=o.mood||"happy", ac=o.action, still=!!o.still;
@@ -2020,7 +2045,7 @@ function avBust(av){av=avNorm(av);const key=JSON.stringify(av);if(BUST[key])retu
   else{clearTimeout(avBust.t);avBust.t=setTimeout(()=>{try{render()}catch(e){}},700)}
   return BUST[key]||"data:image/gif;base64,R0lGODlhAQABAAAAACw="}
 /* dibuja el personaje HD dentro de una escena a resolución lógica (½) */
-function drawHumanAt(c,o){return drawHumanSticker(c,{h:56,...o})}
+function drawHumanAt(c,o){return drawHumanSticker(c,{h:36,...o})}
 
 /* versión pequeña para el mundo (cabe en una casilla de 16 px, estilo Pokémon) */
 const TR_HAIR={ondas:"largo",rizos:"largo",trenzas2:"largo",flequillo:"largo",afro:"crespo",chonguitos:"colitas",coleta:"mono",lateral:"corto",rapado:"corto"};
@@ -2119,7 +2144,11 @@ window.addEventListener("pointermove",e=>{if(!fdrag)return;const pt=lcdPoint(e);
 window.addEventListener("pointerup",async e=>{if(!fdrag)return;const d=fdrag;fdrag=null;const now=performance.now();
   if(d.kind==="hum"){if(!d.moved){humMenu=!humMenu;petMenu=null;beep(990,.05);render()}else{hum.held=false;hum.wait=60;hum.pose="wave";hum.poseUntil=now+700;beep(660,.05)}return}
   if(!d.moved){furnBounce[d.id]=now;tune([[880,.04],[1175,.06]]);const pid=selPet(d.kid),st=calc(S.pets[pid]);if(st&&!st.egg&&!st.dead&&FURN.findIndex(f=>f.id===d.id)>=24&&FURN.findIndex(f=>f.id===d.id)<32){walker=wk(pid);walker.tx=d.x;walker.ty=Math.min(WALK.y1,d.y+4);walker.wait=0;setTimeout(()=>doAct("play"),900)}return}
-  furnBounce[d.id]=now;beep(523,.05);await petWrite(d.kid,pp=>({place:{...(pp.place||{}),[d.id]:[Math.round(d.x),Math.round(d.y)]}}))});
+  furnBounce[d.id]=now;beep(523,.05);
+  const mp=S.pets[d.kid]||{},L=ROOMS.map(r=>r.id).filter(r=>roomsOwned(mp).has(r)),ci=L.indexOf(curRoom);let room=curRoom,x=Math.round(d.x);
+  if(d.x<=6&&ci>0){room=L[ci-1];x=112}else if(d.x>=122&&ci<L.length-1){room=L[ci+1];x=16}
+  if(room!==curRoom){const f=FURN.find(q=>q.id===d.id),rr=ROOMS.find(q=>q.id===room);toast(`${f?f.n:"Mueble"} → ${rr.n}`);tune([[659,.05],[880,.08]])}
+  await petWrite(d.kid,pp=>({place:{...(pp.place||{}),[d.id]:[x,Math.round(d.y),room]}}))});
 window.addEventListener("pointermove",e=>{if(!ix)return;const pt=lcdPoint(e);if(!pt)return;
   if(ix.mode==="down"&&Math.hypot(pt.x-ix.sx,pt.y-ix.sy)>7){ix.mode="drag";clearTimeout(ix.hold);petMenu=null;beep(880,.05);beep(990,.05)}
   if(ix.mode==="drag"){const st=SIZES[xpInfo(ix.id).stage];ix.px=Math.max(WALK.x0,Math.min(WALK.x1,pt.x));ix.pb=Math.max(st[1]*2+6-sceneOff(+document.getElementById("lcd").dataset.lh||SH),Math.min(WALK.y1,pt.y+st[1]*2-2));
@@ -2219,7 +2248,7 @@ function sceneCore(c,kidId,ts,live,top,bottom){
     if(sm==="dead"||sm==="sick")expr="sad";else if(sm==="hungry"||sm==="dirty"||sm==="sad")expr="wow";else if(sm==="sleep")expr="sleepy";
     if(live&&ix&&ix.mode==="pet")expr="love";if(live&&hum.task)expr=hum.task.type==="eat"?"smile":"laugh";if(pose==="wave"||pose==="cheer"||pose==="jump")expr="laugh";
     if(expr==="smile"&&ts%9000<450)expr="wink";if(live&&hum.held)expr="wow";if(live&&!hum.task&&hum.poseUntil>ts&&hum.exprOv)expr=hum.exprOv;
-    actors.push({y:fy2,draw:()=>{sh(c,fx2,fy2+1,11,2,.24);const r=drawHumanAt(c,{x:fx2,base:fy2,av,face,pose,t:ts,hold,reach,expr});if(live){humBox=r;if(hum.say&&hum.poseUntil>ts&&!hum.task)sayBubble(c,fx2,r.top-2,hum.say,ts)}}});
+    actors.push({y:fy2,draw:()=>{sh(c,fx2,fy2+1,8,2,.24);const r=drawHumanAt(c,{x:fx2,base:fy2,av,face,pose,t:ts,hold,reach,expr});if(live){humBox=r;if(hum.say&&hum.poseUntil>ts&&!hum.task)sayBubble(c,fx2,r.top-2,hum.say,ts)}}});
   }
   drawWorld(c,main,ts,actors,top,bottom,live);if(live)roomBottom=bottom;
   if(!selR)return;
@@ -2234,7 +2263,7 @@ function sceneCore(c,kidId,ts,live,top,bottom){
   });
 }
 const DEMO_AV=[{v:2,g:"nina",sk:1,hs:"g1",hc:0,ey:8,tp:"g0",bt:"g6",sh:"g0",ac:"g5_0"},{v:2,g:"nino",sk:2,hs:"b1",hc:1,ey:0,tp:"b5",bt:"b4",sh:"b6"},{v:2,g:"nina",sk:3,hs:"g5",hc:1,ey:1,tp:"g4",bt:"g7",sh:"g7",ah:"g1_2"},{v:2,g:"nino",sk:0,hs:"b4",hc:3,ey:0,fr:1,tp:"b6",bt:"b1",sh:"b1",ae:"b6_0"},{v:2,g:"nina",sk:4,hs:"g7",hc:0,ey:8,tp:"g7",bt:"g0",sh:"g4"},{v:2,g:"nino",sk:1,hs:"b2",hc:0,ey:1,tp:"b4",bt:"b3",sh:"b3",ah:"b0_1"}];
-const DEMO_ROOM={house:2,owned:["cama","planta","cuadro","lampara","alfombra","ventana","tv","globos","puff","estante","pelota"]};
+const DEMO_ROOM={house:1,owned:["cama","planta","cuadro","lampara","alfombra","ventana","tv","globos","puff","estante","pelota"]};
 function drawDemo(c,ts,Hl){
   const H=Hl||c.canvas.height,off=sceneOff(H);c.save();c.translate(0,off);
   const sps=Object.keys(SPECIES), i=Math.floor(ts/4000)%sps.length;
@@ -2267,7 +2296,7 @@ function paintAll(){
       c.fillStyle="rgba(60,40,20,.16)";c.beginPath();c.ellipse(72,151,30,6,0,0,Math.PI*2);c.fill();
       drawHumanSticker(c,{x:72,base:150,h:132,av,face:0,pose:"idle",t:1000,still:true});c.setTransform(1,0,0,1,0,0)}
     else if(k==="wall"){c.setTransform(cv.width/128,0,0,cv.width/128,0,0);roomBack(c,{wall:a},1000,0,SH);c.setTransform(1,0,0,1,0,0)}
-    else if(k==="house"){const p=S.pets[b]||{};c.setTransform(cv.width/128,0,0,cv.width/128,0,0);drawWorld(c,{...p,house:+a},1000,[],0,SH);c.setTransform(1,0,0,1,0,0)}
+    else if(k==="room"){c.setTransform(cv.width/128,0,0,cv.width/128,0,0);roomBack(c,S.pets[b]||{},1000,0,SH,a);c.setTransform(1,0,0,1,0,0)}
   });
 }
 
@@ -3036,12 +3065,12 @@ const LOGROS=[
  ["truco","🎩","Primer truco","Enséñale un truco a tu fichamigo.","tricks",1,30],["trucos","🤹","Maestro de trucos","Enséñale todos los trucos.","tricks",TRICKS.length,120],
  ["amigo","🤝","Primer amigo salvaje","Hazte amigo de un fichamigo salvaje.","friends",1,30],["amigos10","📖","Coleccionista","Ten 10 amigos en tu álbum.","friends",10,120],["raro","✨","¡Un unicornio!","Encuentra al fichamigo más raro.","rare",1,200],
  ["explorador","🧭","Explorador","Llega a 4 lugares del mapa.","visited",4,60],["trotamundos","🗺️","Trotamundos","Llega a todos los lugares del mapa.","visited",LANDMARKS.length,150],["paseos","🥾","Caminante","Sal a explorar 10 veces.","walks",10,60],
- ["muebles","🛋️","Decorador","Ten 8 muebles en tu casa.","furn",8,60],["casa","🏡","Casa nueva","Múdate a una casa más grande.","house",2,80],["estilo","👕","Con estilo","Compra 3 piezas para tu personaje.","looks",3,50],["meta","🎯","Meta cumplida","Recibe tu primer premio real.","goals",1,100]];
+ ["muebles","🛋️","Decorador","Ten 8 muebles en tu casa.","furn",8,60],["casa","🏡","Casa que crece","Compra otra habitación para tu casa.","house",2,80],["estilo","👕","Con estilo","Compra 3 piezas para tu personaje.","looks",3,50],["meta","🎯","Meta cumplida","Recibe tu primer premio real.","goals",1,100]];
 function achStats(kidId){const main=S.pets[kidId]||{},L=arr("ledger").filter(l=>l.kidId===kidId),pets=petsOf(kidId).filter(o=>o.p.species),m=money(kidId);
   const own=new Set([...(main.owned||[]),...furnOwned(main)]);
   return {tareas:L.filter(l=>l.type==="tarea").length,earned:m.earned,stage:Math.max(0,...pets.map(o=>xpInfo(o.id).stage)),pets:pets.length,
     tricks:Math.max(0,...pets.map(o=>TRICKS.filter(([id])=>((o.p.tricks||{})[id]||0)>=LEARN).length)),friends:(main.friends||[]).length,rare:(main.friends||[]).includes("estrellin")?1:0,
-    visited:(main.visited||[]).length,walks:L.filter(l=>l.type==="juego").length,furn:FURN.filter(f=>own.has(f.id)).length,house:main.house||1,
+    visited:(main.visited||[]).length,walks:L.filter(l=>l.type==="juego").length,furn:FURN.filter(f=>own.has(f.id)).length,house:roomsOwned(main).size,
     looks:(main.aOwned||[]).filter(k=>/^[htpsa]:/.test(k)).length,goals:arr("goals").filter(g=>g.kidId===kidId&&g.status==="entregada").length}}
 function achList(kidId){const st=achStats(kidId),cl=(S.pets[kidId]||{}).ach||{};
   return LOGROS.map(([id,e,n,d,k,goal,r])=>{const v=Math.min(goal,st[k]||0);return {id,e,n,d,goal,v,r,done:v>=goal,claimed:!!cl[id]}})}
@@ -3060,11 +3089,14 @@ function kInventario(kidId,m){const main=S.pets[kidId]||{},own=new Set([...(main
   return `<div class="hero"><span class="hart">🎒</span><div><h2>Inventario</h2><p>Todo lo que has conseguido con tu esfuerzo.</p></div><div class="hstat"><span class="e">${cI("f")}</span>${m.wallet} fichas<b>${cI("m")}${m.mon}</b></div></div>
   ${box("Mis fichamigos",`${pets.length} de 3`,pets.length?`<div class="invg">${pets.map(o=>{const sp=SPECIES[o.p.species]||{};return tile(`<img src="fm/${sp.f}.webp" alt="">`,esc(o.p.name||"Fichamigo"),calc(o.p).egg?"Huevo":stageLabel(xpInfo(o.id)))}).join("")}</div>`:"","Aún no tienes fichamigos.")}
   ${box("Mi personaje",`${looks.length} piezas compradas`,`<div class="invg">${tile(`<img src="${headSrc(kidId)}" alt="">`,"Mi personaje",esc(kidTitle(kidId)))}${looks.map(k=>{const it=rigItem(k);return tile(`<img src="${it.img}" alt="">`,esc(it.n),{h:"Peinado",t:"Camisa",p:"Pantalón",s:"Zapatos",a:"Accesorio"}[it.sec])}).join("")}</div>`)}
-  ${box("Muebles",`${furn.length} en tu casa · ${HOUSES[(main.house||1)-1].n}`,furn.length?`<div class="invg">${furn.map(f=>tile(`<img src="st/${f.id}.webp" alt="">`,esc(f.n))).join("")}</div>`:"","Compra muebles en la Tienda para decorar tu casa.")}
+  ${box("Muebles",`${furn.length} en tu casa · ${roomsOwned(main).size} habitaciones`,furn.length?`<div class="invg">${furn.map(f=>tile(`<img src="st/${f.id}.webp" alt="">`,esc(f.n))).join("")}</div>`:"","Compra muebles en la Tienda para decorar tu casa.")}
   ${box("Colores y accesorios del fichamigo",`${tints.length+wear.length}`,tints.length||wear.length?`<div class="invg">${tints.map(t=>tile(`<span class="sw" style="background:${t.c}"></span>`,esc(t.n),"Color")).join("")}${wear.map(w=>tile("🎀",esc(w.n),"Accesorio")).join("")}</div>`:"","Todavía no has comprado colores ni accesorios.")}
   ${walls.length?box("Paredes",`${walls.length}`,`<div class="invg">${walls.map(w=>tile("🖼️",esc(w.n))).join("")}</div>`):""}
   ${box("Amigos salvajes",`${fr.length} de ${CRIT.length}`,fr.length?`<div class="invg">${fr.map(id=>{const c=CRIT.find(x=>x.id===id);if(!c)return"";const sp=SPECIES[c.sp]||{};return tile(`<img src="fm/${sp.f}.webp" alt="">`,esc(c.n))}).join("")}</div>`:"","Sal a explorar y juega con los fichamigos salvajes para hacerte su amigo.")}
   ${box("Medallas",`${ach.length} de ${LOGROS.length}`,ach.length?`<div class="invg">${ach.map(x=>tile(`<span class="md">${x.e}</span>`,esc(x.n))).join("")}</div>`:"","Cumple retos en Logros para ganar medallas.")}`}
+function roomNav(kidId,asParent){const mp=S.pets[kidId]||{},own=roomsOwned(mp);if(!own.has(curRoom))curRoom="cuarto";
+  return `<nav class="rooms" aria-label="Habitaciones de la casa">${ROOMS.map(r=>own.has(r.id)?`<button class="rm" data-act="room" data-v="${r.id}" aria-pressed="${curRoom===r.id}"><span>${r.e}</span>${r.n}</button>`
+    :asParent?"":`<button class="rm lock" data-act="kgo" data-v="tienda" aria-label="${r.n}: se compra en la tienda"><span>🔒</span>${r.n}</button>`).join("")}</nav>`}
 function kidScreen(kidId,asParent){
   if(G&&G.kid===kidId)return gameScreen();
   const k=S.kids[kidId], main=S.pets[kidId];
@@ -3100,7 +3132,8 @@ function kidScreen(kidId,asParent){
     ${petRow(kidId,pid,asParent)}
     ${!k.linked&&!menuOpen?pair:""}
     <div class="lcdwrap"><canvas id="lcd" width="128" height="96" data-mode="kid" data-kid="${kidId}" aria-label="Tu cuarto con tu personaje y ${esc(p.name||"tu fichamigo")}. Toca a un fichamigo para ver qué sabe hacer."></canvas>${petMenu&&!dis?petMenuHtml(pid,p,st):""}${humMenu&&!asParent?humMenuHtml():""}${asParent?"":`<div class="rside"><button class="sbtn" data-act="kgo" data-v="deberes"><span class="ic">📅</span><span class="lb">Misiones</span>${pend?`<span class="badge">${pend}</span>`:""}</button><button class="sbtn" data-act="kgo" data-v="metas"><span class="ic">🎁</span><span class="lb">Recompensas</span>${goalsReady?`<span class="badge">${goalsReady}</span>`:""}</button><button class="sbtn" data-act="kgo" data-v="tienda"><span class="ic">🏪</span><span class="lb">Tienda</span></button><button class="sbtn" data-act="kgo" data-v="logros"><span class="ic">🏆</span><span class="lb">Logros</span>${achN?`<span class="badge">${achN}</span>`:""}</button><button class="sbtn" data-act="kgo" data-v="inventario"><span class="ic">🎒</span><span class="lb">Inventario</span></button></div>`}</div>
-    ${dis?"":`<div class="hint">Toca a ${esc(p.name)} para jugar · Mantén presionado para acariciar · Arrastra para cargarlo</div>`}
+    ${roomNav(kidId,asParent)}
+    ${dis?"":`<div class="hint">Toca a ${esc(p.name)} para jugar · Arrastra los muebles para moverlos; llévalos al borde para pasarlos a otra habitación</div>`}
     ${st.egg||st.dead?"":`<div class="stats">${sChip("🍎","Comida",st.h)}${sChip("💗","Ánimo",st.hp)}${sChip("🫧","Limpieza",st.c)}</div>`}
     <div class="status">${statusMsg(p,st,xi)}</div>
     ${foodOpen&&!dis?`<div class="drawer">${FOODS.map(f=>`<div class="food"><img class="foodimg" src="st/${(FOOD_OLD[f.id]||f.id)}.webp" alt="">${f.n}<div class="fpay"><button data-act="feed" data-id="${pid}" data-f="${f.id}" data-cur="f" ${m.wallet<f.p?"disabled":""} aria-label="${f.n} por ${f.p} fichas">${cI("f")}${f.p}</button><button data-act="feed" data-id="${pid}" data-f="${f.id}" data-cur="m" ${m.mon<f.p*RATE?"disabled":""} aria-label="${f.n} por ${f.p*RATE} monedas">${cI("m")}${f.p*RATE}</button></div></div>`).join("")}</div>`:""}
@@ -3147,7 +3180,7 @@ function kPersonaje(kidId,m,xi,asParent){
   <section class="avopts">${avOpts(a,"own",kidId,own)}${avPieces(a,"own",kidId,own,m,asParent)}</section>`;
 }
 function kTienda(kidId,m){
-  const pid=selPet(kidId), p=S.pets[pid]||{}, main=S.pets[kidId], own=new Set([...(main.owned||[]),...furnOwned(main)]), eq=p.equip||{}, lvl=main.house||1, cap=HOUSES[lvl-1].cap, nf=FURN.filter(f=>own.has(f.id)).length, pn=esc(p.name||"tu fichamigo");
+  const pid=selPet(kidId), p=S.pets[pid]||{}, main=S.pets[kidId], own=new Set([...(main.owned||[]),...furnOwned(main)]), eq=p.equip||{}, ro=roomsOwned(main), nf=FURN.filter(f=>own.has(f.id)).length, pn=esc(p.name||"tu fichamigo");
   const tints=[{id:"",n:"Color original",p:0}].concat(TINTS).map(t=>{const has=!t.p||own.has("tint-"+t.id),on=(p.tint||"")===t.id;
     return `<div class="prod ${on?"owned":""}"><canvas width="256" height="192" data-paint="tint:${t.id}:${pid}"></canvas><div class="t">${t.n}</div><div class="row2">${has?(on?`<span class="pill ok">Puesto</span>`:`<button class="btn sm" data-act="settint" data-id="${pid}" data-w="${t.id}">Usar</button>`)
       :payBtns("tint",pid,t.id,t.p,m)}</div></div>`}).join("");
@@ -3156,16 +3189,14 @@ function kTienda(kidId,m){
       :payBtns("wear",pid,w.id,w.p,m)}</div></div>`}).join("");
   const furn=FURN.map(f=>{const has=own.has(f.id);
     return `<div class="prod ${has?"owned":""}"><img class="stkimg" src="st/${f.id}.webp" alt="" loading="lazy"><div class="t">${f.n}</div><div class="row2">${has?`<span class="pill ok">En tu casa</span>`
-      :payBtns("furn",kidId,f.id,f.p,m,nf>=cap,"Sin espacio: amplía tu casa")}</div></div>`}).join("");
-  const next=HOUSES[lvl];
+      :payBtns("furn",kidId,f.id,f.p,m)}</div></div>`}).join("");
   const walls=WALLS.map(w=>{const has=w.p===0||own.has("wall-"+w.id),on=(main.wall||"celeste")===w.id;
     return `<div class="prod ${has?"owned":""}"><canvas width="256" height="240" data-paint="wall:${w.id}"></canvas><div class="t">${w.n}</div><div class="row2">${has?(on?`<span class="pill ok">Puesta</span>`:`<button class="btn sm" data-act="setwall" data-id="${kidId}" data-w="${w.id}">Usar</button>`)
       :payBtns("wall",kidId,w.id,w.p,m)}</div></div>`}).join("");
   return `<div class="curnote">Paga con <b>fichas</b> (de tus deberes) o con <b>monedas</b> (de explorar). Una ficha vale ${RATE} monedas.</div>
   <section><div class="sechead"><h2>Colores para ${pn}</h2><p>${tok(m.wallet)} · ${mon(m.mon)}</p></div><div class="shop">${tints}</div></section>
-  <section><div class="sechead"><h2>Casa</h2><p>${HOUSES[lvl-1].n} · ${nf} de ${cap} muebles</p></div>
-    ${next?`<div class="prod"><canvas width="256" height="240" data-paint="house:${next.l}:${kidId}"></canvas><div class="t">Mudarse a: ${next.n}</div><p class="muted" style="font-size:.85rem">Espacio para ${next.cap} muebles y piso nuevo.</p><div class="row2">${payBtns("house",kidId,next.l,next.p,m)}</div></div>`
-    :`<div class="empty">Ya tienes la casa más grande.</div>`}</section>
+  <section><div class="sechead"><h2>Habitaciones de tu casa</h2><p>${ro.size} de ${ROOMS.length} · ${nf} muebles</p></div>
+    <div class="shop">${ROOMS.map(r=>{const has=ro.has(r.id);return `<div class="prod ${has?"owned":""}"><canvas width="256" height="240" data-paint="room:${r.id}:${kidId}"></canvas><div class="t">${r.e} ${r.n}</div><p class="muted" style="font-size:.8rem;margin:0">${r.d}</p><div class="row2">${has?`<span class="pill ok">Ya es tuya</span>`:payBtns("room",kidId,r.id,r.p,m)}</div></div>`}).join("")}</div></section>
   <section><h2>Muebles</h2><div class="shop">${furn}</div></section>
   <section><h2>Paredes</h2><div class="shop">${walls}</div></section>`;
 }
@@ -3532,6 +3563,7 @@ document.addEventListener("click",async e=>{
     await petWrite(id,pp=>({ach:{...(pp.ach||{}),[L.id]:Date.now()}}));await ledger(id,"logro",L.r,"Logro: "+L.n,null,"m");tune([[523,.06],[659,.06],[784,.06],[1046,.18]]);toast(`¡Medalla "${L.n}"! +${L.r} monedas`);return}
   if(a==="gpanel"){if(G&&!G.end&&!G.enc&&!MG&&!G.dialog){G.panel=b.dataset.v;G.path=null;G.after=null;beep(880,.05);render()}return}
   if(a==="gpanelx"){if(G){G.panel=null;render()}return}
+  if(a==="room"){curRoom=b.dataset.v;humMenu=false;petMenu=null;hum.x=hum.tx=40;hum.y=hum.ty=100;beep(784,.05);render();return}
   if(a==="kgo"){petMenu=null;menuOpen=true;foodOpen=false;ktab=b.dataset.v;beep(700);render();return}
   if(a==="openmenu"){petMenu=null;menuOpen=true;foodOpen=false;beep(700);render();return}
   if(a==="closemenu"){menuOpen=false;render();return}
@@ -3564,7 +3596,7 @@ document.addEventListener("click",async e=>{
     if(k==="av"){item=rigItem(w);if(!item)return;price=item.p;label="Estilo: "+item.n;avShow=null;patch=pp=>({aOwned:[...new Set([...(pp.aOwned||[]),w])],avatar:{...avNorm(pp.avatar),[item.fld]:item.id}})}
     if(k==="furn"){item=FURN.find(x=>x.id===w);price=item.p;label="Mueble: "+item.n;patch=pp=>({owned:[...(pp.owned||[]),w]})}
     if(k==="wall"){item=WALLS.find(x=>x.id===w);price=item.p;label="Pared: "+item.n;patch=pp=>({owned:[...(pp.owned||[]),"wall-"+w],wall:w})}
-    if(k==="house"){item=HOUSES[+w-1];price=item.p;label="Casa: "+item.n;patch=()=>({house:+w})}
+    if(k==="room"){item=ROOMS.find(r=>r.id===w);if(!item)return;price=item.p;label="Habitación: "+item.n;curRoom=w;patch=pp=>({rooms:[...new Set([...(pp.rooms||[]),w])]})}
     const cur=b.dataset.cur==="m"?"m":"f",cost=cur==="m"?price*RATE:price;
     if((cur==="m"?m.mon:m.wallet)<cost){toast(cur==="m"?"No te alcanzan las monedas.":"No te alcanzan las fichas.");return}
     tune([[660,.06],[880,.06],[1320,.1]]);await ledger(kid,"compra",-cost,label,null,cur);await petWrite(kid,patch);if(petPatch)await petWrite(id,petPatch);toast("¡Comprado!");return}
