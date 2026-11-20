@@ -1261,12 +1261,65 @@ function sprVariant(im,f,key){const tinted=key&&TINT_F[key];const k=f+"|"+(tinte
   return tintCache[k]=stickerOutline(src,W,H)}
 const PET_H=[0,13,17,21,25];
 function drop(c,x,y,col){c.beginPath();c.moveTo(x,y-3);c.quadraticCurveTo(x+2.2,y,x,y+1.6);c.quadraticCurveTo(x-2.2,y,x,y-3);c.fillStyle=col;c.fill();c.lineWidth=.5;c.strokeStyle="rgba(40,60,120,.6)";c.stroke()}
+/* ================= Fichamigo articulado (por piezas) ================= */
+const PRIG={s22:{h_open:[234,189],h_happy:[220,174],h_sleep:[216,175],h_wow:[213,178],h_sad:[214,178],h_love:[207,175],f_torso:[149,180],f_arm0:[78,166],f_arm1:[79,166],f_leg0:[89,132],f_leg1:[88,132],f_tail:[117,129],b_torso:[150,173],b_arm0:[78,171],b_arm1:[77,171],b_leg0:[89,134],b_leg1:[89,134],b_tail:[119,117],b_head:[303,198],
+  H:500,headW:300,hip:36,hipY:-118,torsoBot:-104,sh:74,shY:-246,headBot:-250}};
+const PRI={};
+function prImg(sp,k){const key=sp+"_"+k;let im=PRI[key];if(!im){im=new Image();im.decoding="async";im.onload=()=>{im._ok=1;sprReady()};im.src="prig/"+key+".webp";PRI[key]=im}return im._ok?im:null}
+const PROFF={};
+function petRigBlit(c,o,sp,h,key){
+  const R=PRIG[sp],t=o.t||1000,mood=o.mood||"happy",ac=o.action,still=!!o.still,v=o.back?"b":"f",S=Math.sin,D=Math.PI/180;
+  let face="open";
+  if(mood==="sleep")face="sleep";else if(mood==="sad"||mood==="sick"||mood==="hungry")face="sad";else if(mood==="dirty")face="wow";
+  if(ac==="eat")face=Math.floor(t/160)%2?"happy":"wow";else if(ac==="shout"||ac==="confused")face="wow";else if(ac&&ac!=="drag")face="happy";if(ac==="drag")face="wow";
+  if(o.closed)face="love";if(!still&&face==="open"&&(t%3400)<140)face="sleep";
+  const names=v==="b"?["b_head","b_torso","b_arm0","b_arm1","b_leg0","b_leg1","b_tail"]:["h_"+face,"f_torso","f_arm0","f_arm1","f_leg0","f_leg1","f_tail"];
+  ["h_open","h_happy","h_sleep","h_wow","h_sad","h_love"].forEach(k=>prImg(sp,k));
+  const I=names.map(k=>prImg(sp,k));if(I.some(x=>!x))return false;
+  const [head,torso,a0,a1,l0,l1,tail]=I,dm=k=>R[names[k]];
+  let leg=[0,0],arm=[10,-10],hr=0,tl=S(t/260)*10,bob=0;
+  if(!still){bob=S(t/420)*3;
+    if(o.walking){const w=S(t/110);leg=[w*13,-w*13];arm=[10-w*22,-10-w*22];bob=Math.abs(w)*6;tl=S(t/90)*18}
+    if(mood==="happy"&&!ac&&!o.walking)tl=S(t/120)*22;
+    if(mood==="sad"||mood==="hungry"){hr=6+S(t/900)*3;arm=[4,-4];tl=-18}
+    if(mood==="sleep"){hr=12;arm=[4,-4];tl=-20}
+    if(ac==="play"||ac==="jump"||ac==="dance"){arm=[150+S(t/100)*12,-150-S(t/100)*12];leg=[S(t/120)*10,-S(t/120)*10];tl=S(t/80)*25}
+    if(ac==="wave"){arm=[10,-150+S(t/120)*20];hr=-5}
+    if(ac==="shout"){arm=[120,-120];hr=S(t/40)*3}
+    if(ac==="sing"){arm=[40,-40];hr=S(t/300)*8}
+    if(ac==="eat"){arm=[-30,30];hr=8}
+    if(ac==="confused")hr=S(t/380)*12;
+    if(ac==="drag"){arm=[160,-160];leg=[S(t/140)*18,-S(t/140)*18]}
+    if(o.closed){hr=S(t/300)*5;tl=S(t/70)*25}}
+  const m=c.getTransform(),scr=Math.hypot(m.a,m.b)||1,pxH=Math.max(20,Math.ceil(h*scr)),k=pxH/R.H,pad=Math.ceil(8*k)+4,W=Math.ceil(560*k)+2*pad,Hh=pxH+Math.ceil(120*k)+2*pad;
+  let B=PROFF.b;if(!B){B=PROFF.b={a:document.createElement("canvas"),b:document.createElement("canvas")}}
+  if(B.a.width<W||B.a.height<Hh){B.a.width=B.b.width=Math.max(B.a.width,W);B.a.height=B.b.height=Math.max(B.a.height,Hh)}
+  const x=B.a.getContext("2d");x.setTransform(1,0,0,1,0,0);x.clearRect(0,0,W+2,Hh+2);x.imageSmoothingQuality="high";x.setTransform(k,0,0,k,W/2,Hh-pad-4*k);
+  const part=(im,d,px,py,ang,ax,ay)=>{x.save();x.translate(px,py);x.rotate(ang*D);x.drawImage(im,-d[0]*ax,-d[1]*ay,d[0],d[1]);x.restore()};
+  const tailD=()=>{const d=dm(6),sg=v==="b"?-1:1;part(tail,d,sg*52,R.hipY-34,tl*sg,sg>0?.12:.88,.86)};
+  if(v==="f")tailD();
+  part(l0,dm(4),-R.hip,R.hipY,leg[0],.5,.1);part(l1,dm(5),R.hip,R.hipY,leg[1],.5,.1);
+  x.save();x.translate(0,-bob);
+  const up=i=>Math.abs(arm[i])>75;
+  if(!up(0))part(a0,dm(2),-R.sh,R.shY,arm[0],.55,.08);if(!up(1))part(a1,dm(3),R.sh,R.shY,arm[1],.45,.08);
+  {const d=dm(1);x.drawImage(torso,-d[0]/2,R.torsoBot-d[1],d[0],d[1])}
+  if(v==="b")tailD();
+  {const d=dm(0),w=R.headW*(v==="b"?1.06:1),hh=w*d[1]/d[0];x.save();x.translate(0,R.headBot);x.rotate(hr*D);x.drawImage(head,-w/2,-hh,w,hh);x.restore()}
+  if(up(0))part(a0,dm(2),-R.sh,R.shY,arm[0],.55,.08);if(up(1))part(a1,dm(3),R.sh,R.shY,arm[1],.45,.08);
+  x.restore();
+  const s2=B.b.getContext("2d");s2.setTransform(1,0,0,1,0,0);s2.globalCompositeOperation="source-over";s2.clearRect(0,0,W+2,Hh+2);s2.drawImage(B.a,0,0,W,Hh,0,0,W,Hh);s2.globalCompositeOperation="source-in";s2.fillStyle="#fff";s2.fillRect(0,0,W,Hh);s2.globalCompositeOperation="source-over";
+  const bw=Math.max(1.2,6*k);
+  c.save();c.scale(1/scr,1/scr);c.translate(-W/2,-(Hh-pad-4*k));c.imageSmoothingEnabled=true;
+  for(let i=0;i<12;i++){const a=i/12*Math.PI*2;c.drawImage(B.b,0,0,W,Hh,Math.cos(a)*bw,Math.sin(a)*bw,W,Hh)}
+  const F=key&&TINT_F[key];if(F&&typeof c.filter==="string")c.filter=F;c.drawImage(B.a,0,0,W,Hh,0,0,W,Hh);if(F)c.filter="none";c.restore();
+  return true}
 function drawPetSticker(c,o){
   const sp=SPECIES[o.sp]?o.sp:"blob", d=SPECIES[sp], stage=Math.max(1,o.stage||1), t=o.t||1000, mood=o.mood||"happy", ac=o.action, still=!!o.still;
   const h=PET_H[stage]*(o.scale||1), w=h*(d.ar||.85), x=Math.round(o.x*2)/2, base=o.base;
   let sx=1,sy=1,rot=0,dy=0,dx=0;
   if(!still){sy=1+Math.sin(t/420)*.03;sx=1-Math.sin(t/420)*.02;
-    if(o.walking){dy=-Math.abs(Math.sin(t/110))*3;rot=Math.sin(t/110)*.08}
+    const RG=!!PRIG[sp];
+    if(o.walking){dy=-Math.abs(Math.sin(t/110))*(RG?1:3);rot=RG?0:Math.sin(t/110)*.08}
     else if(mood==="happy"&&!ac){const k=(t%2800)/2800;if(k<.16){const q=Math.sin(k/.16*Math.PI);dy=-q*5;sy*=1+q*.07;sx*=1-q*.04}}
     if(mood==="hungry"||mood==="sad"){sy*=.95;rot+=Math.sin(t/900)*.05}
     if(mood==="sick")dx=Math.sin(t/45)*.6;
@@ -1282,14 +1335,15 @@ function drawPetSticker(c,o){
     if(o.closed){sy*=.92;sx*=1.07}}
   const im0=sprImg(sp);
   c.save();c.translate(x+dx,base+dy);c.rotate(rot);c.scale(sx,sy);
-  if(im0){const key=mood==="sick"?"_enfermo":o.tint;c.imageSmoothingEnabled=true;c.imageSmoothingQuality="high";const W2=w*1.1,H2=h*1.1;c.drawImage(sprVariant(im0,d.f,key),-W2/2,-H2+H2*.045,W2,H2)}
+  if(PRIG[sp]&&petRigBlit(c,o,sp,h*1.12,mood==="sick"?"_enfermo":o.tint)){}
+  else if(im0){const key=mood==="sick"?"_enfermo":o.tint;c.imageSmoothingEnabled=true;c.imageSmoothingQuality="high";const W2=w*1.1,H2=h*1.1;c.drawImage(sprVariant(im0,d.f,key),-W2/2,-H2+H2*.045,W2,H2)}
   else{c.beginPath();c.ellipse(0,-h/2,w/2.4,h/2.2,0,0,Math.PI*2);c.fillStyle=d.b;c.fill()}
   c.restore();
   const top=base+dy-h*sy, ex=x+dx;
   /* expresiones (encima del sticker) */
   if(!still){
-    if(o.closed||(ac==="play")){c.fillStyle="rgba(255,110,150,.55)";[-.22,.22].forEach(k=>{c.beginPath();c.ellipse(ex+w*k,top+h*.55,w*.09,h*.045,0,0,Math.PI*2);c.fill()})}
-    if(mood==="sad"&&!ac){const k=(t%1600)/1600;drop(c,ex+w*.18,top+h*(.42+k*.3),"#8FD3FF")}
+    if(!PRIG[sp]&&(o.closed||(ac==="play"))){c.fillStyle="rgba(255,110,150,.55)";[-.22,.22].forEach(k=>{c.beginPath();c.ellipse(ex+w*k,top+h*.55,w*.09,h*.045,0,0,Math.PI*2);c.fill()})}
+    if(!PRIG[sp]&&mood==="sad"&&!ac){const k=(t%1600)/1600;drop(c,ex+w*.18,top+h*(.42+k*.3),"#8FD3FF")}
     if(mood==="sick"&&!ac){drop(c,ex+w*.36,top+h*.18+Math.sin(t/300),"#BDE6FF");c.strokeStyle="rgba(90,160,90,.8)";c.lineWidth=.8;c.beginPath();for(let i=0;i<14;i++){const a=i*.6+t/300,r=1+i*.22;c.lineTo(ex-w*.34+Math.cos(a)*r,top+h*.2+Math.sin(a)*r)}c.stroke()}
     if(mood==="sleep"){c.fillStyle="#6B7CFF";c.font="bold 6px system-ui";const k=(t%2400)/2400;c.globalAlpha=1-k;c.fillText("z",ex+w*.38+k*3,top+h*.15-k*6);c.font="bold 8px system-ui";c.globalAlpha=Math.max(0,1-((t+1200)%2400)/2400);c.fillText("Z",ex+w*.45+((t+1200)%2400)/2400*3,top+h*.05-((t+1200)%2400)/2400*6);c.globalAlpha=1}
     if(mood==="dirty"&&!ac){c.strokeStyle="rgba(120,140,60,.7)";c.lineWidth=.8;[-.25,0,.25].forEach((k,i)=>{c.beginPath();for(let j=0;j<6;j++)c.lineTo(ex+w*k+Math.sin(t/200+j+i)*1.2,top-1-j*1.4);c.stroke()});
@@ -2519,7 +2573,7 @@ function drawGame(c,ts,Hl){
   (G.team||[]).forEach((pid,i)=>{const pp=S.pets[pid];if(!pp)return;const a=G.hist[i+1]||G.hist[G.hist.length-1],b=G.hist[i]||a;
     const fx2=(G.mv?a.x+(b.x-a.x)*k:a.x)*TS,fy2=(G.mv?a.y+(b.y-a.y)*k:a.y)*TS;if(Math.abs(fx2-px)<2&&Math.abs(fy2-py)<2&&!G.mv&&i>0)return;
     const sx2=Math.round(fx2-camX),sy2=Math.round(fy2-camY);
-    obj.push({y:fy2+14,d:()=>{sh(c,sx2+8,sy2+15,6,2);drawPet(c,{sp:pp.species,tint:pp.tint,stage:1,scale:.85,mood:"happy",equip:pp.equip,x:sx2+8,base:sy2+14,t:ts+i*250,walking,still:false});grassFront(fx2,fy2)}})});
+    obj.push({y:fy2+14,d:()=>{sh(c,sx2+8,sy2+15,6,2);drawPet(c,{sp:pp.species,tint:pp.tint,stage:1,scale:.85,mood:"happy",equip:pp.equip,x:sx2+8,base:sy2+14,t:ts+i*250,walking,still:false,back:G.face==="up"});grassFront(fx2,fy2)}})});
   obj.push({y:py+15,d:()=>{if(av){sh(c,psx+8,psy+15,6,2,.22);drawHumanSticker(c,{x:psx+8,base:psy+15,h:28,av,face:G.face==="left"?-1:G.face==="right"?1:0,back:G.face==="up",pose:walking?"walk":"idle",t:ts})}else{sh(c,psx+8,psy+15,7,2);drawPet(c,{sp:p.species,stage:1,mood:"happy",equip:p.equip,x:psx+8,base:psy+14,t:ts,walking,still:false})}grassFront(px,py)}});
   if(G.mark&&ts-G.mark.t<900){const k=(ts-G.mark.t)/900,mx=G.mark.x*TS-camX+8,my=G.mark.y*TS-camY+12;c.save();c.globalAlpha=1-k;c.strokeStyle="#FFFFFF";c.lineWidth=1.5;c.beginPath();c.ellipse(mx,my,4+k*5,2+k*2.5,0,0,Math.PI*2);c.stroke();c.strokeStyle="#FFD60A";c.lineWidth=.8;c.stroke();c.restore()}
   obj.sort((a,b)=>a.y-b.y).forEach(o=>o.d());
